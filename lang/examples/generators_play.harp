@@ -1,0 +1,23 @@
+// Generators drive the notes. A euclidean rhythm says when a note starts (a note lasts until the next one), a mutating phrase in a scale
+// says which, and the instrument is a function: play makes a new run of it for every note, with the gate and the pitch as signals.
+//
+//   harp play examples/generators_play.harp
+
+bpm = 120
+steps = 4
+seed = 5
+
+// the third field of a note: how bright it is, drawn from its own generator
+melody = degrees(a2, minor, mutate([7 9 11 9 8 7 4 7], swap: 0.6))
+bright = [800 2400 1200 3600 1600]
+
+fn pluck(gate, note, cutoff) {
+  freq = hz(note)
+  tone = saw([freq * 0.997, freq * 1.003])
+  body = tone.lowpass(cutoff: cutoff, res: 0.4)
+  body * env(gate, [0 1 0], [0.003 0.4], -4, release: 1) * 0.4
+}
+
+notes = play(pluck, rhythm: euclid(16, 7), legato: 0.7, fields: [melody, bright], voices: 3)
+
+out = notes.spread(0.6).echo(max: 1, time: [0.375, 0.5], feedback: 0.35, mix: 0.25)

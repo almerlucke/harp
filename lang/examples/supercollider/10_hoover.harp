@@ -1,0 +1,40 @@
+// SuperCollider (the hoover of the 60Hz Gabber Rave 1995: 20 pairs of detuned saws, each with a delay of its own, spread over the stereo field)
+//
+//   {
+//     SynthDef(\hoover, {
+//         var snd, freq, bw, delay, decay;
+//         freq = \freq.kr(440);
+//         freq = freq * Env([-5, 6, 0], [0.1, 1.7], [\lin, -4]).kr.midiratio;
+//         bw = 1.035;
+//         snd = { DelayN.ar(Saw.ar(freq * ExpRand(bw, 1 / bw)) + Saw.ar(freq * 0.5 * ExpRand(bw, 1 / bw)), 0.01, Rand(0, 0.01)) }.dup(20);
+//         snd = (Splay.ar(snd) * 3).atan;
+//         snd = snd * Env.asr(0.01, 1.0, 1.0).kr(0, \gate.kr(1));
+//         snd = FreeVerb2.ar(snd[0], snd[1], 0.3, 0.9);
+//         snd = snd * Env.asr(0, 1.0, 4, 6).kr(2, \gate.kr(1));
+//         Out.ar(\out.kr(0), snd * \amp.kr(0.1));
+//     })
+//   }
+//
+// Played as a note of 14 beats with a sustain of 7 (see 11_gabber_rave.harp). Every note has its own random detunes and delays in
+// SuperCollider; here every voice has (an instrument is built once for each of its voices), and two voices play in turn. The random
+// numbers are not SuperCollider's, so only the sort of sound can be compared (a distribution of seeds, harp compare -seeds).
+
+bpm = 210
+steps = 4
+
+// one of the twenty: two saws and a delay, each with random detunes and a random delay of its own
+fn osc(i, freq) {
+  bw = 1.035
+  saws = scsaw(freq * exprand(bw, 1 / bw)) + scsaw(freq * 0.5 * exprand(bw, 1 / bw))
+  scdelayn(saws, 0.01, rand(0, 0.01))
+}
+
+fn hoover(gate) {
+  freq = hz(74) * midiratio(env(gate, [-5 6 0], [0.1 1.7], [0 -4], control: true))
+  mixed = atan(spread(fill(osc, 20, freq), 1) * 3)
+  shaped = mixed * env(gate, [0 1 0], [0.01 1], -4, release: 1, control: true)
+  verb = freeverb2(shaped, 0.3, 0.9)
+  verb * env(gate, [0 1 0], [0 4], 6, release: 1, control: true) * dbamp(-20)
+}
+
+out = play(hoover, dur: [14], sustain: 7, voices: 2)

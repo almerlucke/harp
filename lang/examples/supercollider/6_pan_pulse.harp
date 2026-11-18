@@ -1,0 +1,11 @@
+// SuperCollider: a pulse wave that a slow triangle pans from side to side
+//
+//   { Pan2.ar(Pulse.ar(100, 0.3, 0.1), LFTri.kr(0.2)) }.play
+//
+// SuperCollider's Pulse is not a pulse between -1 and 1 (measured with SuperCollider 3.14.1): it swings over
+// half of that (a pulse of 1 from top to bottom), has a mean of 0, and the part of the width is the negative one.
+// The pulse of harp is between -1 and 1 and has a mean of 2*width-1 (-0.4 here), so the offset is taken
+// away and the size is halved: (pulse + (1 - 2*width)) is a pulse with a mean of 0, and * -0.05 makes it
+// the size of Pulse.ar(100, 0.3, 0.1) and turns it over
+
+out = ((pulse(100, width: 0.3) + (1 - 2 * 0.3)) * -0.05).pan(triangle(0.2))

@@ -1,0 +1,5 @@
+// SuperCollider: a sine with vibrato, the same on both channels
+//
+//   { SinOsc.ar(SinOsc.kr(5, 0, 10, 440), 0, 0.2) ! 2 }.play
+
+out = sine(lfo(5) * 10 + 440).gain(0.2).dup()

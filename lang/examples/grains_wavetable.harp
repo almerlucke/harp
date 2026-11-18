@@ -1,0 +1,20 @@
+// Two synths that are made from a sound: a wavetable that morphs while it plays, and a cloud of grains cut from a sung line.
+//
+//   harp check examples/grains_wavetable.harp
+//   harp play examples/grains_wavetable.harp
+//
+// The wavetable is a table that psalm makes: a hard synced saw whose ratio rises as the position moves. The
+// grains come from a chant of psalm's assets, a pad that holds one moment of it. Both play the same slow chords.
+
+bpm = 66
+steps = 4
+seed = 3
+
+progression = [[a2 e3 a3 c4] [f2 c3 f3 a3] [g2 d3 g3 b3] [e2 b2 e3 g3]]
+held = chords(progression, every(32), velocity: 0.8, length: 28)
+bass = melody([a2 f3 g3 e4], every(32), velocity: 1, length: 24)
+
+pad = grains(held, "../../../psalm/assets/sounds/chants/Johannes.Hymnus.wav", preset: "frozen_drone", root: 57, position: 0.3, voices: 8)
+low = wavetable(bass, table: "sync", preset: "reese", position: 0.4, voices: 2)
+
+out = (pad.gain(0.5) + low.gain(0.6)).reverb(mix: 0.3, decay: 4).gain(0.7)

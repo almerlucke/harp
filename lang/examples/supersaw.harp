@@ -1,0 +1,17 @@
+// A supersaw pad on slow chords, with a plucked arpeggio over it.
+
+bpm  = 100
+seed = 3
+
+chordsOfTheBar = [[a2 e3 a3 c4 e4] [f2 c3 f3 a3 c4] [c3 g3 c4 e4 g4] [g2 d3 g3 b3 d4]]
+
+pad = chords(chordsOfTheBar, every(16), velocity: 0.6, length: 15)
+  .supersaw(preset: "trance_pad", voices: 10)
+  .gain(0.35)
+
+arp = melody([a4 c5 e5 c5 a4 e4 c5 e5], euclid(16, 11), length: 0.9)
+  .subtractive(preset: "pluck", voices: 6)
+  .gain(0.4)
+  .echo(max: 1, time: [60 / bpm * 0.75, 60 / bpm], feedback: 0.4, mix: 0.25)
+
+out = (pad + arp).reverb(mix: 0.3, decay: 3)

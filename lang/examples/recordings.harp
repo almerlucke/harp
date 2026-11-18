@@ -1,0 +1,23 @@
+// Recordings played by generators: a celesta (an SFZ instrument), percussion cut from a loop of 66 bpm, and a long recording streamed from
+// disk under it. The files are those of psalm's assets (the folder of psalm is next to harp's); a path is looked for next to the patch first.
+//
+//   harp check examples/recordings.harp      says what the loop was cut into, and on which keys
+//   harp play examples/recordings.harp
+
+bpm = 66
+steps = 4
+seed = 9
+
+// the percussion: the loop cut at its hits, one piece on each key from 36 up; a phrase of keys picks the pieces, on a rhythm
+keys = degrees(36, minor, mutate([0 2 4 7 4 2 5 9], swap: 0.4))
+hits = melody(keys, euclid(16, 7), velocity: 0.9, length: 2)
+drums = sampler(hits, "../../../psalm/assets/sounds/various/66-bpm-uniq-percussions-264333.wav", mode: "hits", args: [9, 0.08], first: 36, voices: 8).gain(0.8)
+
+// the celesta: a phrase in C minor, an SFZ instrument as it is
+phrase = degrees(c5, minor, mutate([0 2 4 7 4 2 -1 0], swap: 0.3))
+bells = sampler(melody(phrase, euclid(16, 5, 2), velocity: 0.7, length: 4), "../../../psalm/assets/Virtual-Playing-Orchestra3/Keys/celesta.sfz", voices: 6).gain(0.6)
+
+// under it a long recording, from disk: it holds while the key is down, and lets go over half a second
+wash = streamer(melody([60], every(64), velocity: 0.8, length: 60), "../../../psalm/assets/sounds/various/animals.wav", key: 60, hold: true, release: 0.5, start: 3).gain(0.15)
+
+out = (drums + bells + wash).reverb(mix: 0.2, decay: 2.5)

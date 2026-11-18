@@ -1,0 +1,61 @@
+# ---- Go (the standard list)
+
+# Binaries, and what `go test -c` and `go build` leave
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Coverage and profiles (go test -coverprofile, harp -cpuprofile)
+*.coverprofile
+coverage.txt
+coverage.html
+*.prof
+*.pprof
+
+# Dependency folder, if `go mod vendor` is used
+vendor/
+
+# Environment files
+.env
+
+# go.work is NOT ignored here: it is what joins this module to its neighbours (../genny, ../psalm, ../exbana, ../sndfile, ../go-jack),
+# which have to be in the same folder as harp. go.work.sum stays with it.
+
+# ---- harp
+
+# The program, if it is built in place (go build ./cmd/harp)
+/harp
+/lang/cmd/harp/harp
+
+# Sound that is rendered (harp render, harp compare -save) is made, not written
+*.wav
+*.aif
+*.aiff
+*.flac
+*.ogg
+*.mp3
+# ... except what the tests read
+!/lang/testdata/**
+
+# What the compare tool and the tests leave behind
+*.log
+/tmp/
+/out/
+
+# ---- editors and systems
+
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local settings of Claude Code
+.claude/settings.local.json

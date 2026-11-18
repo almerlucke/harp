@@ -1,0 +1,36 @@
+// The generators of genny at work: chords that follow a progression with smooth voice leading, a bass from a chain of chance, a lead that
+// grows from an L-system, a rhythm from a cellular automaton, and a filter that follows a chaotic system.
+//
+//   harp check examples/generators_more.harp
+//   harp play examples/generators_more.harp
+//
+// Try the live edit (harp play -watch): change the rule of `cellular` (30, 90, 110), the table of `markov`, the style of `progression`, the rules of `lsystem`.
+
+bpm = 92
+steps = 4
+seed = 11
+
+// ---- chords: a progression in the classical style on the degrees of A minor, built of thirds, each chord near the one before it
+changes = triads(a3, minor, progression("classical"), size: 4)
+pad = chords(voicelead(changes, 52, 76), every(32), velocity: 0.6, length: 30)
+  .subtractive(preset: "pad", voices: 8)
+  .gain(0.3)
+
+// ---- bass: a chain of chance on three notes of the scale; a note stays, or moves to another
+bass = melody(markov([a3 e4 c4 g3], [[1 3 2 1] [2 0 2 1] [3 1 0 2] [2 1 2 0]]), euclid(16, 5, 0), velocity: 0.9, length: 2)
+  .subtractive(preset: "bass", voices: 2)
+  .gain(0.35)
+
+// ---- lead: Lindenmayer's algae as degrees: a phrase that is like itself at every size, on the rhythm of a cellular automaton (rule 30 from
+// chance) that is thinned a little by chance
+algae = lsystem("A", ["A=AB", "B=AC", "C=A"], 7, ["A=0", "B=2", "C=4"])
+lead = melody(degrees(a4, minor, algae), maybe(cellular(30, 16, start: "random"), 0.85), velocity: 0.7, length: 1)
+  .subtractive(preset: "pluck", voices: 6)
+  .gain(0.5)
+  .echo(max: 1, time: [0.375, 0.5], feedback: 0.35, mix: 0.3)
+
+// ---- a drone whose filter follows the Lorenz attractor
+orbit = remap(chaos("lorenz", axis: 0), -20, 20, 300, 5600)
+drone = saw([110.0, 110.4, 111.82]).mix().lowpass(cutoff: seq(orbit), res: 0.3).gain(0.05)
+
+out = (pad + bass + lead + drone.dup()).reverb(mix: 0.25, decay: 4)

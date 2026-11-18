@@ -1,0 +1,31 @@
+// The sampler: recordings played by generators, four ways. The files are in psalm's assets (the folder of psalm is next to harp's).
+//
+//   harp check examples/sampler.harp       says what each recording was cut into, and on which keys
+//   harp play examples/sampler.harp
+//
+// A drum kit of single hits, an 808 played as a bass, and a sung line that was cut into pieces at its pauses; the pieces are played in an order
+// that a mutating phrase decides.
+
+bpm = 84
+steps = 4
+seed = 5
+
+// ---- a kit of single hits: `whole` puts a sound on one key (first: 60: a note of 60 plays it as it is), vol is in dB.
+// Each drum has its own rhythm of euclid, and a note of 60 for every hit.
+kick_hit = melody([60], euclid(16, 5, 0), velocity: 1, length: 1)
+snare_hit = melody([60], euclid(16, 2, 4), velocity: 0.9, length: 1)
+hat_hit = melody([60], euclid(16, 11, 1), velocity: 0.6, length: 1)
+
+kick = sampler(kick_hit, "../../../psalm/assets/sounds/drums/kick/51_Kick_SP_225_01.wav", first: 60, vol: -3, voices: 2)
+snare = sampler(snare_hit, "../../../psalm/assets/sounds/drums/snare/Cymatics - Humble Adequate Snare - E.wav", first: 60, vol: -6, voices: 2)
+hats = sampler(hat_hit, "../../../psalm/assets/sounds/drums/hihat/Cymatics - Humble Closed Hihat 1.wav", first: 60, vol: -14, pan: 0.3, voices: 4)
+
+// ---- an 808 as a bass: the sound is in tune at D (key 38), on the keys from 26 to 50: the notes of a line bring it to their pitch
+line = degrees(d2, minor, mutate([0 0 3 0 4 0 2 -2], swap: 0.25))
+bass = sampler(melody(line, euclid(16, 5, 0), velocity: 0.9, length: 3), "../../../psalm/assets/sounds/drums/808/Cymatics - Humble 808 1 - D.wav", mode: "whole", args: [50, 38], first: 26, vol: -6, voices: 2)
+
+// ---- a sung line, cut where the singer pauses: 13 pieces on the keys 36 to 48. A phrase of keys picks a piece, now and then
+pieces = degrees(36, major, mutate([0 3 1 5 2 7 4 6], swap: 0.5))
+choir = sampler(melody(pieces, euclid(32, 3, 7), velocity: 0.7, length: 24), "../../../psalm/assets/sounds/chants/Johannes.Hymnus.wav", mode: "pauses", args: [30, 0.3, 4], first: 36, vol: -8, voices: 3)
+
+out = (kick + snare + hats + bass + choir.reverb(mix: 0.35, decay: 3.5)).gain(0.8)

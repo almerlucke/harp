@@ -1,0 +1,54 @@
+// A small piece in A minor, driven by generators. Rhythms (euclid, every) say when, mutating phrases in the scale say which note, and
+// the parameters of the effects take their values from generators too (the echo mix, the hat filter, the brightness of every note): where a signal is wanted a generator steps (a new value every
+// step, held until the next); seq makes one of a list and glide smooths its jumps.
+//
+//   harp play examples/generators_fx.harp
+
+bpm = 104
+steps = 4
+seed = 21
+
+// ---- the bass: five notes in a bar, a phrase that swaps itself around now and then, a saw with a sine under it
+bassline = degrees(a1, minor, mutate([0 0 3 0 4 0 2 -2], swap: 0.35))
+
+fn bass(gate, note) {
+  f = hz(note)
+  tone = saw(f) * 0.6 + sine(f) * 0.8
+  // the cutoff opens on every note and closes again
+  body = tone.lowpass(cutoff: 250 + 900 * env(gate, [0 1 0], [0.004 0.25], -4), res: 0.2)
+  body * env(gate, [0 1 0], [0.005 0.12], -3, release: 1) * 0.4
+}
+
+low = play(bass, rhythm: euclid(16, 5, 0), legato: 0.9, fields: [bassline])
+
+// ---- the pad: a chord on every bar (Am, F, C, G), through psalm's subtractive synth
+progression = [[a3 c4 e4] [f3 a3 c4 f4] [c3 g3 c4 e4] [g3 b3 d4 g4]]
+pad = chords(progression, every(16), length: 14).subtractive(preset: "pad", voices: 8).gain(0.3)
+
+// ---- the lead: a pluck, a phrase an octave and a half up that moves slowly; every note has the brightness of the next in a list
+phrase = degrees(a3, minor, mutate([7 9 11 9 8 7 4 7 9 11 14 11 9 8], swap: 0.5))
+
+fn pluck(gate, note, bright) {
+  f = hz(note)
+  tone = saw([f * 0.997, f * 1.004])
+  body = tone.lowpass(cutoff: bright * (0.4 + 0.6 * env(gate, [0 1 0], [0.003 0.3], -4)), res: 0.25)
+  body * env(gate, [0 1 0], [0.003 0.35], -4) * 0.3
+}
+
+lead = play(pluck, rhythm: euclid(16, 9, 2), legato: 0.5, fields: [phrase, [2400 3600 1800 4200 2800]], voices: 3)
+
+// the echo of the lead: a dotted eighth on the left and a quarter on the right, and a mix that takes the next of a list at every step and
+// glides to it, so the echoes swell on the beat. (The time is fixed on purpose: a delay time that moves bends the pitch of what is in
+// the line, and it sounds as squeaking on every step.)
+echoed = lead.echo(max: 1, time: [0.433, 0.577], feedback: 0.42, mix: seq([0.12 0.35 0.2 0.45], glide: 70))
+
+// ---- drums: a kick on every beat, hats on a euclidean rhythm whose filter steps through a list
+fn kick(gate) { sine(42 + 130 * env(gate, [1 0], [0.07], -6)) * env(gate, [0 1 0], [0.002 0.22], -4) * 0.7 }
+drums_kick = play(kick, rhythm: every(4), legato: 0.3).dup()
+
+fn hat(gate, tone) { noise().highpass(cutoff: tone, res: 0.2) * env(gate, [0 1 0], [0.001 0.05], -4) * 0.12 }
+drums_hat = play(hat, rhythm: euclid(16, 7, 3), legato: 0.2, fields: [[6500 8000 7200 9000]]).dup()
+
+mix = low.dup() + pad + echoed.spread(0.7) + drums_kick + drums_hat
+
+out = mix.reverb(mix: 0.18, decay: 2.2).gain(0.7)

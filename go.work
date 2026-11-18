@@ -1,0 +1,13 @@
+go 1.27
+
+use (
+	.
+	./blocks
+	./lang
+	./examples/play
+	../genny
+	../exbana
+	../psalm
+	../sndfile
+	../go-jack
+)

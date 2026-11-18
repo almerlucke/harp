@@ -1,0 +1,8 @@
+// SuperCollider: the example of the help file of Decay2, an impulse that speeds up
+//
+//   { Decay2.ar(Impulse.ar(XLine.kr(1, 50, 20), 0), 0.01, 0.2, FSinOsc.ar(600)) }.play
+//
+// The help file has an Impulse with a phase of 0.25; harp has no phase argument, so here it is 0: the
+// first impulse is at the start
+
+out = decay2(impulse(xline(1, 50, 20)), attack: 0.01, decay: 0.2) * sine(600)

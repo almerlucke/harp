@@ -1,0 +1,82 @@
+// Berlin school: a sequencer that never stops and slowly drifts, deep wavetables that move, and beats that do not keep the beat on every beat.
+// Slow (88 bpm), in A minor, three minutes.
+//
+//   harp check examples/electronic.harp
+//   harp play examples/electronic.harp
+//
+// The sequencer is a bar of sixteenths, played over the chords i VI III VII (two bars each) and opened and closed by a filter that follows the
+// plan of the piece. A second sequencer, a pattern of eight notes played by two voices of which one is a little faster each round (phasing), comes
+// in with the drop. Under them a pad of vowels and a drone, wavetables whose table, filter and unison all move on slow signals of their own. The
+// beats are all of other lengths: a boom every 13 steps, ticks every 11, a rhythm that goes round after 25, hats in rolls, and now and then a
+// glitch from a cellular automaton. They drift against the bar and each other, and come back together after a long time.
+//
+// The recordings are in psalm's assets, next to harp (../../../psalm); without them there are no beats, and harp check says so.
+// Edit it while it plays (harp play -watch): the plan, the sequence, the lengths of the beats, the rule of the automaton.
+
+bpm = 88
+steps = 4
+seed = 8
+
+// ---- the plan: intro, a, b, break, c and outro, of 8, 8, 16, 8, 8 and 8 bars (16 steps a bar). A layer is on (1) or off (0) in each of them
+fn on(v) { sweep(v, v, 2) }
+fn plan(a, b, c, d, e, f) {
+  glide(seq(sections([on(a), on(b), on(c), on(d), on(e), on(f)], [128, 128, 256, 128, 128, 128])), 400)
+}
+// the cutoff of the sequencer: it opens in the intro, again in b, closes in the break, opens in c, and closes at the end
+cutplan = glide(seq(sections([sweep(400, 2200, 128), sweep(2200, 3200, 128), sweep(3200, 6500, 256), sweep(6500, 900, 128), sweep(900, 7500, 128), sweep(7500, 500, 128)],
+  [128, 128, 256, 128, 128, 128])), 30)
+
+// ---- the sequencer: a bar of sixteenths, twice for each chord; the chords are A, F, C and G, so the bars go -4, +3 and -2 semitones
+bar = phrase([45 57 64 57 72 57 64 57 45 57 64 57 69 64 57 64], [1], velocity: 0.8, legato: 0.85)
+two = tile(bar, 2)
+sequence = together([two, shift(transpose(two, -4), 32), shift(transpose(two, 3), 64), shift(transpose(two, -2), 96)])
+sequencer = wavetable(sequence, table: "brightness", preset: "arp_pluck", voices: 5,
+  position: lfo(0.037).range(0.15, 0.8), cutoff: cutplan * lfo(0.11).range(0.55, 1), resonance: lfo(0.047).range(0.25, 0.6))
+  .echo(max: 1, time: [0.511, 0.682], feedback: 0.4, mix: 0.3)
+  .gain(0.5 * plan(1, 1, 1, 1, 1, 1))
+
+// ---- the second sequencer: eight notes of a chord of A minor with a seventh, played by two voices; the second is faster by half a step every
+// round, so they move apart and come together again after sixteen rounds
+motif = phrase([69 72 76 72 69 67 64 67], [1], velocity: 0.7, legato: 0.6)
+phased = wavetable(phasing(motif, 0.5), table: "fm", preset: "arp_glass", voices: 6,
+  position: lfo(0.029).range(0.1, 0.9), cutoff: lfo(0.061).range(2500, 8000))
+  .echo(max: 1, time: [0.511, 0.341], feedback: 0.35, mix: 0.25)
+  .gain(0.3 * plan(0, 0, 1, 0, 1, 0))
+
+// ---- the pad: chords of four notes, led smoothly, in a table of vowels; its table, its filter, its width and its detune move, each slowly
+changes = voicelead(triads(a2, minor, [0 5 2 6], size: 4), 46, 70)
+warm = wavetable(chords(changes, every(32), velocity: 0.7, length: 31), table: "vowels", preset: "dark_pad", voices: 6,
+  position: lfo(0.021).range(0.05, 0.95), cutoff: lfo(0.017).range(700, 4200), spread: lfo(0.013).range(0.35, 1), detune: lfo(0.011).range(0.1, 0.9))
+  .gain(0.25 * plan(0.7, 1, 1, 1, 1, 0.8))
+
+// ---- the drone: one very low note that fills the bar; a table that is a saw with a comb moving over it
+drone = wavetable(melody([a1], every(128), velocity: 0.9, length: 126), table: "comb", preset: "dark_drone", voices: 2,
+  position: lfo(0.019).range(0.1, 0.9), cutoff: lfo(0.023).range(120, 520), warp: lfo(0.015).range(0, 1), warpmode: "mirror")
+  .gain(0.5 * plan(1, 1, 1, 1, 1, 1))
+
+// ---- the lead: a slow melody that walks over A minor, five notes in two bars, long; the echo is a dotted eighth
+walk = melody(stepwise(a4, minor, start: 0, lo: -3, hi: 4, step: 1, leap: 0.2, maxleap: 3), euclid(32, 5, 3), velocity: 0.7, length: 7)
+lead = wavetable(walk, table: "vowels", preset: "theremin_lead", voices: 3, position: lfo(0.043).range(0.2, 0.8), cutoff: lfo(0.027).range(1200, 5200))
+  .echo(max: 1, time: [0.511, 0.682], feedback: 0.45, mix: 0.4)
+  .gain(0.35 * plan(0, 0, 1, 1, 1, 0))
+
+// ---- the beats: a boom that comes every 13 steps (4 hits of 13), ticks every 11, a rhythm of 25 steps, hats that roll, and glitches from an automaton
+boom = sampler(melody([60], euclid(13, 4, 0), velocity: 1, length: 1), "../../../psalm/assets/sounds/drums/808/Cymatics - Humble 808 7 - A.wav", first: 60, vol: -3, voices: 2)
+  .gain(plan(0, 1, 1, 0, 1, 0))
+fn tick(gate, note) {
+  f = hz(note)
+  sine(f + sine(f * 1.5) * f * 2 * env(gate, [1 0], [0.03], -4)) * env(gate, [0 1 0], [0.001 0.05], -5) * 0.3
+}
+ticks = play(tick, rhythm: euclid(11, 6, 2), legato: 0.2, fields: [[93 96 100 98 93 105]], swing: 0.12, humanize: 0.02, accent: accents([4 4 4 4], other: 0.5))
+  .dup().gain(plan(0, 1, 1, 0, 1, 0))
+wood = sampler(melody([60], talea([5 3 3 5 2 3 4]), velocity: 0.8, length: 1), "../../../psalm/assets/sounds/drums/percussion/Cymatics - Odyssey Percussion 3.wav", first: 60, vol: -6, voices: 3)
+  .gain(plan(0, 0, 1, 0, 1, 0))
+fn hat(gate) { noise().highpass(cutoff: 7500, res: 0.3) * env(gate, [0 1 0], [0.001 0.03], -6) * 0.3 }
+hats = play(hat, rhythm: ratchets([1 2 1 1 3 1 2 4], 4), legato: 0.3, swing: 0.16, humanize: 0.03, accent: accents([4 4 4 4], downbeat: 1, group: 0.7, other: 0.4))
+  .dup().gain(2 * plan(0, 0, 1, 0, 1, 0))
+glitches = sampler(melody([60], maybe(cellular(90, 16, start: "random"), 0.4), velocity: 0.7, length: 1), "../../../psalm/assets/sounds/drums/glitch/Glitch_10_SP.wav", first: 60, vol: -8, voices: 3)
+  .gain(plan(0, 0, 1, 0, 1, 0))
+
+// ---- the mix: the beats through a short echo, everything through a long reverb
+beats = (boom + ticks + wood + hats + glitches).echo(max: 1, time: [0.17, 0.34], feedback: 0.3, mix: 0.2)
+out = (sequencer + phased + warm + drone + lead + beats).reverb(mix: 0.28, decay: 6).gain(0.55)

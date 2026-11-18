@@ -1,0 +1,51 @@
+# Getting started
+
+## Build
+
+harp is Go code in a workspace with psalm, genny and exbana next to it (`go.work`). From `lang/`:
+
+```
+go build -o harp ./cmd/harp
+```
+
+or run it without building: `go run ./cmd/harp ...`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `harp check patch.harp` | reads and checks a patch, prints its channels and tempo |
+| `harp render patch.harp -o out.wav -seconds 10` | writes the sound to a WAV file (`-float` for 32 bit float, `-rate 44100`) |
+| `harp play patch.harp` | plays it on the sound card, and again when you save the file ([live editing](live-editing.md)) |
+| `harp compare patch.harp` | renders it and the SuperCollider code it translates, and says how alike they are ([SuperCollider](supercollider.md)) |
+| `harp functions` | lists the functions (`-md` for markdown) |
+| `harp presets [synth]` | lists the presets of the synths |
+| `harp cache [clear]` | the folder of the kept mipmaps of recordings, and how big it is ([Recordings](recordings.md)) |
+
+`play` takes `-seconds N`, `-buffer 512`, `-rate 44100`, `-watch=false` (do not watch the file) and `-cpuprofile file`.
+
+## A first patch
+
+Save as `first.harp`:
+
+```harp
+bpm = 110
+seed = 1
+
+melody = degrees(a3, minor, mutate([0 2 4 7 4 2], swap: 0.4))
+voice  = notes(melody, euclid(16, 7), length: 0.6)
+
+out = saw(voice.pitch)
+  .lowpass(cutoff: lfo(0.2).range(400, 3000), res: 0.4)
+  .gain(adsr(0.005, 0.15, 0.4, 0.2).on(voice.gate))
+  .gain(0.3)
+  .dup()
+```
+
+`harp play first.harp` plays it. Change the cutoff range or the rhythm and save: the sound changes without a restart.
+
+What the patch says: a phrase in A minor that now and then swaps its notes (a generator); a rhythm of 7 hits in 16 steps (a generator); a saw that follows the notes, through a filter that an lfo sweeps, shaped by an envelope that the rhythm triggers; the result in stereo.
+
+## Where next
+
+[The language](language.md), then [Generators](generators.md).

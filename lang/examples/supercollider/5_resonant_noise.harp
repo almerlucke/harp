@@ -1,0 +1,13 @@
+// SuperCollider: noise through a narrow bandpass whose center wanders, in the style of the help files
+//
+//   { Resonz.ar(WhiteNoise.ar(0.5), LFNoise1.kr(1).exprange(200, 5000), 0.05) }.play
+//
+// Resonz takes the bandwidth as a ratio, 0.05 of the center: a Q of 20. The bandpass of psalm has a
+// gain of Q at the center, so it is scaled by its 1/Q to have 0 dB there: res 0.975 is a Q of 20.
+
+seed = 1
+
+out = noise().gain(0.5)
+  .bandpass(cutoff: lfnoise(1).exprange(200, 5000), res: 0.975)
+  .gain(0.05)
+  .dup()

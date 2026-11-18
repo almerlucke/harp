@@ -1,0 +1,31 @@
+// Scores: music that is made whole when the patch is built, as a MIDI file is, instead of a value at every step. A fugue (an exposition: a
+// subject enters in three voices, each with its own synth), and a piece of phasing in the way of Steve Reich.
+//
+//   harp check examples/scores.harp
+//   harp play examples/scores.harp
+//
+// A score plays on any synth, where the synth takes notes. Take one voice of a fugue (voice: 0) to give it a synth of its own, or all of them
+// together (voice: -1). A MIDI file is a score too: midifile("song.mid", track: 0).
+
+bpm = 76
+steps = 4
+seed = 4
+
+// ---- the fugue: a subject in D minor, 4 steps to the beat, bars of 16 steps
+subject = [62 64 65 64 62 69 67 65 64 62]
+lengths = [4 4 4 2 2 4 4 4 2 6]
+voice0 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 0, barsteps: 16)
+voice1 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 1, barsteps: 16)
+voice2 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 2, barsteps: 16)
+
+high = subtractive(voice0, preset: "pluck", voices: 4).gain(0.28)
+middle = modal(transpose(voice1, 0), preset: "marimba", voices: 4).gain(0.3)
+low = subtractive(transpose(voice2, -12), preset: "bass", voices: 3).gain(0.3)
+
+// ---- phasing: a pattern of twelve notes played by two voices; the second is faster by half a step every round, and after 24 rounds (a minute)
+// the two are together again
+pattern = phrase([76 78 83 85 86 78 76 85 83 78 86 85], [1])
+steady = modal(phasing(pattern, 0.5, voice: 0), preset: "vibraphone", voices: 6).gain(0.12)
+moving = modal(phasing(pattern, 0.5, voice: 1), preset: "vibraphone", voices: 6).gain(0.12)
+
+out = (high + middle + low + steady + moving).reverb(mix: 0.25, decay: 3.5)

@@ -1,0 +1,10 @@
+// SuperCollider: "analog bubbles", by James McCartney (one of the examples that come with SuperCollider)
+//
+//   {
+//       var f = LFSaw.kr(0.4, 0, 24, LFSaw.kr([8, 7.23], 0, 3, 80)).midicps;
+//       CombN.ar(SinOsc.ar(f, 0, 0.04), 0.2, 0.2, 4)
+//   }.play
+
+f = hz(ramp(0.4) * 24 + ramp([8, 7.23]) * 3 + 80)
+
+out = sine(f).gain(0.04).comb(delay: 0.2, decay: 4)

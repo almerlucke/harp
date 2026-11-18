@@ -1,0 +1,27 @@
+// One stream drives the notes and an effect, at the same step. A mutating phrase in A minor is a value for every step (seq); the plucks
+// read it at the start of each of their notes (a signal in `fields`), and the cutoff of the drone's filter and the pitch of the
+// drone follow the same values: when the phrase moves, they move together.
+//
+//   harp play examples/shared_stream.harp
+
+bpm = 110
+steps = 4
+seed = 3
+
+stream = seq(degrees(a2, minor, mutate([0 2 4 7 9 7 4 2], swap: 0.3)))
+
+fn pluck(gate, note) {
+  f = hz(note)
+  tone = saw([f * 0.997, f * 1.004])
+  body = tone.lowpass(cutoff: 600 + 3000 * env(gate, [0 1 0], [0.003 0.3], -4), res: 0.2)
+  body * env(gate, [0 1 0], [0.003 0.3], -4) * 0.25
+}
+
+// a note on 11 of the 16 steps of a bar, an octave and a half above the stream: each reads the value its step has
+pitch = stream + 24
+notes = play(pluck, rhythm: euclid(16, 11), legato: 0.5, fields: [pitch], voices: 3)
+
+// the drone is the stream itself, an octave down, and its filter opens with the same values
+drone = saw(hz(stream - 12)).lowpass(cutoff: glide(hz(stream + 24), ms: 90), res: 0.25).gain(0.18)
+
+out = (notes + drone).reverb(mix: 0.2, decay: 1.8)

@@ -1,0 +1,43 @@
+// A patch for trying live edits (harp play examples/live_demo.harp, after copying it somewhere: cp examples/live_demo.harp ~/live.harp).
+// It is made so that a restart or a cut tail is easy to hear: a drone whose filter is swept by a very slow lfo (a full sweep takes 14 s: if a
+// save restarted it, you would hear it jump back to the start), a slow arpeggio, and a long reverb.
+//
+// Things to change while it plays, and what you should hear:
+//   the numbers of `cutoff` below           the drone gets brighter or darker; the sweep goes on from where it is
+//   `lfo(0.07)` -> `lfo(0.2)`               the sweep gets faster, from where it is (no jump)
+//   the notes of `phrase`                   the arpeggio takes the new notes from its next note, in time
+//   `bright` list                           the notes get another brightness from the next note; the phrase goes on
+//   `decay: 5` of the reverb                the reverb is new (its tail is cut); everything else goes on
+//   `gain(0.06)` of the drone               the drone gets louder or quieter; nothing restarts
+//   `bpm = 90` -> `bpm = 110`               the arpeggio gets faster at the next step
+//   `euclid(16, 9)`                         a new rhythm: the arpeggio starts again; the drone and the reverb go on
+//   delete the drone line from `mix`        the drone goes; the reverb tail of it rings out
+
+bpm = 90
+steps = 4
+seed = 7
+
+// the drone: three saws a few cents apart, an octave and a fifth, through a lowpass that a very slow lfo sweeps
+drone = saw([110.0, 110.4, 165.0, 165.6, 220.0]).mix()
+cutoff = lfo(0.07).range(300, 2400)
+droned = drone.lowpass(cutoff: cutoff, res: 0.35).gain(0.06)
+
+// the arpeggio: a note every two steps, a phrase in A minor that moves a little now and then
+phrase = degrees(a3, minor, mutate([0 2 4 7 4 2 0 -3], swap: 0.3))
+bright = [1800 2800 2200 3400]
+
+fn pluck(gate, note, cutoff) {
+  f = hz(note)
+  tone = saw([f * 0.997, f * 1.003])
+  body = tone.lowpass(cutoff: cutoff * (0.4 + 0.6 * env(gate, [0 1 0], [0.003 0.4], -4)), res: 0.25)
+  body * env(gate, [0 1 0], [0.003 0.5], -4) * 0.22
+}
+
+arp = play(pluck, rhythm: euclid(16, 8), legato: 0.5, fields: [phrase, bright], voices: 3)
+
+// the echo of the arpeggio, and everything through a long reverb
+echoed = arp.echo(max: 1, time: [0.5, 0.75], feedback: 0.4, mix: 0.3)
+
+mix = droned.dup() + echoed
+
+out = mix.reverb(mix: 0.3, decay: 5)

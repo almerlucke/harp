@@ -1,0 +1,26 @@
+// The synths and effects of psalm together: a vibraphone line, a choir on the chords, a plucked bass, and effects that are moved by signals.
+//
+//   harp play examples/psalm_pieces.harp
+
+bpm = 84
+steps = 4
+seed = 12
+
+// the line: a phrase in C minor that moves now and then, on a rhythm of nine hits in a bar
+phrase = degrees(c4, minor, mutate([0 2 4 7 9 7 4 2], swap: 0.3))
+line = melody(phrase, euclid(16, 9), velocity: 0.8, length: 3)
+vibes = modal(line, preset: "vibraphone", voices: 6).gain(0.5)
+
+// the chords, a bar each, sung by a choir
+progression = [[c3 g3 d#4 g4] [g#2 d#3 c4 d#4] [a#2 f3 d4 f4] [g2 d3 b3 d4]]
+choir = vocal(chords(progression, every(16), velocity: 0.7, length: 15), preset: "choir", voices: 8).gain(0.5)
+
+// a bass on the root of every chord, an octave under, plucked
+roots = melody([c2 g#1 a#1 g1], every(16), velocity: 0.9, length: 6)
+bass = waveguide(roots, preset: "bass", voices: 2).gain(0.5)
+
+// the effects: a chorus on the vibraphone whose depth is moved by a slow lfo, a tremolo that pans the choir, a tape delay on the line
+moving = vibes.chorus(rate: 0.4, depth: lfo(0.05).range(1, 6), mix: 0.35).tape(time: 420, feedback: 0.35, mix: 0.2)
+panned = choir.tremolo(mode: "pan", shape: "sine", rate: 0.15, depth: 0.5)
+
+out = (moving + panned + bass).widener(width: 1.3).shimmer(mix: 0.2, decay: 4).gain(0.5)

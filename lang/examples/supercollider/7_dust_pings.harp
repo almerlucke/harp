@@ -1,0 +1,7 @@
+// SuperCollider: random pings, four a second
+//
+//   { (SinOsc.ar(1200) * Decay2.ar(Dust.ar(4), 0.005, 0.15) * 0.3) ! 2 }.play
+
+seed = 4
+
+out = (sine(1200) * decay2(dust(4), attack: 0.005, decay: 0.15) * 0.3).dup()
