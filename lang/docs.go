@@ -19,7 +19,7 @@ var referenceGroups = []struct {
 	{"Shaping and mapping", "gain tanh atan sign clip2 midiratio hz range exprange linexp"},
 	{"Channels", "dup mix spread pan product reverse"},
 	{"Generators (rhythm, notes, phrases)", "euclid every mutate degrees melody chords notes"},
-	{"Rhythms", "maybe invert both either meter sieve"},
+	{"Rhythms", "pattern maybe invert both either meter sieve"},
 	{"Combining generators", "alternate anyof chance stutter shotgun norepeat distinct flatten stack deal uniform"},
 	{"Numbers that move", "wander drift wave sweep orbit chaos remap gauss expo beta cauchy weibull pink"},
 	{"Rules, chance and growth", "lsystem grammar cellular life scatter markov learn stroll"},

@@ -8,6 +8,7 @@ Some give a **list** (made when the patch is built); a list works wherever a gen
 
 | | |
 |---|---|
+| `pattern("x..x ..x. x...")` | a rhythm written as a string, a step to a character (x is a hit) |
 | `euclid`, `every`, `divide(n, offset)` | even spreads and clocks |
 | `talea([3 2 3])` | a rhythm from lengths of notes (isorhythm: with a pitch list of another length it comes back together late) |
 | `ratchets([1 2 1 4], 4)` | rolls: so many hits in each beat |

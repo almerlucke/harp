@@ -430,6 +430,12 @@ A melody on a rhythm: the next pitch is taken when the rhythm plays, together wi
 
 ## Rhythms
 
+### `pattern`
+
+`pattern(steps: string) -> generator of booleans`
+
+A rhythm written as a string, a step to a character: x is a hit, . (or -) a rest, and spaces are for reading (a bar to a word): pattern("x...x... x..x...."). It goes round.
+
 ### `maybe`
 
 `maybe(rhythm: generator of booleans, p: number) -> generator of booleans`

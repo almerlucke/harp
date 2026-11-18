@@ -10,7 +10,6 @@ In `lang/examples/`. Play one with `harp play lang/examples/NAME.harp` (copy it 
 | `generators_fx.harp` | a small piece in A minor: bass, pad, lead, drums, all driven by generators; effect parameters from generators |
 | `shared_stream.harp` | one stream drives the notes of a `play` and the filter and pitch of a drone |
 | `psalm_pieces.harp` | the synths and effects of psalm together: a vibraphone, a choir, a plucked bass, a chorus moved by an lfo, a tremolo that pans, tape, shimmer |
-| `electronic.harp` | a two minute electronic piece that uses most of what harp has: moving wavetables (the table, the filter, the unison all move), led chords, a chain of chance for the bass, an L-system lead on a cellular rhythm, stabs and hats with swing and accents, drums from recordings, grains of a chant, a canon in the break, a sidechained mix and a plan of sections |
 | `scores.harp` | a fugue exposition in three voices, each on its own synth, and a piece of phasing: music made whole as a score |
 | `generators_more.harp` | chords from a progression with voice leading, a bass from a markov chain, an L-system lead on a cellular rhythm, a drone filtered by the Lorenz attractor |
 | `grains_wavetable.harp` | a pad of grains cut from a chant, and a synced wavetable bass |
