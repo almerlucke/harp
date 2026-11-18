@@ -1066,6 +1066,30 @@ Psalm's pulsar synthesis: trains of short pulses with formants (vowel leads, buz
 
 Psalm's waveshaping and phase distortion synth (cz leads, fm basses, pads, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets shaper).
 
+### `organ`
+
+`organ(notes: generator of notes, preset: string = jazz, drawbars: string = , leslie: number = the preset's own, speed: number = the preset's own) -> signal`
+
+Psalm's tonewheel organ, one instrument: every note is a key of it (a chord is several keys, a note is held for its length), with its drawbars, percussion, vibrato and Leslie. The preset (harp presets organ) sets the registration; drawbars is the registration written as organists do, a digit from 0 to 8 for each of the nine drawbars ("888000000" is a jazz sound), leslie is how much of the rotary speaker there is (0 to 1) and speed how fast it turns (0 stopped, 0.5 slow, 1 fast). Stereo out.
+
+### `dx`
+
+`dx(notes: generator of notes, preset: string = e_piano, voices: number = 8, file: string = , patch: number = 0) -> signal`
+
+Psalm's FM synth in the way of the Yamaha DX7 and TX81Z: operators that modulate each other (electric pianos, bells, brass, basses, pads, ...), playing notes with voices notes at once. The preset (harp presets dx) is one of its own patches; file is a DX7 SysEx bank (a .syx file of 32 patches) and patch the number of the patch in it, counted from 0, which takes the place of the preset. Stereo out.
+
+### `drumsynth`
+
+`drumsynth(notes: generator of notes, kit: string = 808, voices: number = 8) -> signal`
+
+Psalm's drum synthesizer: drums that are made, not played from recordings. kit is 808, 909, electro, industrial, trap. A note is a drum, by its General MIDI key: drum("kick") is the number for a kick, drum("snare"), drum("hat"), drum("open"), drum("clap"), drum("tomLow") and so on (the names are in docs/synths.md); melody([drum("kick")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out.
+
+### `drum`
+
+`drum(name: string) -> number`
+
+The General MIDI key of a drum, by its name, for drumsynth: agogoHigh, agogoLow, bongoHigh, bongoLow, clap, clave, congaHigh, congaLow, congaMute, cowbell, crash, hat, kick, open, ride, rideBell, rim, shaker, snare, tambourine, timbaleHigh, timbaleLow, tomHigh, tomLow, tomMid, triangle, triangleMute, woodblockHigh, woodblockLow.
+
 ### `grains`
 
 `grains(notes: generator of notes, file: string, root: number = 60, preset: string = choir_pad, voices: number = 6, position: number = the preset's own, scan: number = the preset's own, spray: number = the preset's own, density: number = the preset's own, size: number = the preset's own, pitchspread: number = the preset's own) -> signal`

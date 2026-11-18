@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -91,7 +92,7 @@ func TestEveryPresetOfEverySynthPlaysANote(t *testing.T) {
 	writeTone(t, dir, "tone.wav", 1) // for the synths that are made from a sound
 	for synth, names := range presetTables {
 		for _, preset := range names {
-			src := "bpm = 120\nseed = 1\nnotes = melody([a3 c4 e4], every(8), velocity: 0.9, length: 0.9)\nout = " + synth + "(notes, preset: \"" + preset + "\", voices: 2" + map[string]string{"grains": `, file: "tone.wav"`}[synth] + ")\n"
+			src := "bpm = 120\nseed = 1\nnotes = melody([a3 c4 e4], every(8), velocity: 0.9, length: 0.9)\nout = " + synthCall(synth, preset) + "\n"
 			p, err := CompileDir(src, dir)
 			if err != nil {
 				t.Errorf("%s %s: %v", synth, preset, err)
@@ -119,4 +120,17 @@ func TestEveryPresetOfEverySynthPlaysANote(t *testing.T) {
 	if len(silent) > 0 {
 		t.Logf("%d presets are silent for a note of a3: %v", len(silent), silent)
 	}
+}
+
+// synthCall is a note played on a synth with a preset (the organ has no voices, the drum synth has kits, not presets)
+func synthCall(synth, preset string) string {
+	switch synth {
+	case "organ":
+		return fmt.Sprintf("organ(notes, preset: %q)", preset)
+	case "drumsynth":
+		return fmt.Sprintf("drumsynth(notes, kit: %q, voices: 2)", preset)
+	case "grains":
+		return fmt.Sprintf("grains(notes, preset: %q, voices: 2, file: \"tone.wav\")", preset)
+	}
+	return fmt.Sprintf("%s(notes, preset: %q, voices: 2)", synth, preset)
 }

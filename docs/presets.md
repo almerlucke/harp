@@ -36,6 +36,18 @@ acid_pulsar, ae_lead, ah_pad, beating_drone, brass, buzz_bass, choir, chop_lead,
 
 acid, air_pad, bell_morph, brass_lead, choir_pad, church_bell, clav, crowns_cast, crush, crystal_sea, curve_bass, cz_pulse_arp, cz_resonant, cz_saw_lead, cz_square_bass, dark_pad, drone5, duo_lead, e_piano, evolve, flute_lead, fm_bass, fm_lead, fold_lead, fold_pad, four_beasts, funnel_arp, glass, glass_bell, glass_pad, gong, growl, harm_pad, harp, impact, kalimba, kick_sub, laser, legendre_pad, lightning, lion_bass, many_eyes, marimba, metal, morph_pad, music_box, organ, pluck, pluck_lead, poly_lead, pulse_bass, pwm, rainbow, reed, reese, ring_metal, riser, seven_lamps, soft_dead_lead, split_lead, split_pad, square_lead, stab, step_lead, string_pad, sub_drone, sub_fold, sub_sine, supersaw_lead, swarm, sync_lead, throne_drone, thunder, tick, tri_fold_pad, trumpet_voice, tube_bass, tube_organ, vibes, vowel, warm_pad, wide_fold_pad, wide_morph, wobble, x_mod_bell, x_mod_growl, zap
 
+## organ (45)
+
+ballad, ballpark, blues_grit, bright_solo, carnival, cathedral, chime, chorus_v1, church_plenum, deep_vibrato, diapason, flute, full, funky_stab, glass_organ, gospel, gospel_fast, gospel_slow, growl_bass, horror, jazz, jimmy_smith, leslie_fast, leslie_stopped, mellow_full, nasal_reed, pipe_flute, principal_choir, reed, rock, rock_overdrive, screamer, seasick, soft_flute, soft_pad, string_organ, sub_bass, swell_filter, theatre_tibia, wah_organ, warble, warm_chorus, wheel_drive, wheel_leslie, whistle
+
+## dx (128)
+
+accordion, acid_bass, air_flute, alien_bubbles, banjo_twang, baroque_harpsi, bass, bell, bell_pad, bell_shimmer, brass, brass_section, bright_grand, celesta, chance_mallet, choir_pad, church_bell, church_organ, clarinet, clavinet, crystal_glock, drawbar_organ, dyno_keys, e_piano, even_abs_pad, evolving_pad, filter_pluck, flute, fm_bass, fm_lead, fm_organ, fm_piano, french_horn, fretless_bass, fretless_fm, funk_clav, gamelan_bell, glass_keys, glass_pad, glide_lead, glockenspiel, grand_piano, half_sine_organ, harp, harp_fm, harpsichord, hat_fm, hollow_reed, honky_tonk, horn_solo, ice_pad, kalimba, kick_fm, koto, koto_pluck, laser_zap, lead, log_saw_brass, mallet, metallic, music_box, music_box_fm, nasal_oboe, nylon_guitar, nylon_pick, oboe, organ, overdrive_guitar, pad, pan_flute, pan_pipes, percussive_organ, pipe_organ, pizzicato, pluck, pulse_clav, pure_sine, pwm_lead, reed_organ, riser_sweep, rubber_bass, saw_lead, saxophone, sforzando_brass, sitar, slap_bass, slap_fm, snare_fm, soft_brass, soft_piano, solo_trumpet, square_lead, steel_celesta, steel_drum, steel_guitar, strings, sub_bass, sweep_pad, sweep_strings, sync_lead, synth_bass, synth_brass, taiko, tenor_sax, thumb_kalimba, timpani, timpani_fm, tine_keys, tom_fm, trumpet, tube_chime, tubular_bells, upright_bass, velocity_fm, vibes_fm, vowel_ah, warm_pad, warm_strings, wheel_keys, wheel_pad, wind_gust, wood_bass, wood_block_fm, wood_clarinet, wood_marimba, woodblock, wurly_keys, xylophone
+
+## drumsynth (5)
+
+808, 909, electro, industrial, trap
+
 ## grains (7)
 
 choir_pad, frozen_drone, glass_keys, pluck, shimmer, stutter, texture

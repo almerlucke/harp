@@ -1,0 +1,25 @@
+// The last three synths of psalm: a drum synth, a DX7 style FM bass and bells, and a tonewheel organ.
+//
+//   harp check examples/organ_dx_drums.harp
+//   harp play examples/organ_dx_drums.harp
+//
+// The drums are written with their names (drum("kick")) in patterns that are strings. The organ is one instrument: its chord is six keys of it. The FM
+// bass and the bells are patches of psalm; with a DX7 SysEx file, dx(notes, file: "rom1a.syx", patch: 10) plays one of its patches.
+
+bpm = 96
+steps = 4
+seed = 5
+
+kick = drumsynth(melody([drum("kick")], pattern("x..x..x. x...x... x..x..x. x...x.xx"), velocity: 1, length: 1), kit: "909", voices: 3)
+snare = drumsynth(melody([drum("snare")], pattern("....x.......x..."), velocity: 0.9, length: 1), kit: "909", voices: 2)
+hats = drumsynth(melody([drum("hat") drum("hat") drum("open") drum("hat")], every(2), velocity: 0.9, length: 1), kit: "909", voices: 3).gain(2.5)
+drums = (kick + snare + hats).gain(0.3)
+
+bass = dx(melody([a1 a1 c2 a1 e2 a1 g1 a1], pattern("x.x.x..x x.x.x.x."), velocity: 0.9, length: 1.5), preset: "fm_bass", voices: 2).gain(0.9)
+bells = dx(melody(degrees(a4, minor, mutate([0 2 4 7 9 7 4 2], swap: 0.3)), euclid(16, 5, 2), velocity: 0.6, length: 3), preset: "bell", voices: 6).gain(0.4)
+  .echo(max: 1, time: [0.469, 0.625], feedback: 0.35, mix: 0.3)
+
+keys = organ(chords([[a2 e3 a3 c4 e4 a4] [f2 c3 f3 a3 c4 f4] [c3 g3 c4 e4 g4 c5] [g2 d3 g3 b3 d4 g4]], every(32), velocity: 0.7, length: 30), preset: "jazz", leslie: 0.8)
+  .gain(0.25)
+
+out = (drums + bass + bells + keys).reverb(mix: 0.15, decay: 2.5).gain(0.65)

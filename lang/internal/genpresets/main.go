@@ -18,7 +18,11 @@ import (
 )
 
 // synths are the packages to take presets from, and the name of the table they make
-var synths = []string{"modal", "piano", "waveguide", "vocal", "pulsar", "shaper"}
+var synths = []synth{{"modal", "Config"}, {"piano", "Config"}, {"waveguide", "Config"}, {"vocal", "Config"}, {"pulsar", "Config"}, {"shaper", "Config"},
+	{"organ", "Config"}, {"dx", "Patch"}}
+
+// synth is a package, and what its presets give (most give a Config, the FM synth a Patch)
+type synth struct{ pkg, result string }
 
 func main() {
 	root := "../../psalm/synths"
@@ -31,21 +35,21 @@ func main() {
 	fmt.Println()
 	fmt.Println("import (")
 	for _, s := range synths {
-		fmt.Printf("\t\"github.com/almerlucke/psalm/synths/%s\"\n", s)
+		fmt.Printf("\t\"github.com/almerlucke/psalm/synths/%s\"\n", s.pkg)
 	}
 	fmt.Println(")")
 	for _, s := range synths {
-		names := presets(filepath.Join(root, s))
-		fmt.Printf("\nvar %sPresets = map[string]func() %s.Config{\n", s, s)
+		names := presets(filepath.Join(root, s.pkg), s.result)
+		fmt.Printf("\nvar %sPresets = map[string]func() %s.%s{\n", s.pkg, s.pkg, s.result)
 		for _, n := range names {
-			fmt.Printf("\t%q: %s.%s,\n", snake(strings.TrimSuffix(n, "Preset")), s, n)
+			fmt.Printf("\t%q: %s.%s,\n", snake(strings.TrimSuffix(n, "Preset")), s.pkg, n)
 		}
 		fmt.Println("}")
 	}
 }
 
 // presets are the functions of a package that take nothing and give its Config
-func presets(dir string) []string {
+func presets(dir, result string) []string {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, func(fi os.FileInfo) bool { return !strings.HasSuffix(fi.Name(), "_test.go") }, 0)
 	if err != nil {
@@ -57,13 +61,13 @@ func presets(dir string) []string {
 		for _, f := range pkg.Files {
 			for _, d := range f.Decls {
 				fn, ok := d.(*ast.FuncDecl)
-				if !ok || fn.Recv != nil || !fn.Name.IsExported() || fn.Name.Name == "DefaultConfig" {
+				if !ok || fn.Recv != nil || !fn.Name.IsExported() || fn.Name.Name == "DefaultConfig" || fn.Name.Name == "InitVoice" {
 					continue
 				}
 				if len(fn.Type.Params.List) != 0 || fn.Type.Results == nil || len(fn.Type.Results.List) != 1 {
 					continue
 				}
-				if id, ok := fn.Type.Results.List[0].Type.(*ast.Ident); ok && id.Name == "Config" {
+				if id, ok := fn.Type.Results.List[0].Type.(*ast.Ident); ok && id.Name == result {
 					names = append(names, fn.Name.Name)
 				}
 			}

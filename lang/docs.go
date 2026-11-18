@@ -28,7 +28,7 @@ var referenceGroups = []struct {
 	{"Scores (notes with a start and a length)", "phrase midifile harmonize isorhythm chordtones fugue phasing canon transpose stretch mirror retro shift together cut tile pad tune thin pitches lengths velocities onsets chordsof"},
 	{"Generators as signals", "seq glide pulses"},
 	{"Notes on an instrument of your own", "play accents"},
-	{"Synths", "subtractive supersaw modal piano waveguide vocal pulsar shaper grains wavetable"},
+	{"Synths", "subtractive supersaw modal piano waveguide vocal pulsar shaper organ dx drumsynth drum grains wavetable"},
 	{"Recordings", "sampler streamer"},
 	{"While the patch is built (random numbers, lists, functions)", "rand exprand coin choose geom fill repeat dbamp"},
 	{"SuperCollider's own algorithms", "scsaw scsawsync scsin sclpf schpf scrlpf scpeq scdelayn scdelayc freeverb2"},

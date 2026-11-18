@@ -50,6 +50,8 @@ type synthOptions struct {
 	// paced: the voices read their sound from outside while it plays (a streamer reads files): rendering offline, a chunk is not made faster
 	// than they can read, or they would have gaps. (Playing, the device sets the pace)
 	paced bool
+	// single: the synth is one instrument that all the notes go to (an organ: the keys share its wheels), not a set of voices that take a note each
+	single bool
 	// mods are signals that move a setting of every voice while it sounds: the value of each at the start of a chunk of 64 samples is given
 	// to the voices as the value cabled in at the input Index (see Mod)
 	mods []Mod
@@ -95,6 +97,7 @@ func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, c
 		New: func(rt *dsl.Rt) dsl.ProcessN {
 			h := newHost(rt, newVoice, channels, voices)
 			h.paced = opts.paced
+			h.single = opts.single
 			h.modIdx, h.modVal = modIdx, make([]any, len(modIdx))
 			st.rt = rt
 			dsl.LaneWith(rt, func() []pendingNote { // on the control goroutine: the messages are made here, not on the audio thread
@@ -217,6 +220,7 @@ type host[V poly.Voice] struct {
 	ready  [][]float32    // the sound of the chunk that was made last
 	have   bool
 	paced  bool
+	single bool
 	chunk  int64 // the chunk that is being played
 	count  int64 // notes started
 	modIdx []int // the inputs of the voices that the modulations are cabled to
@@ -332,6 +336,11 @@ func (h *host[V]) pick() *slot[V] {
 
 // start gives a note a voice; a voice that still sounds is stolen, and fades out
 func (h *host[V]) start(ev noteEvent, offset int, chunk int64) {
+	if h.single { // the one instrument takes every note as it is: nothing is stolen, nothing is cleared
+		h.slots[0].voice.Note(ev.note.seconds, ev.note.amp, ev.note.msg, psalm.CtrlTick{SampleOffset: offset}, h.cfg)
+		h.count++
+		return
+	}
 	s := h.pick()
 	if s.voice.IsActive() && s.faded != chunk { // what it sounds is not cut: it fades over this chunk, as psalm's poly does
 		s.faded = chunk

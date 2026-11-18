@@ -6,8 +6,11 @@ import (
 	"harp/dsl"
 
 	"github.com/almerlucke/psalm"
+	"github.com/almerlucke/psalm/synths/drumsynth"
+	"github.com/almerlucke/psalm/synths/dx"
 	"github.com/almerlucke/psalm/synths/grains"
 	"github.com/almerlucke/psalm/synths/modal"
+	"github.com/almerlucke/psalm/synths/organ"
 	"github.com/almerlucke/psalm/synths/piano"
 	"github.com/almerlucke/psalm/synths/pulsar"
 	"github.com/almerlucke/psalm/synths/shaper"
@@ -66,4 +69,43 @@ func Grains(cfg grains.Config, what string, voices int, notes dsl.Gen[[]Note]) d
 // move the position, the cutoff, the resonance or the values cabled to the modulation matrix while the notes sound (wavetable.InPosition...)
 func Wavetable(cfg wavetable.Config, what string, voices int, notes dsl.Gen[[]Note], mods []Mod) dsl.Sig {
 	return synthWith(synthOptions{mods: mods}, "wavetable "+what, func() *wavetable.Voice { return wavetable.New(cfg) }, channelsOr(cfg.NumChannels), voices, notes)
+}
+
+// organVoice lets the organ be driven like a voice: it is one instrument that every note goes to (the keys share the wheels), always sounding
+// (its wheels spin, its Leslie rings on)
+type organVoice struct{ *organ.Organ }
+
+func (o organVoice) NoteOn(amplitude float64, message psalm.Message, tick psalm.CtrlTick, cfg psalm.Config) {
+	o.Note(3600, amplitude, message, tick, cfg)
+}
+func (o organVoice) NoteOff()       { o.AllNotesOff() }
+func (o organVoice) Clear()         {}
+func (o organVoice) IsActive() bool { return true }
+
+// Organ is psalm's tonewheel organ, with its drawbars, percussion, vibrato and Leslie: one instrument, the notes are keys of it (a chord is
+// several keys, a note is held for its Length). what names the settings (it tells a live edit whether it is the same organ)
+func Organ(cfg organ.Config, what string, notes dsl.Gen[[]Note]) dsl.Sig {
+	return synthWith(synthOptions{single: true}, "organ "+what, func() organVoice { return organVoice{organ.New(cfg)} }, channelsOr(cfg.NumChannels), 1, notes)
+}
+
+// DX is psalm's FM synth, in the way of the Yamaha DX7 and TX81Z: operators and algorithms, with the patches of the DX7 (SysEx) or its own
+func DX(patch dx.Patch, what string, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+	return synth("dx "+what, func() *dx.Voice { return dx.New(patch, psalm.Stereo) }, psalm.Stereo, voices, notes)
+}
+
+// DrumSynth is psalm's drum synthesizer: a kit of drums that are made, not played from recordings (kick, snare, hats, toms, cymbals, claps, ...).
+// A note is a drum by its General MIDI key (36 kick, 38 snare, 42 closed hat, 46 open hat, ...); the voices are made together, so that an open hat
+// is stopped by a closed one
+func DrumSynth(cfg drumsynth.Config, what string, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+	var made []*drumsynth.Voice
+	next := 0
+	newVoice := func() *drumsynth.Voice {
+		if made == nil {
+			drumsynth.NewPoly(cfg, voices).CallVoices(func(v *drumsynth.Voice) { made = append(made, v) })
+		}
+		v := made[next]
+		next++
+		return v
+	}
+	return synth("drumsynth "+what, newVoice, channelsOr(cfg.NumChannels), voices, notes)
 }

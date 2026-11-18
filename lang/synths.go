@@ -7,6 +7,7 @@ import (
 	"harp/blocks"
 	"harp/dsl"
 
+	"github.com/almerlucke/psalm/synths/drumsynth"
 	"github.com/almerlucke/psalm/synths/modal"
 	"github.com/almerlucke/psalm/synths/piano"
 	"github.com/almerlucke/psalm/synths/pulsar"
@@ -55,6 +56,9 @@ func init() {
 		"vocal":       presetNames(vocalPresets),
 		"pulsar":      presetNames(pulsarPresets),
 		"shaper":      presetNames(shaperPresets),
+		"organ":       presetNames(organPresets),
+		"dx":          presetNames(dxPresets),
+		"drumsynth":   presetNames(drumsynth.Kits),
 		"grains":      presetNames(grainPresets),
 		"wavetable":   presetNames(wavetablePresets),
 	} {
@@ -74,7 +78,7 @@ func PresetsMarkdown() string {
 	var b strings.Builder
 	b.WriteString("# Presets of the synths\n\n<!-- made by `harp presets -md`: do not edit by hand (a test says when it is out of date) -->\n\n")
 	b.WriteString("A synth takes `preset: \"name\"`: `modal(notes, preset: \"church_bell\")`. The names are those of the presets of psalm, in snake case.\n")
-	for _, synth := range []string{"subtractive", "supersaw", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "grains", "wavetable"} {
+	for _, synth := range []string{"subtractive", "supersaw", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "dx", "drumsynth", "grains", "wavetable"} {
 		names := presetTables[synth]
 		fmt.Fprintf(&b, "\n## %s (%d)\n\n%s\n", synth, len(names), strings.Join(names, ", "))
 	}
