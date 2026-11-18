@@ -412,15 +412,15 @@ Scale degrees (0 is the root, 7 an octave up in a scale of 7 notes) as pitches, 
 
 ### `melody`
 
-`melody(pitches: generator of numbers, rhythm: generator of booleans, velocity: number = 0.8, length: number = 1) -> generator of notes`
+`melody(pitches: generator of numbers, rhythm: generator of booleans, velocity: anything = 0.8, length: anything = 1) -> generator of notes`
 
-A melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays.
+A melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays. velocity (0 to 1) and length (in steps) can each be a number, or a list or a generator of numbers: a sequence, one value for each note, in turn, that goes round (velocity: [1 0.5 0.8 0.5], length: [1 1 3], velocity: wander(0.4, 1)); a velocity of 0 is a rest.
 
 ### `chords`
 
-`chords(chords: generator of chords, rhythm: generator of booleans, velocity: number = 0.7, length: number = 1) -> generator of notes`
+`chords(chords: generator of chords, rhythm: generator of booleans, velocity: anything = 0.7, length: anything = 1) -> generator of notes`
 
-Chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps.
+Chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps. velocity (0 to 1) and length can each be a number, or a list or a generator of numbers: a sequence, one value for each chord, in turn (velocity: [1 0.5 0.8 0.5], length: [2 6 4]); a velocity of 0 is a rest.
 
 ### `notes`
 
@@ -840,9 +840,9 @@ Random numbers inside a band that moves, a tendency mask of Koenig: segments is 
 
 ### `phrase`
 
-`phrase(pitches: list of number, durations: list of number = [{number 1}], velocity: number = 0.8, legato: number = 1) -> score`
+`phrase(pitches: list of number, durations: list of number = [{number 1}], velocity: anything = 0.8, legato: anything = 1) -> score`
 
-A score from a list of pitches that follow each other, each as long as the next of durations (in steps, going round): phrase([60 62 64 -1 67], [2 1 1 2 4]). A pitch below 0 is a rest. legato is the part of its duration a note is held. A score plays on any synth: a synth takes it where it takes notes.
+A score from a list of pitches that follow each other, each as long as the next of durations (in steps, going round): phrase([60 62 64 -1 67], [2 1 1 2 4]). A pitch below 0 is a rest. velocity and legato (the part of its duration a note is held) are a number, or a list with a value for each pitch (a rest has one too), going round: velocity: [1 0.5 0.8], legato: [1 0.5]. A score plays on any synth: a synth takes it where it takes notes.
 
 ### `midifile`
 

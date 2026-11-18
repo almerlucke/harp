@@ -77,7 +77,7 @@ var _ = waveguide.Config{}
 func PresetsMarkdown() string {
 	var b strings.Builder
 	b.WriteString("# Presets of the synths\n\n<!-- made by `harp presets -md`: do not edit by hand (a test says when it is out of date) -->\n\n")
-	b.WriteString("A synth takes `preset: \"name\"`: `modal(notes, preset: \"church_bell\")`. The names are those of the presets of psalm, in snake case.\n")
+	b.WriteString("A synth takes `preset: \"name\"`: `modal(notes, preset: \"church_bell\")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumsynth(notes, kit: \"trap\")`.\n")
 	for _, synth := range []string{"subtractive", "supersaw", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "dx", "drumsynth", "grains", "wavetable"} {
 		names := presetTables[synth]
 		fmt.Fprintf(&b, "\n## %s (%d)\n\n%s\n", synth, len(names), strings.Join(names, ", "))

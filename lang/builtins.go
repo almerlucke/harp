@@ -121,15 +121,23 @@ func init() {
 		Call: func(a Args) (Value, error) {
 			return Value{TVoice, dsl.Notes(a.value("melody").V.(dsl.Gen[float64]), a.value("rhythm").V.(dsl.Gen[bool]), a.Num("length"))}, nil
 		}})
-	add(&Func{Name: "chords", Result: TGenNotes, Doc: "chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps",
-		Params: []Param{{"chords", TGenChord, nil}, {"rhythm", TGenBool, nil}, {"velocity", TNum, def(0.7)}, {"length", TNum, def(1)}},
+	add(&Func{Name: "chords", Result: TGenNotes, Doc: "chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps. velocity (0 to 1) and length can each be a number, or a list or a generator of numbers: a sequence, one value for each chord, in turn (velocity: [1 0.5 0.8 0.5], length: [2 6 4]); a velocity of 0 is a rest",
+		Params: []Param{{"chords", TGenChord, nil}, {"rhythm", TGenBool, nil}, {"velocity", TAny, def(0.7)}, {"length", TAny, def(1)}},
 		Call: func(a Args) (Value, error) {
-			return Value{TGenNotes, blocks.Chords(a.value("chords").V.(dsl.Gen[[]float64]), a.value("rhythm").V.(dsl.Gen[bool]), a.Num("velocity"), a.Num("length"))}, nil
+			vel, length, err := noteSequences(a)
+			if err != nil {
+				return Value{}, err
+			}
+			return Value{TGenNotes, blocks.ChordsOf(a.value("chords").V.(dsl.Gen[[]float64]), a.value("rhythm").V.(dsl.Gen[bool]), vel, length)}, nil
 		}})
-	add(&Func{Name: "melody", Result: TGenNotes, Doc: "a melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays",
-		Params: []Param{{"pitches", TGenFloat, nil}, {"rhythm", TGenBool, nil}, {"velocity", TNum, def(0.8)}, {"length", TNum, def(1)}},
+	add(&Func{Name: "melody", Result: TGenNotes, Doc: "a melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays. velocity (0 to 1) and length (in steps) can each be a number, or a list or a generator of numbers: a sequence, one value for each note, in turn, that goes round (velocity: [1 0.5 0.8 0.5], length: [1 1 3], velocity: wander(0.4, 1)); a velocity of 0 is a rest",
+		Params: []Param{{"pitches", TGenFloat, nil}, {"rhythm", TGenBool, nil}, {"velocity", TAny, def(0.8)}, {"length", TAny, def(1)}},
 		Call: func(a Args) (Value, error) {
-			return Value{TGenNotes, blocks.Melody(a.value("pitches").V.(dsl.Gen[float64]), a.value("rhythm").V.(dsl.Gen[bool]), a.Num("velocity"), a.Num("length"))}, nil
+			vel, length, err := noteSequences(a)
+			if err != nil {
+				return Value{}, err
+			}
+			return Value{TGenNotes, blocks.MelodyOf(a.value("pitches").V.(dsl.Gen[float64]), a.value("rhythm").V.(dsl.Gen[bool]), vel, length)}, nil
 		}})
 
 	// ---- signals: audio rate
@@ -474,4 +482,16 @@ func init() {
 	add(&Func{Name: "scsaw", Result: TSig, Doc: "SuperCollider's Saw as SuperCollider works it out: half the size, falling, the frequency read once in 64 samples, and it rings when the frequency jumps (saw does not). To mimic a patch of SuperCollider",
 		Params: []Param{{"freq", TSig, nil}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCSaw(a.Sig("freq"))), nil }}) //nolint
+}
+
+// noteSequences are the velocity and the length of the notes of melody and chords: each a number, or a list or a generator of numbers (a value
+// for each note, in turn)
+func noteSequences(a Args) (vel, length dsl.Gen[float64], err error) {
+	if vel, err = floatGen(a.value("velocity")); err != nil {
+		return nil, nil, fmt.Errorf("velocity: %w", err)
+	}
+	if length, err = floatGen(a.value("length")); err != nil {
+		return nil, nil, fmt.Errorf("length: %w", err)
+	}
+	return vel, length, nil
 }

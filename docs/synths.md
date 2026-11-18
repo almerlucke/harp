@@ -8,7 +8,7 @@ notes = melody(degrees(a3, minor, mutate([0 2 4 7], swap: 0.3)), euclid(16, 7), 
 out = modal(notes, preset: "marimba", voices: 6).reverb(mix: 0.2)
 ```
 
-The sound is stereo. A note that comes while all the voices are busy takes over the oldest voice.
+The sound is stereo. A note that comes while all the voices are busy takes over the oldest voice (the organ is the exception: it is one instrument and has no voices).
 
 | Synth | Makes |
 |---|---|
@@ -33,13 +33,30 @@ A wrong name says what is nearby: `there is no modal preset "marimbaa" (did you 
 
 `melody` and `chords` take `velocity` (0 to 1) and `length` (in steps) of the notes. The pitches are MIDI notes (`a3`, `60`, `degrees(...)`). The same synth can play a rhythm of chords or a line.
 
+### Velocity and length sequences
+
+`velocity` and `length` can each be a number (the same for every note), or a **list or a generator of numbers**: one value for each note, in turn, going round. They are taken with the pitch when the rhythm plays, so a rest takes none (for `chords`, one value for each chord, the same for all its notes).
+
+```harp
+bpm = 100
+steps = 4
+notes = melody([a3 c4 e4 a4], euclid(16, 9),
+  velocity: [1 0.4 0.7 0.4 0.9],   // a pattern of accents, five long, against the four pitches
+  length: [1 1 3])                // short, short, long
+out = modal(notes, preset: "marimba", voices: 6)
+```
+
+A generator moves them by itself: `velocity: wander(0.4, 1)` is a player that is a little different each time, `length: [1 1 1 4]` a phrase that holds every fourth note. **A velocity of 0 is a rest**: the note is not played, and the pitch and the length move on (`velocity: [1 1 0 1]` leaves out every third note). Lists of different lengths go round against each other, so the pattern comes back together only after their lowest common multiple.
+
+In a [score](scores.md), `phrase` takes the same: `velocity: [1 0.5 0.8]` and `legato: [1 0.5]` are a value for each pitch (a rest has one too).
+
 ## Your own instrument
 
 For a sound of your own on every note (an `fn` with oscillators, filters and envelopes), see [play](play.md).
 
-## Not yet
+## Recordings
 
-Recordings are in [Recordings](recordings.md) (`sampler`, `streamer`). All the synths of psalm are in harp.
+Synths that play recordings (`sampler`, `streamer`) are in [Recordings](recordings.md). With these, every synth of psalm is in harp.
 
 ## Organ, dx and drumsynth
 

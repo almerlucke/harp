@@ -2,7 +2,7 @@
 
 <!-- made by `harp presets -md`: do not edit by hand (a test says when it is out of date) -->
 
-A synth takes `preset: "name"`: `modal(notes, preset: "church_bell")`. The names are those of the presets of psalm, in snake case.
+A synth takes `preset: "name"`: `modal(notes, preset: "church_bell")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumsynth(notes, kit: "trap")`.
 
 ## subtractive (88)
 

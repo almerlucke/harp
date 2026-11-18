@@ -57,14 +57,22 @@ func voiceOf(voices [][]note.Event, voice int) (Value, error) {
 }
 
 func init() {
-	add(&Func{Name: "phrase", Result: TScore, Doc: "a score from a list of pitches that follow each other, each as long as the next of durations (in steps, going round): phrase([60 62 64 -1 67], [2 1 1 2 4]). A pitch below 0 is a rest. legato is the part of its duration a note is held. A score plays on any synth: a synth takes it where it takes notes",
-		Params: []Param{{"pitches", ListOf(TNum), nil}, {"durations", ListOf(TNum), listOf(1)}, {"velocity", TNum, def(0.8)}, {"legato", TNum, def(1)}},
+	add(&Func{Name: "phrase", Result: TScore, Doc: "a score from a list of pitches that follow each other, each as long as the next of durations (in steps, going round): phrase([60 62 64 -1 67], [2 1 1 2 4]). A pitch below 0 is a rest. velocity and legato (the part of its duration a note is held) are a number, or a list with a value for each pitch (a rest has one too), going round: velocity: [1 0.5 0.8], legato: [1 0.5]. A score plays on any synth: a synth takes it where it takes notes",
+		Params: []Param{{"pitches", ListOf(TNum), nil}, {"durations", ListOf(TNum), listOf(1)}, {"velocity", TAny, def(0.8)}, {"legato", TAny, def(1)}},
 		Call: func(a Args) (Value, error) {
 			p, err := numbersOf(a.value("pitches"), "pitches")
 			if err != nil {
 				return Value{}, err
 			}
 			d, err := numbersOf(a.value("durations"), "durations")
+			if err != nil {
+				return Value{}, err
+			}
+			vel, err := numbersOf(a.value("velocity"), "velocity")
+			if err != nil {
+				return Value{}, err
+			}
+			leg, err := numbersOf(a.value("legato"), "legato")
 			if err != nil {
 				return Value{}, err
 			}
@@ -75,8 +83,12 @@ func init() {
 				if !(dur > 0) || dur > 4096 {
 					return Value{}, fmt.Errorf("a duration is above 0 steps (%g)", dur)
 				}
-				if pitch >= 0 {
-					events = append(events, note.Event{Pitch: pitch, Velocity: a.Num("velocity"), Start: t, Duration: dur * a.Num("legato")})
+				v, l := vel[i%len(vel)], leg[i%len(leg)]
+				if pitch >= 0 && v > 0 { // a velocity of 0 is a rest as well
+					if !(l > 0) {
+						return Value{}, fmt.Errorf("legato is above 0 (%g)", l)
+					}
+					events = append(events, note.Event{Pitch: pitch, Velocity: v, Start: t, Duration: dur * l})
 				}
 				t += dur
 			}

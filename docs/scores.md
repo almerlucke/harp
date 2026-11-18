@@ -11,7 +11,7 @@ tune = phrase([60 62 64 -1 67], [2 1 1 2 4])
 out = subtractive(tune, preset: "pluck", voices: 4)
 ```
 
-`phrase(pitches, durations)` makes one from a list of pitches (below 0 is a rest) and durations in steps. Notes that start on the same step sound together. The score goes round after its last note (`pad(score, steps)` sets how long it is).
+`phrase(pitches, durations)` makes one from a list of pitches (below 0 is a rest) and durations in steps. `velocity` and `legato` can be lists too, a value for each pitch. Notes that start on the same step sound together. The score goes round after its last note (`pad(score, steps)` sets how long it is).
 
 For `play`, which takes the rhythm and the numbers apart, take them from the score: `onsets(s)` is the rhythm, `chordsof(s)` the notes that start on each step as a [chord](play.md#chords) (a chord field: give `play` a voice for each note), and `pitches(s)`, `lengths(s)` and `velocities(s)` one number for each step (the highest note, when notes start together).
 

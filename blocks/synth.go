@@ -3,6 +3,7 @@ package blocks
 import (
 	"fmt"
 	"harp/dsl"
+	"strconv"
 	"time"
 
 	"github.com/almerlucke/psalm"
@@ -372,38 +373,66 @@ func (g *noteGen) Continuous() bool    { return true }
 func (g *noteGen) Done() bool          { return false }
 func (g *noteGen) Reset()              { g.reset() }
 
+// constGen is a number that is the same for every note (it says what it is, so that a live edit knows the notes are the same)
+type constGen struct{ v float64 }
+
+func (c constGen) Generate() float64   { return c.v }
+func (c constGen) Continuous() bool    { return true }
+func (c constGen) Done() bool          { return false }
+func (c constGen) Reset()              {}
+func (c constGen) Fingerprint() string { return strconv.FormatFloat(c.v, 'g', -1, 64) }
+
 // Melody plays a melody on a rhythm, as Notes does for the oscillators: the rhythm is pulled every
-// step, the pitches only on the steps where it plays, so the next pitch is the next note
+// step, the pitches only on the steps where it plays, so the next pitch is the next note. Every note has the same velocity and length
 func Melody(pitches dsl.Gen[float64], rhythm dsl.Gen[bool], velocity, length float64) dsl.Gen[[]Note] {
+	return MelodyOf(pitches, rhythm, constGen{velocity}, constGen{length})
+}
+
+// MelodyOf is Melody where the velocity and the length of each note are values of generators too, taken with the pitch when the rhythm plays: a
+// sequence of velocities, a sequence of lengths. A note of velocity 0 (or below) is not played: a rest
+func MelodyOf(pitches dsl.Gen[float64], rhythm dsl.Gen[bool], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
 	return &noteGen{
-		fp: noteFP("melody", fmt.Sprint(velocity, length), pitches, rhythm),
+		fp: noteFP("melody", "", pitches, rhythm, velocity, length),
 		next: func() []Note {
 			if !rhythm.Generate() {
 				return nil
 			}
-			return []Note{{Pitch: pitches.Generate(), Velocity: velocity, Length: length}}
+			p, v, l := pitches.Generate(), velocity.Generate(), length.Generate()
+			if !(v > 0) {
+				return nil
+			}
+			return []Note{{Pitch: p, Velocity: v, Length: l}}
 		},
-		reset: func() { pitches.Reset(); rhythm.Reset() },
+		reset: func() { pitches.Reset(); rhythm.Reset(); velocity.Reset(); length.Reset() },
 	}
 }
 
 // Chords plays chords on a rhythm: on the steps where the rhythm plays, all the notes of the next
 // chord start together
 func Chords(chords dsl.Gen[[]float64], rhythm dsl.Gen[bool], velocity, length float64) dsl.Gen[[]Note] {
+	return ChordsOf(chords, rhythm, constGen{velocity}, constGen{length})
+}
+
+// ChordsOf is Chords where the velocity and the length of each chord (the same for all its notes) are values of generators, taken with the chord when
+// the rhythm plays. A chord of velocity 0 (or below) is not played
+func ChordsOf(chords dsl.Gen[[]float64], rhythm dsl.Gen[bool], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
 	return &noteGen{
-		fp: noteFP("chords", fmt.Sprint(velocity, length), chords, rhythm),
+		fp: noteFP("chords", "", chords, rhythm, velocity, length),
 		next: func() []Note {
 			if !rhythm.Generate() {
 				return nil
 			}
-			pitches := chords.Generate()
+			pitches, v, l := chords.Generate(), velocity.Generate(), length.Generate()
+			if !(v > 0) {
+				return nil
+			}
 			notes := make([]Note, len(pitches))
 			for i, p := range pitches {
-				notes[i] = Note{Pitch: p, Velocity: velocity, Length: length}
+				notes[i] = Note{Pitch: p, Velocity: v, Length: l}
 			}
 			return notes
 		},
-		reset: func() { chords.Reset(); rhythm.Reset() },
+		reset: func() { chords.Reset(); rhythm.Reset(); velocity.Reset(); length.Reset() },
 	}
 }
 
