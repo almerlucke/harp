@@ -1,0 +1,56 @@
+// The form of a piece, and what is written in text: a song with sections, chords as text, a bass and a lead as parts that follow the chords, drums
+// as patterns with rolls and triplets, a groove and lanes on a played instrument, and other rhythms in other sections.
+//
+//   harp check examples/forms.harp
+//   harp play examples/forms.harp
+//
+// Edit it while it plays (harp play -watch): the song (add a bar, change a name), the chords, a pattern, the groove.
+
+bpm = 100
+steps = 4
+seed = 6
+
+// ---- the form: sections of bars (16 steps each). It goes round when it has gone through
+form = song("Intro 4, Verse 8, Chorus 8, Verse 8, Chorus 8, Outro 4")
+
+// ---- the chords, a bar each; the parts below follow them
+prog = "Am F C G"
+
+// ---- a pad: the chords as notes, voice led from one to the next, the whole of the piece; it swells in the intro and fades in the outro
+pad = chords(changes(prog, key: "A minor", lowest: 52, lead: true), every(16), velocity: 0.55, length: 15)
+  .subtractive(preset: "pad", voices: 8)
+  .gain(0.35 * curve(form, "Intro: 0.3 -> 1 smooth, Verse: 0.8, Chorus: 1, Outro: 1 -> 0 smooth"))
+
+// ---- the bass: a part, the bass of each chord (@b), on a rhythm of its own
+bass = part("@b . . @b . . @b . | @b . . @b . @b @b .", chords: prog, key: "A minor", velocity: 0.9)
+  .subtractive(preset: "bass", voices: 2)
+  .gain(0.55 * during(form, "not Intro"))
+
+// ---- the lead: the chord tones of each bar (the root @1, the third @2, the fifth @3, ' an octave up), in the verses and the choruses
+lead = part("@1' . @3 @1' . @2' @1' . | . @3' . @1' @2' . @3 .", chords: prog, key: "A minor", register: 60, velocity: 0.7)
+  .subtractive(preset: "pluck", voices: 6)
+  .gain(0.45 * during(form, "Verse, Chorus"))
+  .echo(max: 1, time: [0.45, 0.6], feedback: 0.3, mix: 0.2)
+
+// ---- the drums: patterns of text. A kick that is not on every beat, a snare with a roll at the end of four bars, hats with triplets; the choruses
+// have a busier kick (bysection takes a rhythm for each section)
+kicks = bysection(form, ["Intro, Outro", "Verse", "Chorus"], [pattern("x..."), pattern("x... ..x. x... ...."), pattern("x..x ..x. x... ..x. | x..x ..x. x..x ..x.")], restart: true)
+kick = drumsynth(melody([drum("kick")], kicks, velocity: [1 0.8 0.9]), kit: "909", voices: 2)
+  .gain(0.5 * during(form, "not Intro"))
+snare = drumsynth(melody([drum("snare")], pattern("....x... ....x... | ....x... ....x... | ....x... ....x... | ....x. x3[x x x]"), velocity: [1 0.9]), kit: "909", voices: 2)
+  .gain(0.4 * during(form, "Verse, Chorus"))
+hats = drumsynth(melody([drum("hat") drum("hat") drum("open") drum("hat")], pattern("x x x [x x x] | x x x x | x x x x | x x [x x x] x3"), velocity: [0.7 0.4 0.55 0.4]), kit: "909", voices: 4)
+  .gain(2.5 * during(form, "Chorus"))
+
+// ---- a played instrument with a groove and lanes: an arpeggio of the chords, late on some steps by the MPC feel, a lane of chances
+// and a lane of velocities of 3 steps (it drifts against the bar)
+fn tine(gate, note) {
+  f = hz(note)
+  (sine(f) + sine(f * 3.01) * 0.25 * env(gate, [1 0], [0.15], -3)) * env(gate, [0 1 0], [0.002 0.3], -4) * 0.12
+}
+arp = play(tine, rhythm: pattern("x x x x"), legato: 0.5, fields: [flatten(changes(prog, key: "A minor", lowest: 57))], voices: 6,
+  groove: "mpc 58", lanes: "prob: 100 100 70 100; vel: 100 60 80")
+  .dup().gain(1.8 * during(form, "Verse, Chorus", glide: 4))
+
+mix = pad + bass + lead + kick + snare + hats + arp
+out = mix.reverb(mix: 0.15, decay: 2.5).gain(0.6)

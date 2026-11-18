@@ -25,12 +25,14 @@ const (
 	KGenBool              // a generator of booleans (a rhythm): event rate
 	KGenChord             // a generator of chords (lists of pitches): event rate
 	KGenNotes             // a generator of notes to play on a synth: event rate
+	KGenHits              // a generator of the hits of a step (a roll, a triplet): the rhythm of a pattern with more in it than x and .
 	KEnv                  // an envelope, waiting for a gate
 	KVoice                // the pitch and the gate of a melody: two signals
 	KScale                // the steps of a scale
 	KFunc                 // a function (of the program), to give to repeat or compose
 	KAny                  // only for the parameters of a function of the program: any value
 	KScore                // a score: notes with a start and a length, in steps (a MIDI file, a fugue, a canon)
+	KSong                 // the sections of a piece: Intro 8, Drop 16 (bars)
 )
 
 // Type is the kind of a value, and for a list the kind of its items (nil if it is empty)
@@ -49,12 +51,14 @@ var (
 	TGenBool  = Type{Kind: KGenBool}
 	TGenChord = Type{Kind: KGenChord}
 	TGenNotes = Type{Kind: KGenNotes}
+	TGenHits  = Type{Kind: KGenHits}
 	TEnv      = Type{Kind: KEnv}
 	TVoice    = Type{Kind: KVoice}
 	TScale    = Type{Kind: KScale}
 	TFunc     = Type{Kind: KFunc}
 	TAny      = Type{Kind: KAny}
 	TScore    = Type{Kind: KScore}
+	TSong     = Type{Kind: KSong}
 )
 
 // ListOf is the type of a list of items of a type
@@ -85,6 +89,8 @@ func (t Type) String() string {
 		return "generator of chords"
 	case KGenNotes:
 		return "generator of notes"
+	case KGenHits:
+		return "generator of hits"
 	case KEnv:
 		return "envelope"
 	case KVoice:
@@ -97,12 +103,14 @@ func (t Type) String() string {
 		return "anything"
 	case KScore:
 		return "score"
+	case KSong:
+		return "song"
 	}
 	return "?"
 }
 
 // isGen says if the type is at event rate
-func (t Type) isGen() bool { return t.Kind >= KGenInt && t.Kind <= KGenNotes }
+func (t Type) isGen() bool { return t.Kind >= KGenInt && t.Kind <= KGenHits }
 
 // Value is something a name can have: its type and the Go value that is in the graph of harp
 type Value struct {

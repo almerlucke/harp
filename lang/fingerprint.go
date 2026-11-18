@@ -61,6 +61,8 @@ func fpOf(v Value) string {
 		return "[" + strings.Join(parts, " ") + "]"
 	case KScore:
 		return v.V.(*Score).fingerprint()
+	case KSong:
+		return v.V.(*Song).fingerprint()
 	case KFunc:
 		if f, ok := v.V.(*Func); ok {
 			return "fn:" + f.Name
@@ -105,6 +107,8 @@ func wrapFP(v Value, fp string) Value {
 		v.V = &fpGen[[]float64]{g, fp}
 	case dsl.Gen[[]blocks.Note]:
 		v.V = &fpGen[[]blocks.Note]{g, fp}
+	case dsl.Gen[[]dsl.Hit]:
+		v.V = &fpGen[[]dsl.Hit]{g, fp}
 	}
 	return v
 }

@@ -8,6 +8,8 @@ import (
 
 	"harp/blocks"
 	"harp/dsl"
+
+	"github.com/almerlucke/psalm/tools/rhythm"
 )
 
 // The UGens of SuperCollider as it works them out (see dsl/sc*.go), and the notes of a pattern played on an instrument that is a function of the program
@@ -170,7 +172,7 @@ func init() {
 
 	add(&Func{Name: "play", Result: TSig, Doc: "plays notes on an instrument that is a function of the program, as a Pbind plays a SynthDef: the function is given the gate and then one number for each of the fields, and every note is a new run of it. when the notes are: dur: the beats of each note in turn (a list, or a generator of beats; a whole number of steps), or rhythm: a generator of booleans that is pulled every step (euclid(16, 5)): a note on every true, as long as the steps up to the next. legato: the part of it that the gate is high (or sustain: so many beats), fields: a list with, for each number the instrument takes, a list or a generator (degrees(...), mutate(...)) that is pulled once for every note, or a signal (seq(phrase), lfo(0.1)) that has its value read at the start of every note: so one stream can drive both the notes and an effect voices: notes go to the voices in turn, each of which is a run of the function of its own (random choices in it are made again for each), so that the end of a note goes on while the next one starts. The notes start at the block of 64 samples they fall in, as SuperCollider's messages do",
 		Params: []Param{{"instrument", TFunc, nil}, {"dur", TAny, def(0)}, {"rhythm", TAny, def(0)}, {"legato", TNum, def(0.8)}, {"sustain", TNum, def(0)}, {"fields", TAny, listDefault()}, {"voices", TNum, def(1)},
-			{"swing", TNum, def(0)}, {"humanize", TNum, def(0)}, {"accent", TAny, listDefault()}},
+			{"swing", TNum, def(0)}, {"humanize", TNum, def(0)}, {"accent", TAny, listDefault()}, {"groove", TStr, defStr("")}, {"lanes", TStr, defStr("")}},
 		Call: func(a Args) (Value, error) {
 			f, ok := a.value("instrument").V.(*Func)
 			if !ok {
@@ -230,6 +232,8 @@ func init() {
 			switch {
 			case rv.T.Kind != KNum && dv.T.Kind != KNum:
 				return Value{}, fmt.Errorf("dur and rhythm are two ways to say when the notes are: give one")
+			case rv.T.Kind == KGenHits:
+				events = dsl.HitEvents(rv.V.(dsl.Gen[[]dsl.Hit]), hold, fields)
 			case rv.T.Kind != KNum:
 				rg, err := coerce(rv, TGenBool)
 				if err != nil {
@@ -277,7 +281,10 @@ func init() {
 				}
 				groove.Accent = lv
 			}
-			fp.Groove = joinFP(a.value("swing"), a.value("humanize"), av)
+			if err := groovesAndLanes(a, &groove); err != nil {
+				return Value{}, err
+			}
+			fp.Groove = joinFP(a.value("swing"), a.value("humanize"), av, a.value("groove"), a.value("lanes"))
 			if chordAt >= 0 {
 				events = dsl.ChordEvents(events)
 			}
@@ -300,7 +307,7 @@ func init() {
 				if err != nil {
 					return Value{}, fmt.Errorf("the instrument gives a %s: %w", r.T, err)
 				}
-				if len(groove.Accent) > 0 { // a note is as strong as the accent of its step
+				if groove.HasLevel() { // a note is as strong as the accent of its step
 					s = sigV(dsl.Mul(s.Sig(), ev[v].Level))
 				}
 				if v == 0 {
@@ -453,4 +460,37 @@ func joinFP(vs ...Value) string {
 		}
 	}
 	return strings.Join(parts, ", ")
+}
+
+// groovesAndLanes reads the groove (the name of a feel: mpc 58, shuffle, dilla...) and the lanes of play (a line each: prob: 100 50 . 80) into the groove
+func groovesAndLanes(a Args, g *dsl.Groove) error {
+	if name := a.Str("groove"); name != "" {
+		found := false
+		for _, f := range rhythm.Grooves {
+			if f.Name == name {
+				g.FeelShift, g.FeelVel, found = f.Shift, f.Vel, true
+			}
+		}
+		if !found {
+			return fmt.Errorf("there is no groove %q: one of %s%s", name, strings.Join(rhythm.GrooveNames(), ", "), didYouMean(name, rhythm.GrooveNames()))
+		}
+	}
+	lanes := map[string]*dsl.StepLane{"prob": &g.Prob, "chance": &g.Prob, "vel": &g.Vel, "velocity": &g.Vel, "shift": &g.Shift, "timing": &g.Shift, "len": &g.Len, "length": &g.Len}
+	for _, line := range strings.FieldsFunc(a.Str("lanes"), func(r rune) bool { return r == '\n' || r == ';' }) {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		name, vals, ok := strings.Cut(line, ":")
+		dst, known := lanes[strings.ToLower(strings.TrimSpace(name))]
+		if !ok || !known {
+			return fmt.Errorf("lanes: a lane is like \"prob: 100 50 . 80\" (lanes apart with ;), the lane one of prob, vel, shift, len (not %q)", strings.TrimSpace(name))
+		}
+		l, err := rhythm.ParseLane(vals)
+		if err != nil {
+			return fmt.Errorf("lanes: %s: %v", strings.TrimSpace(name), err)
+		}
+		*dst = dsl.StepLane{Vals: l.Vals, Gap: l.Gap}
+	}
+	return nil
 }

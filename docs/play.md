@@ -54,6 +54,10 @@ fn tick(gate) { noise() * env(gate, [0 1 0], [0.001 0.05], -4) * 0.3 }
 out = play(tick, rhythm: every(1), legato: 0.2, swing: 0.33, accent: accents([4 4 4 4], other: 0.3)).dup()
 ```
 
+`groove:` is the feel of a bar by name, from psalm: `mpc 54`, `mpc 58`, `mpc 62` (every other step late, a little softer), `shuffle`, `laid back`, `push`, `dilla`, `backbeat` (loudness per step). `lanes:` gives each step a value of its own, a lane to a line (apart with `;`), each lane going round on its own length, so a lane of 3 under a pattern of 4 drifts (polymeter): `lanes: "prob: 100 50 . 80; vel: 100 60 80; shift: . 10; len: 50"`. `prob` is the chance the step plays (percent), `vel` its loudness (percent), `shift` how late (percent of a step, negative is early) and `len` how long the gate is held (percent). A `.` is the default there.
+
+With a [pattern](patterns.md) as the `rhythm` hits can fall anywhere in a step (rolls, triplets), and a hit may last as long as it says (`x*2`).
+
 Edit them while the patch plays: the notes that were made already get the new feel, from about two steps on. Swing, humanize and accent are for `play`; the synths (`subtractive`, `modal`, ...) play their notes on the grid.
 
 ## The numbers of a note: fields

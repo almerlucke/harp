@@ -164,3 +164,75 @@ out = play(inst, rhythm: [true true true true], legato: 0.25, accent: [1 0.5])`
 	// an accent where there was none is another pattern of nodes: it is not an error
 	l.swapTo(strings.Replace(src, ", accent: [1 0.25]", "", 1))
 }
+
+func TestANamedGrooveGivesTheStepsTheirFeel(t *testing.T) {
+	step := 4410
+	plain, _ := onsets(renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.3)", 1.2)[0])
+	// mpc 62: every other step is 0.24 of a step late, and the late ones are softer (0.88)
+	feel, lv := onsets(renderPatch(t, grooveHead+`out = play(inst, rhythm: every(1), legato: 0.3, groove: "mpc 62")`, 1.2)[0])
+	for i := 0; i < 8; i++ {
+		want := plain[i]
+		if i%2 == 0 { // the first note that is seen is on step 1
+			want += int(0.24 * float64(step))
+		}
+		if d := feel[i] - want; d < -70 || d > 70 {
+			t.Errorf("note %d starts at %d, wanted about %d", i, feel[i], want)
+		}
+		if w := map[bool]float64{true: 0.88, false: 1}[i%2 == 0]; lv[i] < w-1e-9 || lv[i] > w+1e-9 {
+			t.Errorf("note %d has the level %v, wanted %v", i, lv[i], w)
+		}
+	}
+	if _, err := Compile(grooveHead + `out = play(inst, rhythm: every(1), groove: "mpc 99")` + "\n"); err == nil || !strings.Contains(err.Error(), "no groove") {
+		t.Errorf("a groove that is not there: %v", err)
+	}
+}
+
+func TestLanesGiveEveryStepAValueOnALengthOfItsOwn(t *testing.T) {
+	step := 4410
+	// prob: the steps of a lane of 2: 100 percent, 0 percent: the odd steps do not play (only the even ones are heard: every second step)
+	x := renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.3, lanes: \"prob: 100 0\")", 1.7)[0]
+	at, _ := onsets(x)
+	for i := 1; i < len(at); i++ {
+		if d := at[i] - at[i-1]; d < 2*step-70 || d > 2*step+70 {
+			t.Fatalf("notes %d samples apart, wanted %d: %v", d, 2*step, at)
+		}
+	}
+	if len(at) < 3 {
+		t.Fatalf("%v", at)
+	}
+	// vel: percent, a lane of 3 against the steps (polymeter): 100 50 25 round and round
+	_, lv := onsets(renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.3, lanes: \"vel: 100 50 25\")", 1.5)[0])
+	for i, w := range []float64{0.5, 0.25, 1, 0.5, 0.25, 1} { // the first note seen is on step 1
+		if lv[i] != w {
+			t.Fatalf("levels %v, wanted %v", lv, w)
+		}
+	}
+	// shift: 50 percent of a step late on a lane of 4 with gaps, and len: the note is held half as long
+	plain, _ := onsets(renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.4)", 1.5)[0])
+	moved, _ := onsets(renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.4, lanes: \"shift: 50 . . .; len: 50\")", 1.5)[0])
+	// the lane has a value on every fourth step (0, 4, 8): the note on step 0 is late too (and is seen, as it is not at sample 0); the note on step 4 is
+	// the fifth that is seen, and the fourth of the plain ones
+	if d := moved[4] - plain[3]; d < step/2-70 || d > step/2+70 {
+		t.Errorf("a shift of 50 percent: %d samples late, wanted about %d (%v %v)", d, step/2, plain[:4], moved[:4])
+	}
+	g := renderPatch(t, grooveHead+"out = play(inst, rhythm: every(1), legato: 0.4, lanes: \"len: 50\")", 1)[0]
+	high := 0
+	for i := 5 * step; i < 6*step; i++ {
+		if g[i] != 0 {
+			high++
+		}
+	}
+	if math.Abs(float64(high)-0.2*float64(step)) > 150 { // 0.4 of a step held, half of it
+		t.Errorf("held for %d samples, wanted about %d", high, step/5)
+	}
+	for src, want := range map[string]string{
+		`lanes: "prob 100"`:    "a lane is like",
+		`lanes: "pitch: 1 2"`:  "one of prob, vel, shift, len",
+		`lanes: "prob: 100 x"`: "prob",
+	} {
+		_, err := Compile(grooveHead + "out = play(inst, rhythm: every(1), " + src + ")\n")
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("%s: %v (wanted %q)", src, err, want)
+		}
+	}
+}

@@ -12,6 +12,8 @@ harp combines three libraries: **psalm** (DSP blocks, effects, synths), **genny*
 | know the syntax | [The language](language.md) |
 | know what a value is, and what can be used where | [Types and channels](types.md) |
 | make rhythms and phrases | [Generators](generators.md), [the library](generator-library.md) |
+| write rhythms, melodies and chords as text | [Patterns, parts and chords](patterns.md) |
+| arrange a piece: sections, layers in and out | [The form of a piece](form.md) |
 | make music from whole scores (MIDI files, fugues, canons) | [Scores](scores.md) |
 | play notes on a synth of psalm | [Synths](synths.md), [Presets](presets.md) |
 | play notes on an instrument I write myself | [play](play.md) |

@@ -412,13 +412,13 @@ Scale degrees (0 is the root, 7 an octave up in a scale of 7 notes) as pitches, 
 
 ### `melody`
 
-`melody(pitches: generator of numbers, rhythm: generator of booleans, velocity: anything = 0.8, length: anything = 1) -> generator of notes`
+`melody(pitches: generator of numbers, rhythm: anything, velocity: anything = 0.8, length: anything = 1) -> generator of notes`
 
 A melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays. velocity (0 to 1) and length (in steps) can each be a number, or a list or a generator of numbers: a sequence, one value for each note, in turn, that goes round (velocity: [1 0.5 0.8 0.5], length: [1 1 3], velocity: wander(0.4, 1)); a velocity of 0 is a rest.
 
 ### `chords`
 
-`chords(chords: generator of chords, rhythm: generator of booleans, velocity: anything = 0.7, length: anything = 1) -> generator of notes`
+`chords(chords: generator of chords, rhythm: anything, velocity: anything = 0.7, length: anything = 1) -> generator of notes`
 
 Chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps. velocity (0 to 1) and length can each be a number, or a list or a generator of numbers: a sequence, one value for each chord, in turn (velocity: [1 0.5 0.8 0.5], length: [2 6 4]); a velocity of 0 is a rest.
 
@@ -432,9 +432,9 @@ A melody on a rhythm: the next pitch is taken when the rhythm plays, together wi
 
 ### `pattern`
 
-`pattern(steps: string) -> generator of booleans`
+`pattern(steps: string, mutate: number = 0, seed: number = 0, freeze: number = 0, drift: number = 0, song: anything = 0) -> anything`
 
-A rhythm written as a string, a step to a character: x is a hit, . (or -) a rest, and spaces are for reading (a bar to a word): pattern("x...x... x..x...."). It goes round.
+A rhythm written as text, as the clock of psalm reads it: x is a hit and . a rest, a step each ("x..x ..x. x...", spaces and | are for reading). x3 is a roll, three hits in a step; [x x x] a group that fills one step (a triplet; [x . x x] with rests); *2 after a step or a group: it lasts 2 steps; ?25 after a hit: 25% chance (? is 50%); %2/4 only the second time through in every four (%!2/4 the other three), %first only the first time, %fill only in the last bar of a section of song; ! after a hit: it stays when the pattern mutates. The functions E(5,16) (euclid), A(3+3+2) (additive), CA(30,16) (a cellular automaton) and M(x . x x;16;3) (a Markov chain on an example) give their steps, and +1 in them (E(5,16,+1)) goes on every pass: the rhythm turns round. mutate (0 to 1) changes the pattern from pass to pass (hits fall out, rests become hits: as many as a quarter of the steps at 1) with seed, freeze is the pass after which it changes no more, drift (0 to 0.3) moves the timing along a smooth curve. Plain steps and rests give a rhythm of booleans; with more it gives hits, that melody, chords and play take as their rhythm.
 
 ### `maybe`
 
@@ -533,6 +533,18 @@ A chord of a value from each of the generators of numbers of the list: stack([de
 `deal(list: list of number) -> generator of numbers`
 
 The numbers of a list in a random order, every one once, then again in another order (a shuffled deck).
+
+### `pick`
+
+`pick(values: list of number) -> generator of numbers`
+
+Any one number of a list, a new one every time (the same as order(values, "random")).
+
+### `order`
+
+`order(values: list of number, how: string = in order) -> generator of numbers`
+
+The numbers of a list in an order, round and round: alternate, backwards, converge, in order, random, shuffled, up and down. in order is 1 2 3 4; shuffled every value once before any again, in a new order each time; random any one every time; up and down up and back down without repeating the ends; converge from the outside in (1 4 2 3); alternate the first with each of the others in turn (1 2 1 3 1 4); backwards the list reversed.
 
 ### `uniform`
 
@@ -844,6 +856,18 @@ Random numbers inside a band that moves, a tendency mask of Koenig: segments is 
 
 A score from a list of pitches that follow each other, each as long as the next of durations (in steps, going round): phrase([60 62 64 -1 67], [2 1 1 2 4]). A pitch below 0 is a rest. velocity and legato (the part of its duration a note is held) are a number, or a list with a value for each pitch (a rest has one too), going round: velocity: [1 0.5 0.8], legato: [1 0.5]. A score plays on any synth: a synth takes it where it takes notes.
 
+### `part`
+
+`part(text: string, chords: string = , key: string = C major, barsteps: number = 16, register: number = 48, bass: number = 36, velocity: number = 0.8, legato: number = 0.9, passes: number = 0) -> score`
+
+A melody and its rhythm in one text, as a score: part("C3 Eb3 G3 - Bb3 . G3 Eb3"), a step each. A note is a name (C3, Eb3, f#4; C4 is 60) or a number, . a rest, - the note before held a step longer, C3+Eb3+G3 a chord, [C3 D3 Eb3] a group that fills a step, C3^3 a roll of three, *2 how many steps, ?25 a chance, %2/4 only some passes through it (the text is played passes times: 0 gives as many as the conditions need), ! as in a pattern. chords ("Am F C G": symbols, or roman numerals in key, a bar each of barsteps) gives chord tones to write: @1 the root, @2 the next tone, @3 the fifth, @4 the seventh, @-1 the tone below the root, @b the bass, @c the whole chord, ' after one an octave up and , down: "@1 @3 @5 @3" follows the chords. register is the lowest note of @1 (48), bass of @b (36). legato is how much of its step a note is held (0.9).
+
+### `changes`
+
+`changes(text: string, key: string = C major, lowest: number = 48, lead: boolean = false) -> list of list of number`
+
+Chords written as text, as a list of chords: changes("Dm7 G7*2 Cmaj7") or roman numerals in a key: changes("i VI V7", key: "A minor"). A chord lasts a bar, or *2 bars (*3 and so on: whole bars), - holds the chord before for another bar, . is no chord (a rest). The chords are in root position from lowest up (48 is C3); lead: true gives each the voicing nearest the one before. Give them to chords: chords(changes("Am F C G"), every(16)).
+
 ### `midifile`
 
 `midifile(file: string, track: number = -1) -> score`
@@ -982,6 +1006,32 @@ The rhythm of a score: a hit on each step that a note starts on, going round: th
 
 The notes of a score that start together, as chords, one for each step that a note starts on, going round: the chord field of play, with onsets as its rhythm: play(inst, rhythm: onsets(s), fields: [chordsof(s)], voices: 4). A step with one note is a chord of one.
 
+## The form of a piece
+
+### `song`
+
+`song(sections: string, barsteps: number = 16) -> song`
+
+The form of a piece: sections with their bars, song("Intro 8, Verse 8, Drop 16, Break 8, Drop 16, Outro 8"). barsteps is the steps of a bar (16). It goes round when it has gone through. Use it with during (a layer in and out), curve (a value over the sections) and bysection (other rhythms in other sections).
+
+### `during`
+
+`during(song: song, sections: string, glide: number = 2) -> signal`
+
+1 in the sections of a song that are named, 0 elsewhere, as a signal: .gain(during(form, "Drop, Chorus")) puts a layer in and out. "not Intro" is all but that one, "all" every section. glide is how many steps the change takes, around the edge of a section (2).
+
+### `curve`
+
+`curve(song: song, curves: string) -> signal`
+
+A value that moves through the sections of a song, as a signal: curve(form, "Intro: 0 -> 1 smooth, Drop: 1, Break: 1 -> 0.3"). A section is a value (held), or two with an arrow, and lin (the default), exp (between values above 0), smooth or step. A section with no curve keeps the value where the one before it ended; the sections that have a name twice share the curve.
+
+### `bysection`
+
+`bysection(song: song, sections: list of string, gens: list, restart: boolean = false) -> anything`
+
+Other generators in other sections of a song: bysection(form, ["Intro, Verse", "Drop"], [every(4), euclid(16, 9)]) plays the first in the intro and the verse and the second in the drop (a section that is in no name plays nothing). It takes a value from the generator of the section for every step, so it is for rhythms; restart: true starts a generator from its start whenever its section comes.
+
 ## Generators as signals
 
 ### `seq`
@@ -1006,7 +1056,7 @@ A gate from a rhythm: 1 for length (0 to 1) of the step on every step where the 
 
 ### `play`
 
-`play(instrument: function, dur: anything = 0, rhythm: anything = 0, legato: number = 0.8, sustain: number = 0, fields: anything = [], voices: number = 1, swing: number = 0, humanize: number = 0, accent: anything = []) -> signal`
+`play(instrument: function, dur: anything = 0, rhythm: anything = 0, legato: number = 0.8, sustain: number = 0, fields: anything = [], voices: number = 1, swing: number = 0, humanize: number = 0, accent: anything = [], groove: string = , lanes: string = ) -> signal`
 
 Plays notes on an instrument that is a function of the program, as a Pbind plays a SynthDef: the function is given the gate and then one number for each of the fields, and every note is a new run of it. when the notes are: dur: the beats of each note in turn (a list, or a generator of beats; a whole number of steps), or rhythm: a generator of booleans that is pulled every step (euclid(16, 5)): a note on every true, as long as the steps up to the next. legato: the part of it that the gate is high (or sustain: so many beats), fields: a list with, for each number the instrument takes, a list or a generator (degrees(...), mutate(...)) that is pulled once for every note, or a signal (seq(phrase), lfo(0.1)) that has its value read at the start of every note: so one stream can drive both the notes and an effect voices: notes go to the voices in turn, each of which is a run of the function of its own (random choices in it are made again for each), so that the end of a note goes on while the next one starts. The notes start at the block of 64 samples they fall in, as SuperCollider's messages do.
 

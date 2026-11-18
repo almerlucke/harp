@@ -122,22 +122,30 @@ func init() {
 			return Value{TVoice, dsl.Notes(a.value("melody").V.(dsl.Gen[float64]), a.value("rhythm").V.(dsl.Gen[bool]), a.Num("length"))}, nil
 		}})
 	add(&Func{Name: "chords", Result: TGenNotes, Doc: "chords on a rhythm, as notes for a synth: when the rhythm plays, all the notes of the next chord start, held for length steps. velocity (0 to 1) and length can each be a number, or a list or a generator of numbers: a sequence, one value for each chord, in turn (velocity: [1 0.5 0.8 0.5], length: [2 6 4]); a velocity of 0 is a rest",
-		Params: []Param{{"chords", TGenChord, nil}, {"rhythm", TGenBool, nil}, {"velocity", TAny, def(0.7)}, {"length", TAny, def(1)}},
+		Params: []Param{{"chords", TGenChord, nil}, {"rhythm", TAny, nil}, {"velocity", TAny, def(0.7)}, {"length", TAny, def(1)}},
 		Call: func(a Args) (Value, error) {
 			vel, length, err := noteSequences(a)
 			if err != nil {
 				return Value{}, err
 			}
-			return Value{TGenNotes, blocks.ChordsOf(a.value("chords").V.(dsl.Gen[[]float64]), a.value("rhythm").V.(dsl.Gen[bool]), vel, length)}, nil
+			hits, err := hitsOf(a.value("rhythm"))
+			if err != nil {
+				return Value{}, fmt.Errorf("rhythm: %w", err)
+			}
+			return Value{TGenNotes, blocks.ChordsHits(a.value("chords").V.(dsl.Gen[[]float64]), hits, vel, length)}, nil
 		}})
 	add(&Func{Name: "melody", Result: TGenNotes, Doc: "a melody on a rhythm, as notes for a synth: the next pitch is taken when the rhythm plays. velocity (0 to 1) and length (in steps) can each be a number, or a list or a generator of numbers: a sequence, one value for each note, in turn, that goes round (velocity: [1 0.5 0.8 0.5], length: [1 1 3], velocity: wander(0.4, 1)); a velocity of 0 is a rest",
-		Params: []Param{{"pitches", TGenFloat, nil}, {"rhythm", TGenBool, nil}, {"velocity", TAny, def(0.8)}, {"length", TAny, def(1)}},
+		Params: []Param{{"pitches", TGenFloat, nil}, {"rhythm", TAny, nil}, {"velocity", TAny, def(0.8)}, {"length", TAny, def(1)}},
 		Call: func(a Args) (Value, error) {
 			vel, length, err := noteSequences(a)
 			if err != nil {
 				return Value{}, err
 			}
-			return Value{TGenNotes, blocks.MelodyOf(a.value("pitches").V.(dsl.Gen[float64]), a.value("rhythm").V.(dsl.Gen[bool]), vel, length)}, nil
+			hits, err := hitsOf(a.value("rhythm"))
+			if err != nil {
+				return Value{}, fmt.Errorf("rhythm: %w", err)
+			}
+			return Value{TGenNotes, blocks.MelodyHits(a.value("pitches").V.(dsl.Gen[float64]), hits, vel, length)}, nil
 		}})
 
 	// ---- signals: audio rate
@@ -494,4 +502,16 @@ func noteSequences(a Args) (vel, length dsl.Gen[float64], err error) {
 		return nil, nil, fmt.Errorf("length: %w", err)
 	}
 	return vel, length, nil
+}
+
+// hitsOf is a rhythm as hits: the hits of a pattern, or a rhythm of booleans (a hit on the start of every step that is true; a list of booleans too)
+func hitsOf(v Value) (dsl.Gen[[]dsl.Hit], error) {
+	if v.T.Kind == KGenHits {
+		return v.V.(dsl.Gen[[]dsl.Hit]), nil
+	}
+	b, err := coerce(v, TGenBool)
+	if err != nil {
+		return nil, err
+	}
+	return dsl.HitsOf(b.V.(dsl.Gen[bool])), nil
 }

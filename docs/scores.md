@@ -28,6 +28,7 @@ With chords: `play(inst, rhythm: onsets(s), fields: [chordsof(s)], voices: 4)`.
 | | |
 |---|---|
 | `phrase(pitches, durations)` | a line from lists |
+| `part("C3 Eb3 G3 - Bb3")` | a melody and its rhythm in one text, with chord tones that follow chords: [Patterns, parts and chords](patterns.md#part) |
 | `midifile("song.mid", track: 0)` | a MIDI file, in the steps of the patch (the tempo is the patch's). `track: -1` takes all tracks; `harp check` says how many there are |
 | `fugue(subject, durations, voices: 3, root, scale, voice: 0)` | the exposition of a fugue with a countersubject written by the rules of counterpoint. `voice` picks one voice for a synth of its own |
 | `harmonize(root, degrees: [0 3 4 0])` | chords written for four voices (soprano, alto, tenor, bass) by the rules of four part writing: no parallel fifths or octaves, no crossing, a leading tone that rises, a seventh that falls. Without `degrees` it makes `n` chords by the grammar of tonic, subdominant and dominant, in phrases that end in a cadence. `voice: 0` to `3` gives a voice its own synth. `harp check` says the chords and any rule that had to be broken |

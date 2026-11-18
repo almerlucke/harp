@@ -14,10 +14,11 @@ harp keeps two rates apart, and the checker tells you when they are mixed up by 
 | string | `"pad"` |
 | signal | `saw(110)` |
 | list | `[7 9 11]` |
-| generator of numbers / whole numbers / booleans / chords / notes | `degrees(...)`, `mutate(...)`, `euclid(...)`, `chords(...)` |
+| generator of numbers / whole numbers / booleans / chords / notes / hits | `degrees(...)`, `mutate(...)`, `euclid(...)`, `chords(...)` |
 | envelope | `adsr(0.01, 0.1, 0.5, 0.2)` |
 | voice | `notes(...)` (has `.pitch` and `.gate`) |
 | scale | `minor` |
+| song | `song("Intro 4, Verse 8")`: the sections of a piece ([The form of a piece](form.md)) |
 | score | `phrase(...)`, `midifile(...)`: notes with a start and a length ([Scores](scores.md)) |
 | function | a `fn` of yours |
 

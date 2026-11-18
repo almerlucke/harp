@@ -29,40 +29,119 @@ type Event struct {
 	Span float64
 	// Follow is a note of a chord after the first: its numbers are those of the first, except for the note itself
 	Follow bool
+	// Skip is a note that is not played (the chance of its step, from a lane of the groove)
+	Skip bool
+	// what the event was before the groove gave it its feel: the groove can be another, and the event is given the feel again
+	shift0, hold0 float64
 }
 
-// Groove is what makes the notes of a rhythm swing and what accents them. It is a rule of the step a note starts on (counted from the
-// start of the patch), so that notes that were made already can be given a new one when it is edited: Swing delays every other step by
-// that many steps (1/3 is a triplet feel), Humanize moves every step by a random amount of at most that many steps (the same amount every
-// time it is asked for the same step: it is made from the step and the Seed), and Accent gives the level of the notes by the step, going
-// round (nil is a level of 1 everywhere)
+// StepLane is a value for each step, going round on a length of its own (a lane of 5 against a pattern of 16 steps drifts: polymeter). A gap is the
+// default of the lane
+type StepLane struct {
+	Vals []float64
+	Gap  []bool
+}
+
+// At is the value of the lane at a step, and false where it has none (no lane, or a gap)
+func (l StepLane) At(step int) (float64, bool) {
+	n := len(l.Vals)
+	if n == 0 {
+		return 0, false
+	}
+	i := ((step % n) + n) % n
+	return l.Vals[i], !l.Gap[i]
+}
+
+// Groove is what gives the notes of a rhythm their feel. It is a rule of the step a note starts on (counted from the start of the patch), so
+// that notes that were made already can be given a new one when it is edited:
+//   - Swing delays every other step by that many steps (1/3 is a triplet feel)
+//   - Humanize moves every step by a random amount of at most that many steps (the same amount every time it is asked for the same step: it is
+//     made from the step and the Seed)
+//   - Accent gives the level of the notes by the step, going round
+//   - FeelShift and FeelVel are a named groove (an MPC at 58%, a shuffle): how late each step of the bar is, and a factor for how loud
+//   - the lanes are a value a step, each on a length of its own: Prob the chance (percent) that the step plays, Vel a level (percent), Shift how
+//     late (percent of a step, negative is early) and Len how long the note is held (percent)
 type Groove struct {
 	Swing, Humanize float64
 	Seed            uint64
 	Accent          []float64
+	FeelShift       []float64
+	FeelVel         []float64
+	Prob, Vel       StepLane
+	Shift, Len      StepLane
+}
+
+// HasLevel says that the groove changes how loud the notes are: then the events have a level
+func (g Groove) HasLevel() bool {
+	return len(g.Accent) > 0 || len(g.FeelVel) > 0 || len(g.Vel.Vals) > 0
 }
 
 // IsZero says that the groove does nothing
-func (g Groove) IsZero() bool { return g.Swing == 0 && g.Humanize == 0 && len(g.Accent) == 0 }
+func (g Groove) IsZero() bool {
+	return g.Swing == 0 && g.Humanize == 0 && !g.HasLevel() && len(g.FeelShift) == 0 && len(g.Prob.Vals) == 0 && len(g.Shift.Vals) == 0 && len(g.Len.Vals) == 0
+}
+
+// unit is a number from 0 to 1 that is always the same for a step, a seed and a salt (splitmix64)
+func unit(seed uint64, step int, salt uint64) float64 {
+	z := seed + salt*0xd6e8feb86659fd93 + uint64(step)*0x9e3779b97f4a7c15
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb
+	z ^= z >> 31
+	return float64(z>>11) / float64(1<<53)
+}
+
+// Unit is a number from 0 up to 1 that is always the same for a seed, a step and a salt: a chance that can be asked again and gives the same answer
+func Unit(seed uint64, step int, salt uint64) float64 { return unit(seed, step, salt) }
+
+// Feel is what a groove makes of a step: how late the note starts (steps), how strong it is, a factor for how long it is held, and whether it plays
+type Feel struct {
+	Shift, Level, Len float64
+	Skip              bool
+}
+
+// Feel is the groove at a step
+func (g Groove) Feel(step int) Feel {
+	f := Feel{Level: 1, Len: 1}
+	if step%2 != 0 {
+		f.Shift = g.Swing
+	}
+	if g.Humanize != 0 {
+		f.Shift += (unit(g.Seed, step, 1)*2 - 1) * g.Humanize
+	}
+	if n := len(g.Accent); n > 0 {
+		f.Level = g.Accent[((step%n)+n)%n]
+	}
+	if n := len(g.FeelShift); n > 0 {
+		f.Shift += g.FeelShift[((step%n)+n)%n]
+	}
+	if n := len(g.FeelVel); n > 0 {
+		f.Level *= g.FeelVel[((step%n)+n)%n]
+	}
+	if v, ok := g.Vel.At(step); ok {
+		f.Level *= v / 100
+	}
+	if v, ok := g.Shift.At(step); ok {
+		f.Shift += v / 100
+	}
+	if v, ok := g.Len.At(step); ok {
+		f.Len = v / 100
+	}
+	if v, ok := g.Prob.At(step); ok && unit(g.Seed, step, 2)*100 >= v {
+		f.Skip = true
+	}
+	return f
+}
 
 // At is how many steps late a note on this step starts, and how strong it is
 func (g Groove) At(step int) (shift, level float64) {
-	level = 1
-	if step%2 != 0 {
-		shift = g.Swing
-	}
-	if g.Humanize != 0 {
-		// a number from 0 to 1 that is always the same for a step and a seed (splitmix64)
-		z := g.Seed + uint64(step)*0x9e3779b97f4a7c15
-		z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
-		z = (z ^ (z >> 27)) * 0x94d049bb133111eb
-		z ^= z >> 31
-		shift += (float64(z>>11)/float64(1<<53)*2 - 1) * g.Humanize
-	}
-	if n := len(g.Accent); n > 0 {
-		level = g.Accent[((step%n)+n)%n]
-	}
-	return
+	f := g.Feel(step)
+	return f.Shift, f.Level
+}
+
+// feel gives the event the groove of the step it is on
+func (st *eventsState) feel(ev *Event, step int) {
+	f := st.groove.Feel(step)
+	ev.Shift, ev.Level, ev.Hold, ev.Skip = ev.shift0+f.Shift, f.Level, ev.hold0*f.Len, f.Skip
 }
 
 func (e Event) span() float64 {
@@ -177,11 +256,11 @@ func EventsGrooved(next Gen[Event], voices int, fields []Sig, fp EventFP, groove
 	if fp.Timing != "" || fp.Hold != "" || fp.Groove != "" {
 		gens = "events" // the nodes are the same pattern whatever it is made of: that is looked at when it takes over (RebaseFrom)
 	}
-	id := fmt.Sprintf("events %d %d %v", voices, vals, len(groove.Accent) > 0)
+	id := fmt.Sprintf("events %d %d %v", voices, vals, groove.HasLevel())
 	out := make([]EventVoice, voices)
 	for v := range out {
 		v := v
-		if len(groove.Accent) > 0 {
+		if groove.HasLevel() {
 			out[v].Level = mono(&node{name: "events.level", id: id, lane: true, gens: gens, group: st, build: func(rt *Rt, _ [][]float64, o []float64) Kernel {
 				st.attach(rt)
 				c := &valueCursor{st: st, voice: v, idx: levelIdx, cur: 1}
@@ -234,7 +313,7 @@ func (st *eventsState) RebaseFrom(old any) (bool, func()) {
 		return false, nil
 	}
 	known := func(a, b string) bool { return a != "" && a == b }
-	if (len(st.groove.Accent) > 0) != (len(o.groove.Accent) > 0) {
+	if st.groove.HasLevel() != o.groove.HasLevel() {
 		return false, nil // an accent that is there or not is another set of nodes
 	}
 	sameTiming, sameHold, sameGroove := known(st.fp.Timing, o.fp.Timing), known(st.fp.Hold, o.fp.Hold), known(st.fp.Groove, o.fp.Groove)
@@ -350,10 +429,10 @@ func (st *eventsState) refresh(ps []pulled) []pulled {
 		out[k] = p
 		out[k].ev.Vals = st.redraw(p.ev.Vals, fs)
 		if st.rehold {
-			out[k].ev.Hold = st.holdOf(p.ev.span())
+			out[k].ev.hold0 = st.holdOf(p.ev.span())
 		}
-		if st.regroove {
-			out[k].ev.Shift, out[k].ev.Level = st.groove.At(p.step)
+		if st.rehold || st.regroove {
+			st.feel(&out[k].ev, p.step)
 		}
 	}
 	return out
@@ -444,7 +523,8 @@ func (st *eventsState) pull() []pulled {
 			break
 		}
 		ev := *st.pending
-		ev.Shift, ev.Level = st.groove.At(st.at)
+		ev.shift0, ev.hold0 = ev.Shift, ev.Hold
+		st.feel(&ev, st.at)
 		out = append(out, pulled{st.at - k, st.at, ev})
 		st.at += int(st.pending.Steps)
 		st.pending = nil
@@ -456,6 +536,9 @@ func (st *eventsState) apply(ps []pulled) {
 	k := st.step
 	st.step++
 	for _, p := range ps {
+		if p.ev.Skip { // the chance of its step: it does not play
+			continue
+		}
 		step := float64(k + p.offset)
 		start := int64(math.Ceil((step + p.ev.Shift) * st.rt.StepSamples))
 		start = max(start, st.lastStart) // a late note does not make the next one come before it

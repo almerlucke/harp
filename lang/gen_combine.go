@@ -344,26 +344,6 @@ func init() {
 			}
 			return Value{TGenBool, &allGen{g, false}}, nil
 		}})
-	add(&Func{Name: "pattern", Result: TGenBool, Doc: "a rhythm written as a string, a step to a character: x is a hit, . (or -) a rest, and spaces are for reading (a bar to a word): pattern(\"x...x... x..x....\"). It goes round",
-		Params: []Param{{"steps", TStr, nil}},
-		Call: func(a Args) (Value, error) {
-			var hits []bool
-			for _, r := range a.Str("steps") {
-				switch r {
-				case 'x', 'X':
-					hits = append(hits, true)
-				case '.', '-':
-					hits = append(hits, false)
-				case ' ', '\t', '|':
-				default:
-					return Value{}, fmt.Errorf("a step is x (a hit) or . (a rest), not %q", r)
-				}
-			}
-			if len(hits) == 0 {
-				return Value{}, fmt.Errorf("the pattern has no steps")
-			}
-			return Value{TGenBool, dsl.Loop(hits...)}, nil
-		}})
 	add(&Func{Name: "meter", Result: TGenBool, Doc: "the hits of a meter, thinned by a level: the pulses of the divisions (meter([4, 4], level) is 16 pulses in 4 groups of 4) have an importance, the downbeat the most; the pulses less important than the level (a number, or a generator of numbers: a rising level thins the rhythm out) are rests. Level 0 is every pulse",
 		Params: []Param{{"divisions", ListOf(TNum), nil}, {"level", TGenFloat, nil}},
 		Call: func(a Args) (Value, error) {

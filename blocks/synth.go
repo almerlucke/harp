@@ -17,6 +17,7 @@ type Note struct {
 	Pitch    float64 // a MIDI note number, 60 is middle C; a fraction is cents
 	Velocity float64 // 0 to 1, how hard: 0 is taken as 1
 	Length   float64 // how long the key is held, in steps: the release of the envelopes comes after. 0 is one step
+	Offset   float64 // how far into its step the note starts, 0 up to 1 (a roll, a triplet): 0 is on the step
 }
 
 // synthChunk is the number of samples a voice makes at a time. The synths of psalm make a buffer
@@ -138,7 +139,8 @@ func (st *synthState) pending(ns []Note) []pendingNote {
 		if st.opts.velocity {
 			msg["velocity"] = min(vel, 1)
 		}
-		out[i] = pendingNote{msg: msg, amp: min(vel, 1), seconds: length * st.rt.StepSamples / st.rt.SampleRate}
+		out[i] = pendingNote{msg: msg, amp: min(vel, 1), seconds: length * st.rt.StepSamples / st.rt.SampleRate,
+			offset: int64(max(0, min(n.Offset, 0.999)) * st.rt.StepSamples)}
 	}
 	return out
 }
@@ -195,6 +197,7 @@ type pendingNote struct {
 	msg     psalm.Message
 	amp     float64
 	seconds float64
+	offset  int64 // samples after the start of the step
 }
 
 // noteEvent is a note that starts at a sample of the stream
@@ -251,7 +254,12 @@ func (h *host[V]) apply(notes []pendingNote) {
 		if len(h.events) == cap(h.events) {
 			return // no room: a note is lost, never an allocation on the audio thread
 		}
-		h.events = append(h.events, noteEvent{pos: pos, note: n})
+		// in time order (the notes of a step can be late by different amounts: a roll)
+		ev := noteEvent{pos: pos + n.offset, note: n}
+		h.events = append(h.events, ev)
+		for i := len(h.events) - 1; i > 0 && h.events[i-1].pos > h.events[i].pos; i-- {
+			h.events[i-1], h.events[i] = h.events[i], h.events[i-1]
+		}
 	}
 }
 
@@ -391,19 +399,29 @@ func Melody(pitches dsl.Gen[float64], rhythm dsl.Gen[bool], velocity, length flo
 // MelodyOf is Melody where the velocity and the length of each note are values of generators too, taken with the pitch when the rhythm plays: a
 // sequence of velocities, a sequence of lengths. A note of velocity 0 (or below) is not played: a rest
 func MelodyOf(pitches dsl.Gen[float64], rhythm dsl.Gen[bool], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
+	return MelodyHits(pitches, dsl.HitsOf(rhythm), velocity, length)
+}
+
+// MelodyHits is MelodyOf with a rhythm of hits, that can fall anywhere in a step (a roll, a triplet) and last as long as they say: a note for every
+// hit, as long as its length times the length of the hit (when it has one)
+func MelodyHits(pitches dsl.Gen[float64], hits dsl.Gen[[]dsl.Hit], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
 	return &noteGen{
-		fp: noteFP("melody", "", pitches, rhythm, velocity, length),
+		fp: noteFP("melody", "", pitches, hits, velocity, length),
 		next: func() []Note {
-			if !rhythm.Generate() {
-				return nil
+			var notes []Note
+			for _, h := range hits.Generate() {
+				p, v, l := pitches.Generate(), velocity.Generate(), length.Generate()
+				if !(v > 0) {
+					continue
+				}
+				if h.Len > 0 {
+					l *= h.Len
+				}
+				notes = append(notes, Note{Pitch: p, Velocity: v, Length: l, Offset: h.Offset})
 			}
-			p, v, l := pitches.Generate(), velocity.Generate(), length.Generate()
-			if !(v > 0) {
-				return nil
-			}
-			return []Note{{Pitch: p, Velocity: v, Length: l}}
+			return notes
 		},
-		reset: func() { pitches.Reset(); rhythm.Reset(); velocity.Reset(); length.Reset() },
+		reset: func() { pitches.Reset(); hits.Reset(); velocity.Reset(); length.Reset() },
 	}
 }
 
@@ -416,23 +434,30 @@ func Chords(chords dsl.Gen[[]float64], rhythm dsl.Gen[bool], velocity, length fl
 // ChordsOf is Chords where the velocity and the length of each chord (the same for all its notes) are values of generators, taken with the chord when
 // the rhythm plays. A chord of velocity 0 (or below) is not played
 func ChordsOf(chords dsl.Gen[[]float64], rhythm dsl.Gen[bool], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
+	return ChordsHits(chords, dsl.HitsOf(rhythm), velocity, length)
+}
+
+// ChordsHits is ChordsOf with a rhythm of hits (see MelodyHits)
+func ChordsHits(chords dsl.Gen[[]float64], hits dsl.Gen[[]dsl.Hit], velocity, length dsl.Gen[float64]) dsl.Gen[[]Note] {
 	return &noteGen{
-		fp: noteFP("chords", "", chords, rhythm, velocity, length),
+		fp: noteFP("chords", "", chords, hits, velocity, length),
 		next: func() []Note {
-			if !rhythm.Generate() {
-				return nil
-			}
-			pitches, v, l := chords.Generate(), velocity.Generate(), length.Generate()
-			if !(v > 0) {
-				return nil
-			}
-			notes := make([]Note, len(pitches))
-			for i, p := range pitches {
-				notes[i] = Note{Pitch: p, Velocity: v, Length: l}
+			var notes []Note
+			for _, h := range hits.Generate() {
+				pitches, v, l := chords.Generate(), velocity.Generate(), length.Generate()
+				if !(v > 0) {
+					continue
+				}
+				if h.Len > 0 {
+					l *= h.Len
+				}
+				for _, p := range pitches {
+					notes = append(notes, Note{Pitch: p, Velocity: v, Length: l, Offset: h.Offset})
+				}
 			}
 			return notes
 		},
-		reset: func() { chords.Reset(); rhythm.Reset(); velocity.Reset(); length.Reset() },
+		reset: func() { chords.Reset(); hits.Reset(); velocity.Reset(); length.Reset() },
 	}
 }
 

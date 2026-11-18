@@ -71,7 +71,7 @@ func TestCombiningMistakesAreSaid(t *testing.T) {
 		"out = alternate([1 2 3]).dup()":                             "generator",
 		"out = chance([every(2), every(3)], [1]).dup()":              "2 generators and 1 weights",
 		"out = stutter(every(2), 0).dup()":                           "1 to 64",
-		`out = pattern("x.q").dup()`:                                 "not 'q'",
+		`out = pattern("x.q").dup()`:                                 "unexpected",
 		`out = pattern("  ").dup()`:                                  "no steps",
 		"out = both([]).dup()":                                       "no rhythms",
 		"out = meter([0], 0).dup()":                                  "1 to 64",
