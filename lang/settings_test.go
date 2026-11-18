@@ -136,3 +136,50 @@ func TestTheSettingsPageIsUpToDate(t *testing.T) {
 		t.Error("docs/settings.md is not what the synths say: run  go run ./cmd/harp settings -md > ../docs/settings.md  (in lang)")
 	}
 }
+
+func TestTheModulationMatrixIsText(t *testing.T) {
+	at := func(extra string) []float64 { return renderPatch(t, synthPatch(extra), 1.5)[0] }
+	base := at("")
+	// velocity (1 here) opens the cutoff
+	open := at(`, mods: "velocity -> cutoff 1"`)
+	if bright(open[22050:44100]) < 2*bright(base[22050:44100]) {
+		t.Errorf("velocity to cutoff: %v against %v", bright(open[22050:44100]), bright(base[22050:44100]))
+	}
+	// a negative amount closes it; the names are written as it suits ("Ext 1", "ext1")
+	shut := at(`, mods: "velocity > Cutoff -1"`)
+	if bright(shut[22050:44100]) > bright(base[22050:44100]) {
+		t.Errorf("a negative amount: %v against %v", bright(shut[22050:44100]), bright(base[22050:44100]))
+	}
+	// a signal cabled in as ext1 moves what it is joined to: the sound changes along it
+	moving := at(`, ext1: lfo(0.5).range(0, 1), mods: "ext1 -> cutoff 1"`)
+	if a, b := bright(moving[2000:12000]), bright(moving[32000:42000]); math.Abs(a-b) < 0.2*math.Max(a, b) {
+		t.Errorf("ext1 does not move the cutoff: %v %v", a, b)
+	}
+	// + adds to the slots of the preset, without it they are replaced
+	if _, err := Compile(synthPatch(`, mods: "+ velocity -> cutoff 0.5; wheel -> level"`)); err != nil {
+		t.Error(err)
+	}
+	for extra, want := range map[string]string{
+		`, mods: "velocity cutoff"`:      "source -> destination amount",
+		`, mods: "velcity -> cutoff"`:    "did you mean velocity",
+		`, mods: "velocity -> cutof"`:    "did you mean cutoff",
+		`, mods: "velocity -> cutoff 3"`: "from -1 to 1",
+		`, mods: "velocity -> wobble"`:   "destination",
+		", mods: \"a -> b; a -> b; a -> b; a -> b; a -> b; a -> b; a -> b; a -> b; a -> b\"": "",
+	} {
+		_, err := Compile(synthPatch(extra))
+		if want == "" {
+			if err == nil {
+				t.Errorf("%s: no error", extra)
+			}
+			continue
+		}
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("%s: %v (wanted %q)", extra, err, want)
+		}
+	}
+	// the synths that have a matrix list their sources and destinations in the settings page
+	if md := SettingsMarkdown(); !strings.Contains(md, "**Modulation matrix** (`mods`)") {
+		t.Error("the matrix is not in the settings page")
+	}
+}

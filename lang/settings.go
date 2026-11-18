@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"harp/blocks"
@@ -20,13 +21,15 @@ import (
 //
 // The modulation matrix (mod1Src...) and the very large sets (the operators of dx, the drums of drumSynth) are not here.
 
-var matrixKey = regexp.MustCompile(`^(mod[0-9]+(Src|Dest|Amount)|ext[0-9]+)$`)
+var matrixKey = regexp.MustCompile(`^mod[0-9]+(Src|Dest|Amount)$`)
 
 // synthSettings is what a synth function knows of its settings
 type synthSettings struct {
+	base     params.Set
 	name     string
 	order    []string
 	byKey    map[string]params.Param
+	matrix   bool                            // the synth has a modulation matrix: the parameter mods
 	describe func(a Args) (params.Set, bool) // the settings as the preset of this call has them; false when the preset is not known (the call says so)
 }
 
@@ -61,7 +64,7 @@ func attachSettings(name string, base params.Set, describe func(a Args) (params.
 	for _, k := range taken {
 		have[k] = true
 	}
-	ss := &synthSettings{name: name, byKey: map[string]params.Param{}, describe: describe}
+	ss := &synthSettings{base: base, name: name, byKey: map[string]params.Param{}, describe: describe}
 	add := func(p params.Param) {
 		if matrixKey.MatchString(p.Key) || have[p.Key] {
 			return
@@ -72,7 +75,14 @@ func attachSettings(name string, base params.Set, describe func(a Args) (params.
 	}
 	nbase := len(f.Params)
 	for _, p := range base.Params {
+		if p.Key == "mod1Src" {
+			ss.matrix = true
+		}
 		add(p)
+	}
+	if ss.matrix && !have["mods"] {
+		ss.order = append(ss.order, "mods")
+		f.Params = append(f.Params, Param{Name: "mods", Type: TStr, Default: defStr("")})
 	}
 	for _, e := range base.Envelopes {
 		for i := 0; i < len(e.Stages); i++ {
@@ -114,7 +124,21 @@ func (ss *synthSettings) read(a Args, set params.Set) (blocks.SynthOption, error
 		}
 	}
 	var keyed []blocks.KeyedMod
+	if ss.matrix {
+		if text := a.Str("mods"); strings.TrimSpace(text) != "" {
+			msg, err := readMods(text, set)
+			if err != nil {
+				return nil, fmt.Errorf("mods: %w", err)
+			}
+			for k, v := range msg {
+				given[k] = v
+			}
+		}
+	}
 	for _, key := range ss.order {
+		if key == "mods" {
+			continue
+		}
 		v := a.value(key)
 		if v.T.Kind == KNum && math.IsNaN(v.Float()) {
 			continue // not given: the preset's own
@@ -202,6 +226,10 @@ func synthSettingsMarkdown(name string) string {
 	ss := allSynthSettings[name]
 	var b strings.Builder
 	fmt.Fprintf(&b, "\n## %s (%d)\n", name, len(ss.order))
+	if ss.matrix {
+		src, dest := matrixOptions(ss)
+		fmt.Fprintf(&b, "\n**Modulation matrix** (`mods`): sources %s; destinations %s\n", strings.Join(src, ", "), strings.Join(dest, ", "))
+	}
 	var groups []string
 	byGroup := map[string][]string{}
 	for _, k := range ss.order {
@@ -243,4 +271,95 @@ func SettingsOf(synth string) (string, error) {
 		return "", fmt.Errorf("there is no synth %q with settings%s", synth, didYouMean(synth, synthSettingNames()))
 	}
 	return synthSettingsMarkdown(synth), nil
+}
+
+// readMods reads the modulation matrix as text: slots separated by ; or a line, each "source -> destination amount" (the amount from -1 to 1, 1 when
+// it is left out): "lfo 1 -> cutoff 0.5; velocity -> level 0.3". The slots of the preset are replaced; starting with + the slots are added
+// to the ones that the preset has, in the places that are free. It gives the messages of the slots (the numbers of the choices) and clears
+// the ones that are not used
+func readMods(text string, set params.Set) (map[string]float64, error) {
+	byKey := map[string]params.Param{}
+	for _, p := range set.Params {
+		byKey[p.Key] = p
+	}
+	srcOpts, destOpts := byKey["mod1Src"].Options, byKey["mod1Dest"].Options
+	slots := 0
+	for i := 1; byKey[fmt.Sprintf("mod%dSrc", i)].Key != ""; i++ {
+		slots = i
+	}
+	text = strings.TrimSpace(text)
+	add := strings.HasPrefix(text, "+")
+	text = strings.TrimPrefix(text, "+")
+	out := map[string]float64{}
+	next := 1
+	if add {
+		for next <= slots && byKey[fmt.Sprintf("mod%dSrc", next)].Value != 0 {
+			next++
+		}
+	} else {
+		for i := 1; i <= slots; i++ { // the slots of the preset are cleared
+			out[fmt.Sprintf("mod%dSrc", i)] = 0
+			out[fmt.Sprintf("mod%dDest", i)] = 0
+			out[fmt.Sprintf("mod%dAmount", i)] = 0
+		}
+	}
+	find := func(what, name string, opts []string) (float64, error) {
+		for i, o := range opts {
+			if i > 0 && norm(o) == norm(name) {
+				return float64(i), nil
+			}
+		}
+		return 0, fmt.Errorf("%s %q is not one of %s%s", what, name, strings.Join(opts[1:], ", "), didYouMean(name, opts[1:]))
+	}
+	for _, item := range strings.FieldsFunc(text, func(r rune) bool { return r == ';' || r == '\n' }) {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		arrow := strings.Index(item, ">")
+		if arrow < 0 {
+			return nil, fmt.Errorf("%q: a slot is source -> destination amount, like \"lfo 1 -> cutoff 0.5\"", item)
+		}
+		src := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(item[:arrow]), "-"))
+		rest := strings.Fields(item[arrow+1:])
+		amount := 1.0
+		if n := len(rest); n > 1 {
+			if x, err := strconv.ParseFloat(rest[n-1], 64); err == nil {
+				amount, rest = x, rest[:n-1]
+			}
+		}
+		dest := strings.Join(rest, " ")
+		if amount < -1 || amount > 1 {
+			return nil, fmt.Errorf("%q: the amount is from -1 to 1", item)
+		}
+		if next > slots {
+			return nil, fmt.Errorf("a synth has %d slots in its matrix", slots)
+		}
+		si, err := find("source", src, srcOpts)
+		if err != nil {
+			return nil, err
+		}
+		di, err := find("destination", dest, destOpts)
+		if err != nil {
+			return nil, err
+		}
+		out[fmt.Sprintf("mod%dSrc", next)] = si
+		out[fmt.Sprintf("mod%dDest", next)] = di
+		out[fmt.Sprintf("mod%dAmount", next)] = amount
+		next++
+	}
+	return out, nil
+}
+
+// matrixOptions are the sources and the destinations of the matrix of a synth, from its first preset
+func matrixOptions(ss *synthSettings) (src, dest []string) {
+	for _, p := range ss.base.Params {
+		switch p.Key {
+		case "mod1Src":
+			src = p.Options[1:]
+		case "mod1Dest":
+			dest = p.Options[1:]
+		}
+	}
+	return
 }

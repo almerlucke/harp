@@ -269,5 +269,5 @@ func init() {
 			return wavetable.Describe(make(nil)), true
 		}
 		return params.Set{}, false
-	})
+	}, "ext1", "ext2", "ext3", "ext4")
 }

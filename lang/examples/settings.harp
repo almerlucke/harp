@@ -9,6 +9,7 @@ bass = subtractive(bassNotes, preset: "bass", voices: 2,
     filterMode: "band pass",
     cutoff: lfo(0.08).range(180, 1800),
     resonance: 0.55,
+    mods: "velocity -> cutoff 0.5; lfo 1 -> resonance 0.2", lfo1Rate: 0.25,
     ampAttack: 6, ampDecay: 220, ampSustain: 0.5, ampRelease: 120)
 
 // a pad: a slow attack and a long release, and the cutoff opens by a slow ramp

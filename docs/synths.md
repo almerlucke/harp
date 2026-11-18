@@ -69,7 +69,23 @@ out = subtractive(n, preset: "bass",
 
 A wrong value says what is allowed (`cutoff is from 20 to 20000 Hz: 99999 is not`), and a name that is nearly right is suggested. In a live edit a changed setting is changed in the notes that sound, and one that is taken out goes back to what the preset has.
 
-The modulation matrix, and the sets that are too big for parameters (the operators of `dx`, the drums of `drumSynth`), are not in the parameters yet.
+### The modulation matrix
+
+The synths that have one (all but `organ` and `grains`) take it as one text, `mods`: a slot is `source -> destination amount`, slots are separated by `;`. The amount is from -1 to 1 (1 when left out) and says how far a full source moves the destination.
+
+```harp
+n = melody([a2 a2 c3 a2], every(2), length: 3, velocity: [1 0.5 0.8 0.5])
+out = subtractive(n, preset: "bass", lfo1Rate: 0.3,
+    mods: "velocity -> cutoff 0.8; lfo 1 -> resonance 0.3; ext 1 -> pitch 0.05",
+    ext1: lfo(0.2).range(0, 1))
+```
+
+- the sources and destinations are those of the synth (`harp settings subtractive` has the list); the names can be written as you like (`"lfo 1"`, `"lfo1"`);
+- `ext1` to `ext4` are four cables: a signal from 0 to 1 that you give as a parameter becomes a source of the matrix (`ext 1`). (The wavetable has these four for its warp, detune, spread and sub);
+- the slots of the preset are replaced by the ones you write; start with `+` to add to them instead (`mods: "+ wheel -> cutoff 0.5"`);
+- a synth has 8 slots.
+
+The sets that are too big for parameters (the operators of `dx`, the drums of `drumSynth`) are not in the parameters yet.
 
 ## Your own instrument
 
