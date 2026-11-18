@@ -147,9 +147,10 @@ func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, c
 			h.single = opts.single
 			h.modIdx, h.modVal = modIdx, make([]any, len(modIdx))
 			st.rt = rt
-			dsl.LaneWith(rt, func() []pendingNote { // on the control goroutine: the messages are made here, not on the audio thread
+			dsl.LanePrepared(rt, func() []pendingNote { // on the control goroutine: the messages are made here, not on the audio thread
+				st.steps++
 				return st.pending(st.notes.Generate())
-			}, h.apply, st.refresh, st.finish)
+			}, h.apply, st.refresh, st.finish, st.prepare)
 			return h.process
 		},
 	})
@@ -164,6 +165,10 @@ type synthState struct {
 	notes  dsl.Gen[[]Note]
 	fp     string
 	retime bool
+	// steps is how many steps the generator has been pulled for (the notes that are made again for the steps that are not played yet do not
+	// count); skip says that the generator was put in place of another, and has to be at the step where the old one was
+	steps int64
+	skip  bool
 	// the settings that were asked for (given) and what the preset has (defaults); a patch that takes over from this one and has others puts them in
 	// the voices that sound at the next chunk: dirty says there are some to send, and what
 	given    Settings
@@ -210,7 +215,7 @@ func (st *synthState) RebaseFrom(old any) (bool, func()) {
 	}
 	return true, func() {
 		if !sameNotes {
-			o.notes, o.fp, o.retime = st.notes, st.fp, true
+			o.notes, o.fp, o.retime, o.skip = st.notes, st.fp, true, true
 		}
 		if !sameSettings {
 			// what the old patch had set and the new one does not goes back to what the preset has
@@ -228,6 +233,18 @@ func (st *synthState) RebaseFrom(old any) (bool, func()) {
 	}
 }
 
+// prepare puts a generator that took the place of another at the step of the first note that is not played yet: it goes through the steps that
+// the old one has made and the song has played, so that a part whose text or register is changed goes on where the music is, not from its start
+func (st *synthState) prepare(_ int64, queued [][]pendingNote) {
+	if !st.skip {
+		return
+	}
+	st.skip = false
+	for i := st.steps - int64(len(queued)); i > 0; i-- {
+		st.notes.Generate()
+	}
+}
+
 func (st *synthState) refresh(ps []pendingNote) []pendingNote {
 	if st.retime {
 		return st.pending(st.notes.Generate())
@@ -235,7 +252,7 @@ func (st *synthState) refresh(ps []pendingNote) []pendingNote {
 	return ps
 }
 
-func (st *synthState) finish() { st.retime = false }
+func (st *synthState) finish() { st.retime, st.skip = false, false }
 
 // Subtractive is psalm's subtractive synth (two oscillators and a sub, noise, unison, a filter
 // with its own envelope, two lfos and a modulation matrix) with voices voices: cfg is one of its

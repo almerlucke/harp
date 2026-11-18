@@ -1,0 +1,62 @@
+// A synthwave song for a rainy day: 88 bpm, A minor, a warm pad that breathes, a bass that pulses in eighths, a soft kick and a snare in a gated
+// reverb, an arpeggio that glints through the chords, a slow lead in the choruses, and the rain itself: a hiss of noise that comes and goes,
+// drops on a window, a low rumble on the roof.
+//
+//   harp check examples/rainy_day.harp
+//   harp play examples/rainy_day.harp
+//
+// Edit it while it plays (harp play -watch): the chords, the song, the rain (how hard it falls is the number in rain_level).
+
+bpm = 88
+steps = 4
+seed = 31
+
+// ---- the form: 44 bars, and the chords, a bar each: Am9 Fmaj7 Cmaj7 G6
+form = song("Rain 4, Verse 8, Chorus 8, Bridge 4, Chorus 8, Fade 4")
+prog = "Am9 Fmaj7 Cmaj7 G6"
+
+// ---- the rain: three layers. A hiss of noise whose level and brightness drift (it is a shower, not a tap), drops that ping on glass (dust: random
+// clicks, through a resonant filter that wanders), and a low rumble. It is loudest at the start and the end, and sits low under the song
+rain_level = curve(form, "Rain: 0.5, Verse: 0.4, Chorus: 0.3, Bridge: 0.2, Fade: 0.2 -> 0.5")
+hiss = noise().highPass(cutoff: 1500).lowPass(cutoff: lfNoise(0.3).range(4500, 9000)) * lfNoise(0.5).range(0.5, 1) * 0.05
+drops = dust(11).bandPass(cutoff: lfNoise(2).range(2400, 5200), res: 0.93) * 3 + dust(5).bandPass(cutoff: lfNoise(1.3).range(1200, 2600), res: 0.9) * 2.5
+rumble = noise().lowPass(cutoff: 220) * lfNoise(0.4).range(0.3, 1) * 0.18
+rain = ((hiss + drops * 0.12 + rumble) * rain_level).dup()
+  .echo(max: 1, time: [0.37, 0.53], feedback: 0.35, mix: 0.25)
+
+// ---- the pad: the chords, voice led, a long attack; its filter opens in the choruses and closes in the bridge, a little detune that moves
+pad = chords(changes(prog, key: "A minor", lowest: 48, lead: true), every(16), velocity: 0.6, length: 15)
+  .subtractive(preset: "juno_pad", voices: 8, ampAttack: 700, ampRelease: 1600,
+    cutoff: curve(form, "Rain: 700 -> 1200 smooth, Verse: 1300, Chorus: 2600, Bridge: 900 -> 500 smooth, Fade: 800 -> 400 smooth") * lfo(0.07).range(0.85, 1.15))
+  .gain(0.22 * curve(form, "Rain: 0.3 -> 1 smooth, Verse: 0.8, Chorus: 1, Bridge: 1, Fade: 1 -> 0 smooth"))
+
+// ---- the bass: the root of each chord (@b) in pulsing eighths, round and dark; in the choruses the pulse jumps the octave on the offbeats
+bass_notes = part("@b . @b . @b . @b . @b . @b . @b . @b . | @b . @b . @b . @b . @b . @b . @b . @b .", chords: prog, key: "A minor", bass: 33, velocity: 0.8, legato: 0.7)
+bass = bass_notes.subtractive(preset: "moog_bass", voices: 2, cutoff: lfo(0.05).range(350, 700))
+  .gain(0.6 * during(form, "Verse, Chorus, Bridge", glide: 2))
+
+// ---- the arpeggio: chord tones in eighths, up and down, with a dotted echo; it glints, so it is quiet and goes into the reverb
+arp = part("@1 . @2 . @3 . @2' . @3 . @2 . @1' . @3 . | @1 . @3 . @2' . @3 . @1' . @3 . @2 . @1 .", chords: prog, key: "A minor", register: 64, velocity: 0.6, legato: 0.5)
+  .subtractive(preset: "analog_seq", voices: 6)
+  .gain(0.95 * during(form, "Verse, Chorus, Bridge", glide: 4))
+  .echo(max: 1, time: [0.511, 0.34], feedback: 0.42, mix: 0.3)
+
+// ---- the lead: slow, long notes (the third and the fifth of the chord, the ninth) in the choruses, with a vibrato that comes in late
+lead = part("@3' . . . . . @2' . | @1'' . . . . . . . | @2' . . . @3' . . . | @1' . . . . . . .", chords: prog, key: "A minor", register: 48, velocity: 0.75, legato: 1.1)
+  .subtractive(preset: "mono_lead", voices: 2, lfo1Rate: 5.2, lfo1Pitch: 0.25, lfo1Delay: 900, glide: 0.0)
+  .gain(0.9 * during(form, "Chorus", glide: 2))
+  .echo(max: 1, time: [0.68, 0.51], feedback: 0.4, mix: 0.28)
+
+// ---- the drums: soft and a little behind. The kick on the one and the 'and' of three, the snare on the backbeat with a gated reverb (the reverb
+// of the snare is cut off when the hit is over, the sound of the eighties), hats that are almost not there
+kick = drumSynth(melody([drum("kick")], pattern("x... .... ..x. .... | x... .... x... ..x?60 ..."), velocity: [1 0.8]), kit: "808", voices: 2)
+  .gain(0.5 * during(form, "Verse, Chorus", glide: 1))
+snare_dry = drumSynth(melody([drum("snare")], pattern("....x... ....x... | ....x... ....x..."), velocity: [0.9 1]), kit: "electro", voices: 2)
+snare_gated = snare_dry.reverb(mix: 1, decay: 1.4).gate(sidechain: snare_dry, threshold: -42, hold: 170, release: 40)
+snare = (snare_dry * 0.6 + snare_gated * 0.9).gain(0.45 * during(form, "Verse, Chorus", glide: 1))
+hats = drumSynth(melody([drum("hat") drum("hat") drum("open") drum("hat")], pattern("x x x x | x x x x?70"), velocity: [0.6 0.35 0.5 0.35]), kit: "808", voices: 3)
+  .gain(1.6 * during(form, "Verse, Chorus", glide: 1))
+
+drums = kick + snare + hats
+mix = pad + bass + arp + lead + drums
+out = mix.reverb(mix: 0.18, decay: 2.8).gain(0.6) + rain * 3

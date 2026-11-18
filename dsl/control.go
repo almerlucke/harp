@@ -37,6 +37,12 @@ func LaneWith[T any](rt *Rt, pull func() T, apply func(T), refresh func(T) T, fi
 	laneWith(rt, pull, apply, refresh, finish, nil)
 }
 
+// LanePrepared is LaneWith for a lane that also wants to know where the records that are made again begin: prepare is called before the first
+// refresh with the step of the first of them and the values the records have (how many steps of the lane are not played yet is len(vals))
+func LanePrepared[T any](rt *Rt, pull func() T, apply func(T), refresh func(T) T, finish func(), prepare func(first int64, vals []T)) {
+	laneWith(rt, pull, apply, refresh, finish, prepare)
+}
+
 func laneWith[T any](rt *Rt, pull func() T, apply func(T), refresh func(T) T, finish func(), prepare func(first int64, vals []T)) {
 	l := lane{
 		pull:  func() any { return pull() },

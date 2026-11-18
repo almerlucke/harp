@@ -29,7 +29,8 @@ patch.harp:12:9: there is no function lowpas (did you mean lowPass?)
 | the lists or generators in the `fields` of a `play` | those fields get the new generator, the notes already queued get the new numbers; the rest of the pattern goes on |
 | `dur`, `rhythm`, `legato`, `sustain` of a `play` | the notes follow the new rhythm from the next step; the phrases of the fields go on, no note skipped or played twice |
 | a layer added to or removed from a sum | the sum changes; the reverb and echoes after it keep their tails; the new layer's nodes start |
-| the notes of a synth (`chords`, `melody`, their rhythm) | the synth keeps its voices and what sounds goes on; the next notes are the new ones |
+| the notes of a synth (`chords`, `melody`, `part`, their rhythm, a `register`) | the synth keeps its voices and what sounds goes on; the next notes are the new ones, and the new text goes on at the step the music is at (a `part` of 16 steps that is changed in its seventh step plays its eighth next), not from its start |
+| a setting of a synth (`cutoff: 900`, `ampAttack`, `mods`) | it is changed in the notes that sound, and taking it out gives back the preset's own |
 | a setting that is a number in an effect (`chorus(rate: 0.7)`) | that effect starts again, and its tail is cut. Make the setting a signal (`rate: lfo(0.1).range(0.5, 1)`) to move it without a restart |
 | a setting inside a node: reverb `decay`, echo `max`, a synth preset | that node starts again, and its tail is cut. The nodes around it keep theirs |
 | one oscillator for another (`saw` → `pulse`) | the new oscillator starts; the filter after it is the same filter, with its memory |

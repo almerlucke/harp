@@ -183,3 +183,40 @@ func TestTheModulationMatrixIsText(t *testing.T) {
 		t.Error("the matrix is not in the settings page")
 	}
 }
+
+// zeroCrossings counts, for each step of 1000 samples, how often the signal goes through zero: a pitch for a sine
+func zeroCrossings(x []float64) []int {
+	var out []int
+	for s := 0; s+1000 <= len(x); s += 1000 {
+		n := 0
+		for i := s + 1; i < s+1000; i++ {
+			if (x[i-1] < 0) != (x[i] < 0) {
+				n++
+			}
+		}
+		out = append(out, n)
+	}
+	return out
+}
+
+// a part whose register is changed during playback goes on at the step where the music is, not from its start
+func TestALiveEditOfAPartKeepsItsPlaceInTheMusic(t *testing.T) {
+	src := func(register int) string {
+		return "bpm = 120\nsteps = 4\nlead = part(\"@1 @2 @3 @1' @2' @3' @1 @3 @2' @1' @3 @2\", chords: \"Am\", key: \"A minor\", register: " + string(rune('0'+register/10)) + string(rune('0'+register%10)) + ", legato: 0.9)\n" +
+			"out = lead.subtractive(preset: \"sine_lead\", voices: 4, ampAttack: 2, ampRelease: 20).gain(0.4)\n"
+	}
+	l := startLive(t, src(48))
+	l.play(5000) // the music is at step 5
+	l.swapTo(src(60))
+	live := zeroCrossings(append(l.play(14000), 0))
+	ref := zeroCrossings(reference(t, src(60), 5000+14000))
+	ref = ref[5:] // the steps of the live part after what it had played
+	// the steps that were queued when the edit was made are made again from the new part: from the sixth step after the edit on, all is the new
+	// part at the place of the music
+	for k := 2; k < len(live) && k < len(ref); k++ {
+		if d := live[k] - ref[k]; d > 6 || d < -6 {
+			t.Errorf("step %d after the edit: %d crossings, and the new part itself has %d (live %v, ref %v)", k, live[k], ref[k], live, ref)
+			break
+		}
+	}
+}
