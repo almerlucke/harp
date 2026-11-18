@@ -15,7 +15,7 @@ fn bass(gate, note) {
   f = hz(note)
   tone = saw(f) * 0.6 + sine(f) * 0.8
   // the cutoff opens on every note and closes again
-  body = tone.lowpass(cutoff: 250 + 900 * env(gate, [0 1 0], [0.004 0.25], -4), res: 0.2)
+  body = tone.lowPass(cutoff: 250 + 900 * env(gate, [0 1 0], [0.004 0.25], -4), res: 0.2)
   body * env(gate, [0 1 0], [0.005 0.12], -3, release: 1) * 0.4
 }
 
@@ -31,7 +31,7 @@ phrase = degrees(a3, minor, mutate([7 9 11 9 8 7 4 7 9 11 14 11 9 8], swap: 0.5)
 fn pluck(gate, note, bright) {
   f = hz(note)
   tone = saw([f * 0.997, f * 1.004])
-  body = tone.lowpass(cutoff: bright * (0.4 + 0.6 * env(gate, [0 1 0], [0.003 0.3], -4)), res: 0.25)
+  body = tone.lowPass(cutoff: bright * (0.4 + 0.6 * env(gate, [0 1 0], [0.003 0.3], -4)), res: 0.25)
   body * env(gate, [0 1 0], [0.003 0.35], -4) * 0.3
 }
 
@@ -46,7 +46,7 @@ echoed = lead.echo(max: 1, time: [0.433, 0.577], feedback: 0.42, mix: seq([0.12 
 fn kick(gate) { sine(42 + 130 * env(gate, [1 0], [0.07], -6)) * env(gate, [0 1 0], [0.002 0.22], -4) * 0.7 }
 drums_kick = play(kick, rhythm: every(4), legato: 0.3).dup()
 
-fn hat(gate, tone) { noise().highpass(cutoff: tone, res: 0.2) * env(gate, [0 1 0], [0.001 0.05], -4) * 0.12 }
+fn hat(gate, tone) { noise().highPass(cutoff: tone, res: 0.2) * env(gate, [0 1 0], [0.001 0.05], -4) * 0.12 }
 drums_hat = play(hat, rhythm: euclid(16, 7, 3), legato: 0.2, fields: [[6500 8000 7200 9000]]).dup()
 
 mix = low.dup() + pad + echoed.spread(0.7) + drums_kick + drums_hat

@@ -7,7 +7,7 @@ import (
 )
 
 // 150 bpm and 4 steps a beat at 44100 Hz: a step is 4410 samples. The song is A (1 bar of 4 steps) and B (2 bars: 8 steps): 12 steps, round
-const songHead = "bpm = 150\nsteps = 4\nform = song(\"A 1, B 2\", barsteps: 4)\n"
+const songHead = "bpm = 150\nsteps = 4\nform = song(\"A 1, B 2\", barSteps: 4)\n"
 
 func TestASongGivesSignalsThatFollowItsSections(t *testing.T) {
 	at := func(x []float64, step float64) float64 { return x[int(step*4410)] }
@@ -41,7 +41,7 @@ func TestASongGivesSignalsThatFollowItsSections(t *testing.T) {
 		t.Errorf("held: %v", at(held, 8))
 	}
 	// the sections that have a name twice share the curve; a layer goes in and out through gain
-	twice := "bpm = 150\nsteps = 4\nform = song(\"A 1, B 1, A 1\", barsteps: 4)\nout = during(form, \"A\", glide: 0)"
+	twice := "bpm = 150\nsteps = 4\nform = song(\"A 1, B 1, A 1\", barSteps: 4)\nout = during(form, \"A\", glide: 0)"
 	x := renderPatch(t, twice, 2)[0]
 	if at(x, 1) != 1 || at(x, 5) != 0 || at(x, 9) != 1 {
 		t.Errorf("twice: %v %v %v", at(x, 1), at(x, 5), at(x, 9))
@@ -50,15 +50,15 @@ func TestASongGivesSignalsThatFollowItsSections(t *testing.T) {
 
 func TestSectionsChooseGenerators(t *testing.T) {
 	// the first rhythm in A, nothing in B (a section that is in no name plays nothing)
-	if got := pull(t, "form = song(\"A 1, B 2\", barsteps: 4)\nx = bysection(form, [\"A\"], [every(1)])", 24); got != "xxxx........xxxx........" {
+	if got := pull(t, "form = song(\"A 1, B 2\", barSteps: 4)\nx = bySection(form, [\"A\"], [every(1)])", 24); got != "xxxx........xxxx........" {
 		t.Errorf("%s", got)
 	}
 	// two generators, B has its own, and restart starts it again each time its section comes
-	src := "form = song(\"A 1, B 1, A 1, B 1\", barsteps: 4)\nx = bysection(form, [\"A\", \"B\"], [every(1), pattern(\"x...\")]%s)"
+	src := "form = song(\"A 1, B 1, A 1, B 1\", barSteps: 4)\nx = bySection(form, [\"A\", \"B\"], [every(1), pattern(\"x...\")]%s)"
 	if got := pull(t, strings.Replace(src, "%s", "", 1), 16); got != "xxxxx...xxxxx..." {
 		t.Errorf("%s", got)
 	}
-	if got := pull(t, "form = song(\"A 1, B 1, A 1, B 1\", barsteps: 4)\nx = bysection(form, [\"A\", \"B\"], [every(1), pattern(\"x.x.\")], restart: true)", 16); got != "xxxxx.x.xxxxx.x." {
+	if got := pull(t, "form = song(\"A 1, B 1, A 1, B 1\", barSteps: 4)\nx = bySection(form, [\"A\", \"B\"], [every(1), pattern(\"x.x.\")], restart: true)", 16); got != "xxxxx.x.xxxxx.x." {
 		t.Errorf("%s", got)
 	}
 }
@@ -68,14 +68,14 @@ func TestMistakesInSongs(t *testing.T) {
 		`x = song("Intro")`:                                  "a section is a name and its bars",
 		`x = song("Intro x")`:                                "a section is a name and its bars",
 		`x = song("")`:                                       "no sections",
-		`x = song("A 1", barsteps: 0)`:                       "barsteps",
+		`x = song("A 1", barSteps: 0)`:                       "barSteps",
 		`x = during(song("A 1"), "B")`:                       "no section \"B\"",
 		`x = during(song("Drop 1"), "Dorp")`:                 "did you mean Drop",
 		`x = curve(song("A 1"), "A 0 1")`:                    "a curve is like",
 		`x = curve(song("A 1"), "A: 0 => 1")`:                "a value",
 		`x = curve(song("A 1"), "A: 0 -> 1 exp")`:            "above 0",
 		`x = curve(song("A 1"), "A: x")`:                     "not a number",
-		`x = bysection(song("A 1"), ["A", "B"], [every(1)])`: "a name",
+		`x = bySection(song("A 1"), ["A", "B"], [every(1)])`: "a name",
 	} {
 		_, err := Compile("x0 = 1\n" + src + "\nout = sine(440).dup()\n")
 		if err == nil || !strings.Contains(err.Error(), want) {

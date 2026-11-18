@@ -12,7 +12,7 @@ seed = 11
 
 // ---- chords: a progression in the classical style on the degrees of A minor, built of thirds, each chord near the one before it
 changes = triads(a3, minor, progression("classical"), size: 4)
-pad = chords(voicelead(changes, 52, 76), every(32), velocity: 0.6, length: 30)
+pad = chords(voiceLead(changes, 52, 76), every(32), velocity: 0.6, length: 30)
   .subtractive(preset: "pad", voices: 8)
   .gain(0.3)
 
@@ -31,6 +31,6 @@ lead = melody(degrees(a4, minor, algae), maybe(cellular(30, 16, start: "random")
 
 // ---- a drone whose filter follows the Lorenz attractor
 orbit = remap(chaos("lorenz", axis: 0), -20, 20, 300, 5600)
-drone = saw([110.0, 110.4, 111.82]).mix().lowpass(cutoff: seq(orbit), res: 0.3).gain(0.05)
+drone = saw([110.0, 110.4, 111.82]).mix().lowPass(cutoff: seq(orbit), res: 0.3).gain(0.05)
 
 out = (pad + bass + lead + drone.dup()).reverb(mix: 0.25, decay: 4)

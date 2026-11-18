@@ -56,7 +56,7 @@ The first half second of the file is kept in memory and the rest is read from di
 | Argument | Meaning |
 |---|---|
 | `key` | the note at which it plays at its own pitch (a note a fifth above plays it faster) |
-| `loop` | go round between `loopstart` and `loopend` (seconds; the start and the end of the file by default) while the key is down |
+| `loop` | go round between `loopStart` and `loopEnd` (seconds; the start and the end of the file by default) while the key is down |
 | `hold` | a note off releases the sound over `release` seconds (otherwise it plays to its end, like a drum) |
 | `speed`, `start`, `end` | play faster or slower; play a part of the file (seconds) |
 | `vol`, `pan`, `voices` | dB; -1 to 1; default 4 |

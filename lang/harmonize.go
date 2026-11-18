@@ -11,8 +11,8 @@ import (
 var cadences = map[string]harmony.Cadence{"authentic": harmony.Authentic, "half": harmony.Half, "plagal": harmony.Plagal, "deceptive": harmony.Deceptive}
 
 func init() {
-	add(&Func{Name: "harmonize", Result: TScore, Doc: "chords written for four voices (soprano, alto, tenor, bass) by the rules of four part writing: no parallel fifths or octaves, no crossing voices, a leading tone that rises and a seventh that falls, small leaps. The chords are the scale degrees of degrees (0 is I, 3 is IV, 4 is V, counted from 0: [0 3 4 0]), or, when there are none, n chords that are made by the grammar of tonic, subdominant and dominant, in phrases that end in a cadence. root is the tonic (a note, any octave) and mode is major or minor. With explicit degrees seventh: true makes them seventh chords; for the chords that are made, sevenths, secondary (dominants of the next chord) and borrowed (iv in a major key) are chances from 0 to 1, phrase the chords to a phrase, cadence the way phrases end (authentic, half, plagal, deceptive; else half and authentic in turn). A chord lasts chordsteps steps. voice picks one voice (0 is the soprano, 3 the bass) to give a synth of its own, -1 takes all together. harp check says the chords, and the rules that had to be broken, if any",
-		Params: []Param{{"root", TNum, nil}, {"mode", TStr, defStr("major")}, {"degrees", ListOf(TNum), listDefault()}, {"n", TNum, def(8)}, {"chordsteps", TNum, def(16)}, {"voice", TNum, def(-1)},
+	add(&Func{Name: "harmonize", Result: TScore, Doc: "chords written for four voices (soprano, alto, tenor, bass) by the rules of four part writing: no parallel fifths or octaves, no crossing voices, a leading tone that rises and a seventh that falls, small leaps. The chords are the scale degrees of degrees (0 is I, 3 is IV, 4 is V, counted from 0: [0 3 4 0]), or, when there are none, n chords that are made by the grammar of tonic, subdominant and dominant, in phrases that end in a cadence. root is the tonic (a note, any octave) and mode is major or minor. With explicit degrees seventh: true makes them seventh chords; for the chords that are made, sevenths, secondary (dominants of the next chord) and borrowed (iv in a major key) are chances from 0 to 1, phrase the chords to a phrase, cadence the way phrases end (authentic, half, plagal, deceptive; else half and authentic in turn). A chord lasts chordSteps steps. voice picks one voice (0 is the soprano, 3 the bass) to give a synth of its own, -1 takes all together. harp check says the chords, and the rules that had to be broken, if any",
+		Params: []Param{{"root", TNum, nil}, {"mode", TStr, defStr("major")}, {"degrees", ListOf(TNum), listDefault()}, {"n", TNum, def(8)}, {"chordSteps", TNum, def(16)}, {"voice", TNum, def(-1)},
 			{"seventh", TBool, defBool(false)}, {"sevenths", TNum, def(0)}, {"secondary", TNum, def(0)}, {"borrowed", TNum, def(0)}, {"phrase", TNum, def(4)}, {"cadence", TStr, defStr("")},
 			{"variety", TNum, def(0)}, {"legato", TNum, def(1)}, {"velocity", TNum, def(0.8)}},
 		Call: func(a Args) (Value, error) {
@@ -25,9 +25,9 @@ func init() {
 				return Value{}, fmt.Errorf("mode is major or minor")
 			}
 			key := harmony.Key{Tonic: a.Int("root"), Minor: minor}
-			steps := a.Num("chordsteps")
+			steps := a.Num("chordSteps")
 			if !(steps >= 1) || steps > 4096 || !(a.Num("legato") > 0) || a.Num("variety") < 0 {
-				return Value{}, fmt.Errorf("chordsteps is from 1 to 4096, legato above 0, variety 0 or more")
+				return Value{}, fmt.Errorf("chordSteps is from 1 to 4096, legato above 0, variety 0 or more")
 			}
 			for _, p := range []string{"sevenths", "secondary", "borrowed"} {
 				if x := a.Num(p); x < 0 || x > 1 {

@@ -8,6 +8,6 @@
 seed = 1
 
 out = noise().gain(0.5)
-  .bandpass(cutoff: lfnoise(1).exprange(200, 5000), res: 0.975)
+  .bandPass(cutoff: lfNoise(1).expRange(200, 5000), res: 0.975)
   .gain(0.05)
   .dup()

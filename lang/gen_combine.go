@@ -200,7 +200,7 @@ func init() {
 				N: func(g []dsl.Gen[[]blocks.Note]) dsl.Gen[[]blocks.Note] { return and.NewLoop(g...) },
 			}.of(a.value("gens"), "alternate")
 		}})
-	add(&Func{Name: "anyof", Result: TAny, Doc: "generators at random: every value is from one of the generators of the list, picked at random (a list of generators of one kind)",
+	add(&Func{Name: "anyOf", Result: TAny, Doc: "generators at random: every value is from one of the generators of the list, picked at random (a list of generators of one kind)",
 		Params: []Param{{"gens", anyList, nil}},
 		Call: func(a Args) (Value, error) {
 			return genLists{
@@ -209,7 +209,7 @@ func init() {
 				F: func(g []dsl.Gen[float64]) dsl.Gen[float64] { return or.NewLoop(or.Random, g...) },
 				C: func(g []dsl.Gen[[]float64]) dsl.Gen[[]float64] { return or.NewLoop(or.Random, g...) },
 				N: func(g []dsl.Gen[[]blocks.Note]) dsl.Gen[[]blocks.Note] { return or.NewLoop(or.Random, g...) },
-			}.of(a.value("gens"), "anyof")
+			}.of(a.value("gens"), "anyOf")
 		}})
 	add(&Func{Name: "chance", Result: TAny, Doc: "generators at random with weights: every value is from one of the generators, picked with a chance in proportion to its weight (chance([a, b], [3, 1]): a three times as often as b)",
 		Params: []Param{{"gens", anyList, nil}, {"weights", ListOf(TNum), nil}},
@@ -253,13 +253,13 @@ func init() {
 				C: func(g dsl.Gen[[]float64]) dsl.Gen[[]float64] { return constrain.Shotgun(g, p) },
 			}.each(a.value("gen"), "shotgun")
 		}})
-	add(&Func{Name: "norepeat", Result: TAny, Doc: "a generator of numbers that never plays the same value twice in a row",
+	add(&Func{Name: "noRepeat", Result: TAny, Doc: "a generator of numbers that never plays the same value twice in a row",
 		Params: []Param{{"gen", TAny, nil}},
 		Call: func(a Args) (Value, error) {
 			return genKinds{
 				I: func(g dsl.Gen[int]) dsl.Gen[int] { return constrain.RemoveRepetitions(g) },
 				F: func(g dsl.Gen[float64]) dsl.Gen[float64] { return constrain.RemoveRepetitions(g) },
-			}.each(a.value("gen"), "norepeat")
+			}.each(a.value("gen"), "noRepeat")
 		}})
 	add(&Func{Name: "distinct", Result: TAny, Doc: "a generator of numbers in groups of n values that are all different (a value that is in the group already is drawn again)",
 		Params: []Param{{"gen", TAny, nil}, {"n", TNum, nil}},

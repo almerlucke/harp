@@ -129,17 +129,17 @@ func init() {
 			}
 			return Value{TScale, scale.Semitones(r...)}, nil
 		}})
-	add(&Func{Name: "stepwise", Result: TGenFloat, Doc: "a melody that walks over the degrees of a scale, mostly a step up or down, now and then a leap: it stays between the degrees lo and hi (bouncing off the edges), takes steps of at most step degrees, and with the chance leap a jump of up to maxleap degrees",
-		Params: []Param{{"root", TNum, nil}, {"scale", TScale, nil}, {"start", TNum, def(0)}, {"lo", TNum, def(-7)}, {"hi", TNum, def(7)}, {"step", TNum, def(1)}, {"leap", TNum, def(0.1)}, {"maxleap", TNum, def(4)}},
+	add(&Func{Name: "stepwise", Result: TGenFloat, Doc: "a melody that walks over the degrees of a scale, mostly a step up or down, now and then a leap: it stays between the degrees lo and hi (bouncing off the edges), takes steps of at most step degrees, and with the chance leap a jump of up to maxLeap degrees",
+		Params: []Param{{"root", TNum, nil}, {"scale", TScale, nil}, {"start", TNum, def(0)}, {"lo", TNum, def(-7)}, {"hi", TNum, def(7)}, {"step", TNum, def(1)}, {"leap", TNum, def(0.1)}, {"maxLeap", TNum, def(4)}},
 		Call: func(a Args) (Value, error) {
 			lo, hi, st := a.Int("lo"), a.Int("hi"), a.Int("start")
 			if lo > hi || st < lo || st > hi {
 				return Value{}, fmt.Errorf("lo is at most hi, and start is between them")
 			}
-			if a.Int("step") < 1 || a.Int("maxleap") < a.Int("step") {
-				return Value{}, fmt.Errorf("step is 1 or more, maxleap at least step")
+			if a.Int("step") < 1 || a.Int("maxLeap") < a.Int("step") {
+				return Value{}, fmt.Errorf("step is 1 or more, maxLeap at least step")
 			}
-			return Value{TGenFloat, scale.NewWalk(theScale(a), st, lo, hi, a.Int("step"), a.Num("leap"), a.Int("maxleap"))}, nil
+			return Value{TGenFloat, scale.NewWalk(theScale(a), st, lo, hi, a.Int("step"), a.Num("leap"), a.Int("maxLeap"))}, nil
 		}})
 	add(&Func{Name: "snap", Result: TGenFloat, Doc: "the numbers of a generator moved to the nearest note of a scale on a root: snap(remap(drift(), -1, 1, 48, 72), a2, minor) is a melody that wanders in A minor",
 		Params: []Param{{"gen", TGenFloat, nil}, {"root", TNum, nil}, {"scale", TScale, nil}},
@@ -170,7 +170,7 @@ func init() {
 			}
 			return Value{TGenChord, &degreeChords{theScale(a), a.value("degrees").V.(dsl.Gen[int]), a.Int("size")}}, nil
 		}})
-	add(&Func{Name: "voicelead", Result: TGenChord, Doc: "chords with smooth voice leading: each chord is turned and moved by octaves to be nearest the one before it, and kept between low and high",
+	add(&Func{Name: "voiceLead", Result: TGenChord, Doc: "chords with smooth voice leading: each chord is turned and moved by octaves to be nearest the one before it, and kept between low and high",
 		Params: []Param{{"chords", TGenChord, nil}, {"low", TNum, def(48)}, {"high", TNum, def(72)}},
 		Call: func(a Args) (Value, error) {
 			return Value{TGenChord, transform.NewWithTransformer(a.value("chords").V.(dsl.Gen[[]float64]), chord.NewVoiceLeader(a.Num("low"), a.Num("high")))}, nil
@@ -204,10 +204,10 @@ func init() {
 			}
 			return Value{TGenInt, progression.New(t, a.Int("start"))}, nil
 		}})
-	add(&Func{Name: "tonerow", Result: ListOf(TNum), Doc: "a twelve tone row: the pitch classes 0 to 11 in a random order (made when the patch is built, so seed it). Use it as notes, or through rowform",
+	add(&Func{Name: "toneRow", Result: ListOf(TNum), Doc: "a twelve tone row: the pitch classes 0 to 11 in a random order (made when the patch is built, so seed it). Use it as notes, or through rowForm",
 		Params: nil,
 		Call:   func(a Args) (Value, error) { return numList(row.Random(12)), nil }})
-	add(&Func{Name: "rowform", Result: ListOf(TNum), Doc: "a form of a tone row (or any list of notes): form is " + names(rowForms) + ", moved up transpose semitones",
+	add(&Func{Name: "rowForm", Result: ListOf(TNum), Doc: "a form of a tone row (or any list of notes): form is " + names(rowForms) + ", moved up transpose semitones",
 		Params: []Param{{"row", ListOf(TNum), nil}, {"form", TStr, defStr("prime")}, {"transpose", TNum, def(0)}},
 		Call: func(a Args) (Value, error) {
 			x, err := numbersOf(a.value("row"), "row")
@@ -221,7 +221,7 @@ func init() {
 			return numList(row.Apply(x, row.Form{Op: op, Transpose: a.Num("transpose")})), nil
 		}})
 	add(&Func{Name: "counterpoint", Result: ListOf(TNum), Doc: "a line to go with another, written by the rules of strict counterpoint (note against note): the cantus is a list of notes (whole numbers), the line above it (or below with below: true) is consonant, moves by step and small leaps, and begins and ends on a perfect consonance. It is made when the patch is built, and by chance: seed it. If no line keeps all the rules the best one is given",
-		Params: []Param{{"cantus", ListOf(TNum), nil}, {"below", TBool, defBool(false)}, {"maxleap", TNum, def(9)}},
+		Params: []Param{{"cantus", ListOf(TNum), nil}, {"below", TBool, defBool(false)}, {"maxLeap", TNum, def(9)}},
 		Call: func(a Args) (Value, error) {
 			x, err := numbersOf(a.value("cantus"), "cantus")
 			if err != nil {
@@ -234,7 +234,7 @@ func init() {
 				}
 				cf[i] = int(v)
 			}
-			cfg := counterpoint.Config{MaxLeap: a.Int("maxleap")}
+			cfg := counterpoint.Config{MaxLeap: a.Int("maxLeap")}
 			if a.value("below").V.(bool) {
 				cfg.Side = counterpoint.Below
 			}

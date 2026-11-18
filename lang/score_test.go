@@ -83,7 +83,7 @@ func TestAMidiFileIsAScore(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := func(arg string) string {
-		v := evalLastIn(t, dir, "steps = 4\nx = midifile(\"song.mid\""+arg+")")
+		v := evalLastIn(t, dir, "steps = 4\nx = midiFile(\"song.mid\""+arg+")")
 		var out []string
 		for _, e := range v.V.(*Score).Events {
 			out = append(out, fmt.Sprintf("%g:%g/%g", e.Start, e.Pitch, e.Duration))
@@ -100,7 +100,7 @@ func TestAMidiFileIsAScore(t *testing.T) {
 		t.Errorf("all the tracks: %s", got)
 	}
 	// the notes are the ones in the file, in the steps of the patch (8 steps a beat doubles the steps)
-	prog, _ := Parse("steps = 8\nx = midifile(\"song.mid\", track: 0)\nout = sine(1).dup()\n")
+	prog, _ := Parse("steps = 8\nx = midiFile(\"song.mid\", track: 0)\nout = sine(1).dup()\n")
 	p, err := buildPatch(prog, nil, dir)
 	if err != nil {
 		t.Fatal(err)
@@ -108,10 +108,10 @@ func TestAMidiFileIsAScore(t *testing.T) {
 	if len(p.Info) == 0 || !strings.Contains(strings.Join(p.Info, "\n"), "2 tracks, 2 notes") {
 		t.Errorf("check says nothing about the file: %v", p.Info)
 	}
-	if _, err := CompileDir("x = midifile(\"song.mid\", track: 5)\nout = sine(1).dup()\n", dir); err == nil || !strings.Contains(err.Error(), "2 tracks") {
+	if _, err := CompileDir("x = midiFile(\"song.mid\", track: 5)\nout = sine(1).dup()\n", dir); err == nil || !strings.Contains(err.Error(), "2 tracks") {
 		t.Errorf("a track that is not there: %v", err)
 	}
-	if _, err := CompileDir("x = midifile(\"nothing.mid\")\nout = sine(1).dup()\n", dir); err == nil || !strings.Contains(err.Error(), "there is no file") {
+	if _, err := CompileDir("x = midiFile(\"nothing.mid\")\nout = sine(1).dup()\n", dir); err == nil || !strings.Contains(err.Error(), "there is no file") {
 		t.Errorf("a file that is not there: %v", err)
 	}
 }
@@ -132,7 +132,7 @@ func TestPiecesThatAreScores(t *testing.T) {
 		t.Errorf("%s", got)
 	}
 	// a melody over chords: one bar of 16 steps each, notes in range, a chord tone to start each bar
-	if got := scoreText(t, `chordtones([[60 64 67] [65 69 72]], 60, major)`); !strings.HasPrefix(got, "0:") || strings.Count(got, " ") < 8 {
+	if got := scoreText(t, `chordTones([[60 64 67] [65 69 72]], 60, major)`); !strings.HasPrefix(got, "0:") || strings.Count(got, " ") < 8 {
 		t.Errorf("%s", got)
 	}
 }
@@ -177,8 +177,8 @@ func TestMistakesInScores(t *testing.T) {
 		`isorhythm([0], [60], 4)`:                                "no notes",
 		`fugue([61], [4], voices: 2, root: 60, scale: major)`:    "key",
 		`fugue([60 62], [4], voices: 2, root: 60, scale: major)`: "a duration for each",
-		`chordtones([], 60, major)`:                              "no chords",
-		`midifile("x.mid")`:                                      "there is no file",
+		`chordTones([], 60, major)`:                              "no chords",
+		`midiFile("x.mid")`:                                      "there is no file",
 		`transpose(5, 1)`:                                        "score",
 	} {
 		_, err := Compile("seed = 1\nx = " + src + "\nout = sine(440).dup()\n")

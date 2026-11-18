@@ -2,7 +2,7 @@
 
 <!-- made by `harp functions -md`: do not edit by hand (a test says when it is out of date) -->
 
-Every function can be called as `f(x, ...)` or as `x.f(...)`: the thing before the dot is the first argument. A parameter with `= value` can be left out. Arguments can be named: `lowpass(x, cutoff: 800)`. The kinds (signal, generator, ...) are explained in [types](types.md).
+Every function can be called as `f(x, ...)` or as `x.f(...)`: the thing before the dot is the first argument. A parameter with `= value` can be left out. Arguments can be named: `lowPass(x, cutoff: 800)`. The kinds (signal, generator, ...) are explained in [types](types.md).
 
 ## Oscillators and noise
 
@@ -60,9 +60,9 @@ A sine for modulation, from -1 to 1: rate in Hz. Use range to map it.
 
 White noise from -1 to 1 (WhiteNoise); every noise is a noise of its own.
 
-### `lfnoise`
+### `lfNoise`
 
-`lfnoise(freq: signal, interp: boolean = true, control: boolean = false) -> signal`
+`lfNoise(freq: signal, interp: boolean = true, control: boolean = false) -> signal`
 
 A new random value from -1 to 1, freq times a second: in straight lines between them (LFNoise1), or in steps with interp: false (LFNoise0). With control: true as SuperCollider's .kr: one value for every block of 64 samples, so that it moves in steps of 1.5 ms.
 
@@ -124,21 +124,21 @@ Goes from start to end in seconds by the same ratio every second, and stays at e
 
 ## Filters
 
-### `lowpass`
+### `lowPass`
 
-`lowpass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
+`lowPass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
 
 Psalm's state variable lowpass: cutoff in Hz (a signal moves it), res from 0 to 1. A filter for every channel.
 
-### `highpass`
+### `highPass`
 
-`highpass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
+`highPass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
 
 Psalm's state variable highpass: cutoff in Hz, res from 0 to 1.
 
-### `bandpass`
+### `bandPass`
 
-`bandpass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
+`bandPass(x: signal, cutoff: signal, res: signal = 0.5) -> signal`
 
 Psalm's state variable bandpass: cutoff in Hz, res from 0 to 1 (near 1 it is narrow). Its gain at the cutoff is the Q, which is higher than a unity bandpass (Resonz).
 
@@ -206,9 +206,9 @@ A rotary speaker (Leslie): a horn and a drum that turn, slow or fast. The sound 
 
 A stereo widener, that keeps the lows in the middle. The sound comes out in stereo (a mono signal goes to both sides). Settings: width (0 to 3, 1.4); monoBelow (20 to 1000 Hz, 120). A setting can be a number or a signal that moves it.
 
-### `ringmod`
+### `ringMod`
 
-`ringmod(x: signal, mode: anything = 0, freq: anything = 300, stereo: anything = 0, mix: anything = 0.5) -> signal`
+`ringMod(x: signal, mode: anything = 0, freq: anything = 300, stereo: anything = 0, mix: anything = 0.5) -> signal`
 
 A ring modulator, or a frequency shifter (mode: shift). The sound comes out in stereo (a mono signal goes to both sides). Settings: mode (ring, shift; ring); freq (-4000 to 4000 Hz, 300); stereo (-50 to 50 Hz, 0); mix (0 to 1, 0.5). A setting can be a number or a signal that moves it.
 
@@ -230,9 +230,9 @@ Saturation: soft, tube, hard clipping or folding, with drive and tone. The sound
 
 A tape delay with wow, flutter and saturation. The sound comes out in stereo (a mono signal goes to both sides). Settings: time (0.0625 to 4 beats, 0.75); feedback (0 to 1.2, 0.45); wow (0 to 1, 0.3); flutter (0 to 1, 0.2); drive (1 to 24 dB, 3); highCut (500 to 20000 Hz, 4500); lowCut (20 to 2000 Hz, 150); mix (0 to 1, 0.25). A setting can be a number or a signal that moves it.
 
-### `pingpong`
+### `pingPong`
 
-`pingpong(x: signal, time: anything = 0.75, feedback: anything = 0.35, stereo: anything = 0, highCut: anything = 6000, lowCut: anything = 120, mix: anything = 0.2) -> signal`
+`pingPong(x: signal, time: anything = 0.75, feedback: anything = 0.35, stereo: anything = 0, highCut: anything = 6000, lowCut: anything = 120, mix: anything = 0.2) -> signal`
 
 A delay that bounces from one side to the other. The sound comes out in stereo (a mono signal goes to both sides). Settings: time (0.0625 to 4 beats, 0.75); feedback (0 to 0.98, 0.35); stereo (0 to 1, 0); highCut (500 to 20000 Hz, 6000); lowCut (20 to 2000 Hz, 120); mix (0 to 1, 0.2). A setting can be a number or a signal that moves it.
 
@@ -316,9 +316,9 @@ The arc tangent: a soft clip between -pi/2 and pi/2.
 
 Limits a signal to -level..level (clip2).
 
-### `midiratio`
+### `midiRatio`
 
-`midiratio(x: signal) -> signal`
+`midiRatio(x: signal) -> signal`
 
 The ratio of frequencies that many semitones apart: 12 is 2.
 
@@ -334,17 +334,17 @@ MIDI notes as frequencies in Hz (midicps): 69 is 440. A signal of notes, a sweep
 
 Maps a signal from -1..1 (an lfo) to lo..hi.
 
-### `exprange`
+### `expRange`
 
-`exprange(x: signal, lo: number, hi: number) -> signal`
+`expRange(x: signal, lo: number, hi: number) -> signal`
 
-Maps a signal from -1..1 to lo..hi along an exponential curve, the way pitch is heard (exprange). Neither can be 0.
+Maps a signal from -1..1 to lo..hi along an exponential curve, the way pitch is heard (expRange). Neither can be 0.
 
-### `linexp`
+### `linExp`
 
-`linexp(x: signal, inlo: number, inhi: number, lo: signal, hi: signal) -> signal`
+`linExp(x: signal, inLo: number, inHi: number, lo: signal, hi: signal) -> signal`
 
-Maps a signal from the range inlo..inhi to lo..hi along an exponential curve (LinExp); lo and hi can be signals; the input is not clipped.
+Maps a signal from the range inLo..inHi to lo..hi along an exponential curve (LinExp); lo and hi can be signals; the input is not clipped.
 
 ## Channels
 
@@ -480,9 +480,9 @@ A rhythm from a sieve of Xenakis: a hit on every step that is a member of a resi
 
 Generators in turn: a value from the first, then one from the second, and so on, round again (a list of generators of one kind: alternate([melody(...), melody(...)])).
 
-### `anyof`
+### `anyOf`
 
-`anyof(gens: list) -> anything`
+`anyOf(gens: list) -> anything`
 
 Generators at random: every value is from one of the generators of the list, picked at random (a list of generators of one kind).
 
@@ -504,9 +504,9 @@ Every value of a generator n times (or between n and max times, at random): stut
 
 A generator with values dropped at random: each value is dropped with the chance p and the next one taken, so that it gets thinner in what it plays, not in length.
 
-### `norepeat`
+### `noRepeat`
 
-`norepeat(gen: anything) -> anything`
+`noRepeat(gen: anything) -> anything`
 
 A generator of numbers that never plays the same value twice in a row.
 
@@ -592,7 +592,7 @@ A chaotic system as a number (system: logistic, henon, lorenz, rossler, duffing,
 
 ### `remap`
 
-`remap(gen: generator of numbers, inlo: number, inhi: number, lo: number, hi: number) -> generator of numbers`
+`remap(gen: generator of numbers, inLo: number, inHi: number, lo: number, hi: number) -> generator of numbers`
 
 A generator of numbers moved from one range to another: remap(chaos("lorenz"), -20, 20, 48, 72).
 
@@ -704,9 +704,9 @@ A scale from frequency ratios (just intonation): just([1, 9/8, 5/4, 4/3, 3/2, 5/
 
 ### `stepwise`
 
-`stepwise(root: number, scale: scale, start: number = 0, lo: number = -7, hi: number = 7, step: number = 1, leap: number = 0.1, maxleap: number = 4) -> generator of numbers`
+`stepwise(root: number, scale: scale, start: number = 0, lo: number = -7, hi: number = 7, step: number = 1, leap: number = 0.1, maxLeap: number = 4) -> generator of numbers`
 
-A melody that walks over the degrees of a scale, mostly a step up or down, now and then a leap: it stays between the degrees lo and hi (bouncing off the edges), takes steps of at most step degrees, and with the chance leap a jump of up to maxleap degrees.
+A melody that walks over the degrees of a scale, mostly a step up or down, now and then a leap: it stays between the degrees lo and hi (bouncing off the edges), takes steps of at most step degrees, and with the chance leap a jump of up to maxLeap degrees.
 
 ### `snap`
 
@@ -726,9 +726,9 @@ The notes of a chord, as a list: chord(a3, "minor7"); kind is add9, aug, dim, di
 
 The chords on the scale degrees that a generator gives, built of thirds of the scale: triads(a2, minor, [0 5 3 4]) is the chords i, vi, iv, v (size: 4 for seventh chords). The generator can be a progression.
 
-### `voicelead`
+### `voiceLead`
 
-`voicelead(chords: generator of chords, low: number = 48, high: number = 72) -> generator of chords`
+`voiceLead(chords: generator of chords, low: number = 48, high: number = 72) -> generator of chords`
 
 Chords with smooth voice leading: each chord is turned and moved by octaves to be nearest the one before it, and kept between low and high.
 
@@ -744,21 +744,21 @@ An arpeggio of a list of notes (a chord): mode is alternate, converge, random, u
 
 Chord changes by chance, as scale degrees (0 is I): a table of what can follow what, in the style of blues, classical, jazz, pop. It starts on degree start. Use it with triads: triads(a2, minor, progression("pop")).
 
-### `tonerow`
+### `toneRow`
 
-`tonerow() -> list of number`
+`toneRow() -> list of number`
 
-A twelve tone row: the pitch classes 0 to 11 in a random order (made when the patch is built, so seed it). Use it as notes, or through rowform.
+A twelve tone row: the pitch classes 0 to 11 in a random order (made when the patch is built, so seed it). Use it as notes, or through rowForm.
 
-### `rowform`
+### `rowForm`
 
-`rowform(row: list of number, form: string = prime, transpose: number = 0) -> list of number`
+`rowForm(row: list of number, form: string = prime, transpose: number = 0) -> list of number`
 
 A form of a tone row (or any list of notes): form is invert, prime, retro, retroinvert, moved up transpose semitones.
 
 ### `counterpoint`
 
-`counterpoint(cantus: list of number, below: boolean = false, maxleap: number = 9) -> list of number`
+`counterpoint(cantus: list of number, below: boolean = false, maxLeap: number = 9) -> list of number`
 
 A line to go with another, written by the rules of strict counterpoint (note against note): the cantus is a list of notes (whole numbers), the line above it (or below with below: true) is consonant, moves by step and small leaps, and begins and ends on a perfect consonance. It is made when the patch is built, and by chance: seed it. If no line keeps all the rules the best one is given.
 
@@ -770,9 +770,9 @@ A line to go with another, written by the rules of strict counterpoint (note aga
 
 The Fibonacci numbers 0 1 1 2 3 5 8 ... each taken modulo mod (so they go round in a pattern): fibonacci(8) is 0 1 1 2 3 5 0 5 5 2 7 1 0 ...
 
-### `thuemorse`
+### `thueMorse`
 
-`thuemorse() -> generator of whole numbers`
+`thueMorse() -> generator of whole numbers`
 
 The Thue-Morse sequence 0 1 1 0 1 0 0 1 ...: it never repeats and has no long runs. As degrees it is a fair melody of two notes, with divisible a rhythm.
 
@@ -858,9 +858,9 @@ A score from a list of pitches that follow each other, each as long as the next 
 
 ### `part`
 
-`part(text: string, chords: string = , key: string = C major, barsteps: number = 16, register: number = 48, bass: number = 36, velocity: number = 0.8, legato: number = 0.9, passes: number = 0) -> score`
+`part(text: string, chords: string = , key: string = C major, barSteps: number = 16, register: number = 48, bass: number = 36, velocity: number = 0.8, legato: number = 0.9, passes: number = 0) -> score`
 
-A melody and its rhythm in one text, as a score: part("C3 Eb3 G3 - Bb3 . G3 Eb3"), a step each. A note is a name (C3, Eb3, f#4; C4 is 60) or a number, . a rest, - the note before held a step longer, C3+Eb3+G3 a chord, [C3 D3 Eb3] a group that fills a step, C3^3 a roll of three, *2 how many steps, ?25 a chance, %2/4 only some passes through it (the text is played passes times: 0 gives as many as the conditions need), ! as in a pattern. chords ("Am F C G": symbols, or roman numerals in key, a bar each of barsteps) gives chord tones to write: @1 the root, @2 the next tone, @3 the fifth, @4 the seventh, @-1 the tone below the root, @b the bass, @c the whole chord, ' after one an octave up and , down: "@1 @3 @5 @3" follows the chords. register is the lowest note of @1 (48), bass of @b (36). legato is how much of its step a note is held (0.9).
+A melody and its rhythm in one text, as a score: part("C3 Eb3 G3 - Bb3 . G3 Eb3"), a step each. A note is a name (C3, Eb3, f#4; C4 is 60) or a number, . a rest, - the note before held a step longer, C3+Eb3+G3 a chord, [C3 D3 Eb3] a group that fills a step, C3^3 a roll of three, *2 how many steps, ?25 a chance, %2/4 only some passes through it (the text is played passes times: 0 gives as many as the conditions need), ! as in a pattern. chords ("Am F C G": symbols, or roman numerals in key, a bar each of barSteps) gives chord tones to write: @1 the root, @2 the next tone, @3 the fifth, @4 the seventh, @-1 the tone below the root, @b the bass, @c the whole chord, ' after one an octave up and , down: "@1 @3 @5 @3" follows the chords. register is the lowest note of @1 (48), bass of @b (36). legato is how much of its step a note is held (0.9).
 
 ### `changes`
 
@@ -868,17 +868,17 @@ A melody and its rhythm in one text, as a score: part("C3 Eb3 G3 - Bb3 . G3 Eb3"
 
 Chords written as text, as a list of chords: changes("Dm7 G7*2 Cmaj7") or roman numerals in a key: changes("i VI V7", key: "A minor"). A chord lasts a bar, or *2 bars (*3 and so on: whole bars), - holds the chord before for another bar, . is no chord (a rest). The chords are in root position from lowest up (48 is C3); lead: true gives each the voicing nearest the one before. Give them to chords: chords(changes("Am F C G"), every(16)).
 
-### `midifile`
+### `midiFile`
 
-`midifile(file: string, track: number = -1) -> score`
+`midiFile(file: string, track: number = -1) -> score`
 
 A score from a MIDI file: its notes, in the steps of this patch (steps a beat; the tempo is that of the patch). track picks one track (counted from 0), -1 takes all of them together. harp check says how many tracks and notes there are. Look at the tracks one at a time to give each its own synth.
 
 ### `harmonize`
 
-`harmonize(root: number, mode: string = major, degrees: list of number = [], n: number = 8, chordsteps: number = 16, voice: number = -1, seventh: boolean = false, sevenths: number = 0, secondary: number = 0, borrowed: number = 0, phrase: number = 4, cadence: string = , variety: number = 0, legato: number = 1, velocity: number = 0.8) -> score`
+`harmonize(root: number, mode: string = major, degrees: list of number = [], n: number = 8, chordSteps: number = 16, voice: number = -1, seventh: boolean = false, sevenths: number = 0, secondary: number = 0, borrowed: number = 0, phrase: number = 4, cadence: string = , variety: number = 0, legato: number = 1, velocity: number = 0.8) -> score`
 
-Chords written for four voices (soprano, alto, tenor, bass) by the rules of four part writing: no parallel fifths or octaves, no crossing voices, a leading tone that rises and a seventh that falls, small leaps. The chords are the scale degrees of degrees (0 is I, 3 is IV, 4 is V, counted from 0: [0 3 4 0]), or, when there are none, n chords that are made by the grammar of tonic, subdominant and dominant, in phrases that end in a cadence. root is the tonic (a note, any octave) and mode is major or minor. With explicit degrees seventh: true makes them seventh chords; for the chords that are made, sevenths, secondary (dominants of the next chord) and borrowed (iv in a major key) are chances from 0 to 1, phrase the chords to a phrase, cadence the way phrases end (authentic, half, plagal, deceptive; else half and authentic in turn). A chord lasts chordsteps steps. voice picks one voice (0 is the soprano, 3 the bass) to give a synth of its own, -1 takes all together. harp check says the chords, and the rules that had to be broken, if any.
+Chords written for four voices (soprano, alto, tenor, bass) by the rules of four part writing: no parallel fifths or octaves, no crossing voices, a leading tone that rises and a seventh that falls, small leaps. The chords are the scale degrees of degrees (0 is I, 3 is IV, 4 is V, counted from 0: [0 3 4 0]), or, when there are none, n chords that are made by the grammar of tonic, subdominant and dominant, in phrases that end in a cadence. root is the tonic (a note, any octave) and mode is major or minor. With explicit degrees seventh: true makes them seventh chords; for the chords that are made, sevenths, secondary (dominants of the next chord) and borrowed (iv in a major key) are chances from 0 to 1, phrase the chords to a phrase, cadence the way phrases end (authentic, half, plagal, deceptive; else half and authentic in turn). A chord lasts chordSteps steps. voice picks one voice (0 is the soprano, 3 the bass) to give a synth of its own, -1 takes all together. harp check says the chords, and the rules that had to be broken, if any.
 
 ### `isorhythm`
 
@@ -886,17 +886,17 @@ Chords written for four voices (soprano, alto, tenor, bass) by the rules of four
 
 An isorhythmic piece: the talea is a list of durations in steps (a negative one is a rest) and the color a list of pitches; the two go round at their own lengths, and come back together only after their lowest common multiple. length is how many steps it lasts.
 
-### `chordtones`
+### `chordTones`
 
-`chordtones(chords: list of list of number, root: number, scale: scale, bars: number = 0, barsteps: number = 16, beatsteps: number = 4, maxleap: number = 3, low: number = 60, high: number = 84) -> score`
+`chordTones(chords: list of list of number, root: number, scale: scale, bars: number = 0, barSteps: number = 16, beatSteps: number = 4, maxLeap: number = 3, low: number = 60, high: number = 84) -> score`
 
 A melody over chords, one chord to a bar: on the first step of each beat a note of the chord (the first of the bar strongest), between them steps along the scale, and the last step of a bar a chord tone again. chords is a list of chords (lists of notes), repeated if there are more bars. By chance: seed it.
 
 ### `fugue`
 
-`fugue(subject: list of number, durations: list of number, voices: number = 3, root: number, scale: scale, voice: number = -1, barsteps: number = 16) -> score`
+`fugue(subject: list of number, durations: list of number, voices: number = 3, root: number, scale: scale, voice: number = -1, barSteps: number = 16) -> score`
 
-The exposition of a fugue: a subject (pitches that are all notes of the key, and a duration in steps for each) enters in each of the voices in turn, as the subject and as the answer in the fifth, against a countersubject that is written for it by the rules of counterpoint. voice picks one voice (0 is the highest) to give its own synth, -1 takes all of them together. root and scale are the key; barsteps is the length of a bar. By chance: seed it.
+The exposition of a fugue: a subject (pitches that are all notes of the key, and a duration in steps for each) enters in each of the voices in turn, as the subject and as the answer in the fifth, against a countersubject that is written for it by the rules of counterpoint. voice picks one voice (0 is the highest) to give its own synth, -1 takes all of them together. root and scale are the key; barSteps is the length of a bar. By chance: seed it.
 
 ### `phasing`
 
@@ -1000,19 +1000,19 @@ How hard each note of a score is, 0 to 1, one for each note in turn: a field for
 
 The rhythm of a score: a hit on each step that a note starts on, going round: the rhythm of play, with the pitches of the score as a field: play(inst, rhythm: onsets(s), fields: [pitches(s)]).
 
-### `chordsof`
+### `chordsOf`
 
-`chordsof(score: score) -> generator of chords`
+`chordsOf(score: score) -> generator of chords`
 
-The notes of a score that start together, as chords, one for each step that a note starts on, going round: the chord field of play, with onsets as its rhythm: play(inst, rhythm: onsets(s), fields: [chordsof(s)], voices: 4). A step with one note is a chord of one.
+The notes of a score that start together, as chords, one for each step that a note starts on, going round: the chord field of play, with onsets as its rhythm: play(inst, rhythm: onsets(s), fields: [chordsOf(s)], voices: 4). A step with one note is a chord of one.
 
 ## The form of a piece
 
 ### `song`
 
-`song(sections: string, barsteps: number = 16) -> song`
+`song(sections: string, barSteps: number = 16) -> song`
 
-The form of a piece: sections with their bars, song("Intro 8, Verse 8, Drop 16, Break 8, Drop 16, Outro 8"). barsteps is the steps of a bar (16). It goes round when it has gone through. Use it with during (a layer in and out), curve (a value over the sections) and bysection (other rhythms in other sections).
+The form of a piece: sections with their bars, song("Intro 8, Verse 8, Drop 16, Break 8, Drop 16, Outro 8"). barSteps is the steps of a bar (16). It goes round when it has gone through. Use it with during (a layer in and out), curve (a value over the sections) and bySection (other rhythms in other sections).
 
 ### `during`
 
@@ -1026,11 +1026,11 @@ The form of a piece: sections with their bars, song("Intro 8, Verse 8, Drop 16, 
 
 A value that moves through the sections of a song, as a signal: curve(form, "Intro: 0 -> 1 smooth, Drop: 1, Break: 1 -> 0.3"). A section is a value (held), or two with an arrow, and lin (the default), exp (between values above 0), smooth or step. A section with no curve keeps the value where the one before it ended; the sections that have a name twice share the curve.
 
-### `bysection`
+### `bySection`
 
-`bysection(song: song, sections: list of string, gens: list, restart: boolean = false) -> anything`
+`bySection(song: song, sections: list of string, gens: list, restart: boolean = false) -> anything`
 
-Other generators in other sections of a song: bysection(form, ["Intro, Verse", "Drop"], [every(4), euclid(16, 9)]) plays the first in the intro and the verse and the second in the drop (a section that is in no name plays nothing). It takes a value from the generator of the section for every step, so it is for rhythms; restart: true starts a generator from its start whenever its section comes.
+Other generators in other sections of a song: bySection(form, ["Intro, Verse", "Drop"], [every(4), euclid(16, 9)]) plays the first in the intro and the verse and the second in the drop (a section that is in no name plays nothing). It takes a value from the generator of the section for every step, so it is for rhythms; restart: true starts a generator from its start whenever its section comes.
 
 ## Generators as signals
 
@@ -1128,9 +1128,9 @@ Psalm's tonewheel organ, one instrument: every note is a key of it (a chord is s
 
 Psalm's FM synth in the way of the Yamaha DX7 and TX81Z: operators that modulate each other (electric pianos, bells, brass, basses, pads, ...), playing notes with voices notes at once. The preset (harp presets dx) is one of its own patches; file is a DX7 SysEx bank (a .syx file of 32 patches) and patch the number of the patch in it, counted from 0, which takes the place of the preset. Stereo out.
 
-### `drumsynth`
+### `drumSynth`
 
-`drumsynth(notes: generator of notes, kit: string = 808, voices: number = 8) -> signal`
+`drumSynth(notes: generator of notes, kit: string = 808, voices: number = 8) -> signal`
 
 Psalm's drum synthesizer: drums that are made, not played from recordings. kit is 808, 909, electro, industrial, trap. A note is a drum, by its General MIDI key: drum("kick") is the number for a kick, drum("snare"), drum("hat"), drum("open"), drum("clap"), drum("tomLow") and so on (the names are in docs/synths.md); melody([drum("kick")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out.
 
@@ -1138,19 +1138,19 @@ Psalm's drum synthesizer: drums that are made, not played from recordings. kit i
 
 `drum(name: string) -> number`
 
-The General MIDI key of a drum, by its name, for drumsynth: agogoHigh, agogoLow, bongoHigh, bongoLow, clap, clave, congaHigh, congaLow, congaMute, cowbell, crash, hat, kick, open, ride, rideBell, rim, shaker, snare, tambourine, timbaleHigh, timbaleLow, tomHigh, tomLow, tomMid, triangle, triangleMute, woodblockHigh, woodblockLow.
+The General MIDI key of a drum, by its name, for drumSynth: agogoHigh, agogoLow, bongoHigh, bongoLow, clap, clave, congaHigh, congaLow, congaMute, cowbell, crash, hat, kick, open, ride, rideBell, rim, shaker, snare, tambourine, timbaleHigh, timbaleLow, tomHigh, tomLow, tomMid, triangle, triangleMute, woodblockHigh, woodblockLow.
 
 ### `grains`
 
-`grains(notes: generator of notes, file: string, root: number = 60, preset: string = choir_pad, voices: number = 6, position: number = the preset's own, scan: number = the preset's own, spray: number = the preset's own, density: number = the preset's own, size: number = the preset's own, pitchspread: number = the preset's own) -> signal`
+`grains(notes: generator of notes, file: string, root: number = 60, preset: string = choir_pad, voices: number = 6, position: number = the preset's own, scan: number = the preset's own, spray: number = the preset's own, density: number = the preset's own, size: number = the preset's own, pitchSpread: number = the preset's own) -> signal`
 
-Psalm's granular synth: every note is a stream of short grains of a recording (a sound file), played at the pitch of the note; root is the note at which the recording is at its own pitch. The preset (harp presets grains) sets the character: position (0-1, where in the recording), scan (how fast that moves: 0 holds, 1 is the original speed), spray (seconds of spread), density (grains a second), size (a grain, in ms), pitchspread (semitones) are the preset's own unless given. Stereo out.
+Psalm's granular synth: every note is a stream of short grains of a recording (a sound file), played at the pitch of the note; root is the note at which the recording is at its own pitch. The preset (harp presets grains) sets the character: position (0-1, where in the recording), scan (how fast that moves: 0 holds, 1 is the original speed), spray (seconds of spread), density (grains a second), size (a grain, in ms), pitchSpread (semitones) are the preset's own unless given. Stereo out.
 
 ### `wavetable`
 
-`wavetable(notes: generator of notes, table: string = basic, preset: string = pad, voices: number = 6, position: anything = the preset's own, cutoff: anything = the preset's own, resonance: anything = the preset's own, warp: anything = the preset's own, warpmode: string = , detune: anything = the preset's own, spread: anything = the preset's own, sub: anything = the preset's own, size: number = 2048, frames: number = 32, amount: number = 0) -> signal`
+`wavetable(notes: generator of notes, table: string = basic, preset: string = pad, voices: number = 6, position: anything = the preset's own, cutoff: anything = the preset's own, resonance: anything = the preset's own, warp: anything = the preset's own, warpMode: string = , detune: anything = the preset's own, spread: anything = the preset's own, sub: anything = the preset's own, size: number = 2048, frames: number = 32, amount: number = 0) -> signal`
 
-Psalm's wavetable synth: an oscillator morphing through the frames of a table, with unison, a sub oscillator and a filter. The table is a sound file of single cycles of size samples each (2048 is usual), or one that psalm makes: basic, brightness, comb, drawbars, filter, fm, fold, odd_even, pwm, quantize, random, resonance, saturate, steps, sync, vowels (frames of them, and amount: the number of their own, like the sync ratio, the fm index or the pulse width; 0 is the usual one). The preset (harp presets wavetable) sets the rest. These can be a number, or a signal that moves them while the notes sound (lfo(0.1).range(0, 1), env(...), seq(...)): position (0 to 1, where in the table: the table moves), cutoff (Hz) and resonance of the filter, and, as a signal from 0 to 1 that is the amount of the preset's own setting: warp (bends the cycle: warpmode is benddown, bendup, fmb, fmsine, mirror, off, sync), detune (up to 100 cents), spread (the stereo width of the unison), sub (the level of the sub oscillator); up to 4 of those four can be signals. A signal is one channel. Stereo out.
+Psalm's wavetable synth: an oscillator morphing through the frames of a table, with unison, a sub oscillator and a filter. The table is a sound file of single cycles of size samples each (2048 is usual), or one that psalm makes: basic, brightness, comb, drawbars, filter, fm, fold, odd_even, pwm, quantize, random, resonance, saturate, steps, sync, vowels (frames of them, and amount: the number of their own, like the sync ratio, the fm index or the pulse width; 0 is the usual one). The preset (harp presets wavetable) sets the rest. These can be a number, or a signal that moves them while the notes sound (lfo(0.1).range(0, 1), env(...), seq(...)): position (0 to 1, where in the table: the table moves), cutoff (Hz) and resonance of the filter, and, as a signal from 0 to 1 that is the amount of the preset's own setting: warp (bends the cycle: warpMode is benddown, bendup, fmb, fmsine, mirror, off, sync), detune (up to 100 cents), spread (the stereo width of the unison), sub (the level of the sub oscillator); up to 4 of those four can be signals. A signal is one channel. Stereo out.
 
 ## Recordings
 
@@ -1162,9 +1162,9 @@ Psalm's sampler playing notes with a recording: an SFZ instrument (file: "harp.s
 
 ### `streamer`
 
-`streamer(notes: generator of notes, file: string, key: number = 60, loop: boolean = false, hold: boolean = false, speed: number = 1, start: number = 0, end: number = 0, loopstart: number = 0, loopend: number = 0, release: number = 0.1, vol: number = 0, pan: number = 0, voices: number = 4) -> signal`
+`streamer(notes: generator of notes, file: string, key: number = 60, loop: boolean = false, hold: boolean = false, speed: number = 1, start: number = 0, end: number = 0, loopStart: number = 0, loopEnd: number = 0, release: number = 0.1, vol: number = 0, pan: number = 0, voices: number = 4) -> signal`
 
-Psalm's streamer playing notes with a long recording that is read from disk while it plays (the memory it takes is its first half second): file is a sound file; key is the note at which it plays at its own pitch (a note above plays it faster); loop makes it go round (between loopstart and loopend, in seconds) while the key is down; hold lets the end of a note release it; start and end take a part of the file (seconds). Stereo out.
+Psalm's streamer playing notes with a long recording that is read from disk while it plays (the memory it takes is its first half second): file is a sound file; key is the note at which it plays at its own pitch (a note above plays it faster); loop makes it go round (between loopStart and loopEnd, in seconds) while the key is down; hold lets the end of a note release it; start and end take a part of the file (seconds). Stereo out.
 
 ## While the patch is built (random numbers, lists, functions)
 
@@ -1174,9 +1174,9 @@ Psalm's streamer playing notes with a long recording that is read from disk whil
 
 A random number from lo up to hi, decided when the patch is built.
 
-### `exprand`
+### `expRand`
 
-`exprand(lo: number, hi: number) -> number`
+`expRand(lo: number, hi: number) -> number`
 
 A random number from lo up to hi, with the same chance for every ratio (ExpRand), decided when the patch is built. Neither can be 0.
 
@@ -1210,65 +1210,65 @@ A list of what the function f gives for 0, 1, ... n-1 (and, if f takes a second 
 
 Gives x to the function f, gives what comes out to f again, and so on, n times: repeat(f, 16, x). A function with random choices in it makes new ones every time.
 
-### `dbamp`
+### `dbAmp`
 
-`dbamp(db: number) -> number`
+`dbAmp(db: number) -> number`
 
 Decibels as an amplitude: -6 is 0.5 (about), 0 is 1.
 
 ## SuperCollider's own algorithms
 
-### `scsaw`
+### `scSaw`
 
-`scsaw(freq: signal) -> signal`
+`scSaw(freq: signal) -> signal`
 
 SuperCollider's Saw as SuperCollider works it out: half the size, falling, the frequency read once in 64 samples, and it rings when the frequency jumps (saw does not). To mimic a patch of SuperCollider.
 
-### `scsawsync`
+### `scSawSync`
 
-`scsawsync(freq: signal, sync: signal) -> signal`
+`scSawSync(freq: signal, sync: signal) -> signal`
 
-Scsaw that starts again from phase 0 when sync rises above 0, as a new synth of SuperCollider does for every note.
+ScSaw that starts again from phase 0 when sync rises above 0, as a new synth of SuperCollider does for every note.
 
-### `scsin`
+### `scSin`
 
-`scsin(freq: signal, phase: number = 0) -> signal`
+`scSin(freq: signal, phase: number = 0) -> signal`
 
 SuperCollider's SinOsc as it works it out: a table of 8192 values, a phase that is a whole number (so the frequency is a little off), the start phase in radians.
 
-### `sclpf`
+### `scLpf`
 
-`sclpf(x: signal, freq: signal) -> signal`
+`scLpf(x: signal, freq: signal) -> signal`
 
 SuperCollider's LPF: a second order lowpass, cutoff in Hz.
 
-### `schpf`
+### `scHpf`
 
-`schpf(x: signal, freq: signal) -> signal`
+`scHpf(x: signal, freq: signal) -> signal`
 
 SuperCollider's HPF: a second order highpass, cutoff in Hz.
 
-### `scrlpf`
+### `scRlpf`
 
-`scrlpf(x: signal, freq: signal, rq: signal = 1) -> signal`
+`scRlpf(x: signal, freq: signal, rq: signal = 1) -> signal`
 
 SuperCollider's RLPF: a resonant lowpass, rq the reciprocal of Q (1 is flat, 0.5 resonates).
 
-### `scpeq`
+### `scPeq`
 
-`scpeq(x: signal, freq: signal, rq: signal = 1, db: signal = 0) -> signal`
+`scPeq(x: signal, freq: signal, rq: signal = 1, db: signal = 0) -> signal`
 
 SuperCollider's BPeakEQ: boosts or cuts db decibel around freq, rq the bandwidth as a part of freq.
 
-### `scdelayn`
+### `scDelayN`
 
-`scdelayn(x: signal, max: number, time: signal) -> signal`
+`scDelayN(x: signal, max: number, time: signal) -> signal`
 
 SuperCollider's DelayN: a delay of time seconds (up to max), cut to whole samples.
 
-### `scdelayc`
+### `scDelayC`
 
-`scdelayc(x: signal, max: number, time: signal) -> signal`
+`scDelayC(x: signal, max: number, time: signal) -> signal`
 
 SuperCollider's DelayC: a delay of time seconds (up to max), with cubic interpolation, for a time that moves.
 

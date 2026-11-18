@@ -5,7 +5,7 @@
 //   harp play examples/scores.harp
 //
 // A score plays on any synth, where the synth takes notes. Take one voice of a fugue (voice: 0) to give it a synth of its own, or all of them
-// together (voice: -1). A MIDI file is a score too: midifile("song.mid", track: 0).
+// together (voice: -1). A MIDI file is a score too: midiFile("song.mid", track: 0).
 
 bpm = 76
 steps = 4
@@ -14,9 +14,9 @@ seed = 4
 // ---- the fugue: a subject in D minor, 4 steps to the beat, bars of 16 steps
 subject = [62 64 65 64 62 69 67 65 64 62]
 lengths = [4 4 4 2 2 4 4 4 2 6]
-voice0 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 0, barsteps: 16)
-voice1 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 1, barsteps: 16)
-voice2 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 2, barsteps: 16)
+voice0 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 0, barSteps: 16)
+voice1 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 1, barSteps: 16)
+voice2 = fugue(subject, lengths, voices: 3, root: d4, scale: minor, voice: 2, barSteps: 16)
 
 high = subtractive(voice0, preset: "pluck", voices: 4).gain(0.28)
 middle = modal(transpose(voice1, 0), preset: "marimba", voices: 4).gain(0.3)

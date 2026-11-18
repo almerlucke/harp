@@ -274,13 +274,13 @@ func sectionsOf[T any](song *Song, which []int, gens []dsl.Gen[T], restart bool)
 }
 
 func init() {
-	add(&Func{Name: "song", Result: TSong, Doc: "the form of a piece: sections with their bars, song(\"Intro 8, Verse 8, Drop 16, Break 8, Drop 16, Outro 8\"). barsteps is the steps of a bar (16). It goes round when it has gone through. Use it with during (a layer in and out), curve (a value over the sections) and bysection (other rhythms in other sections)",
-		Params: []Param{{"sections", TStr, nil}, {"barsteps", TNum, def(16)}},
+	add(&Func{Name: "song", Result: TSong, Doc: "the form of a piece: sections with their bars, song(\"Intro 8, Verse 8, Drop 16, Break 8, Drop 16, Outro 8\"). barSteps is the steps of a bar (16). It goes round when it has gone through. Use it with during (a layer in and out), curve (a value over the sections) and bySection (other rhythms in other sections)",
+		Params: []Param{{"sections", TStr, nil}, {"barSteps", TNum, def(16)}},
 		Call: func(a Args) (Value, error) {
-			if a.Int("barsteps") < 1 || a.Int("barsteps") > 256 {
-				return Value{}, fmt.Errorf("barsteps is from 1 to 256")
+			if a.Int("barSteps") < 1 || a.Int("barSteps") > 256 {
+				return Value{}, fmt.Errorf("barSteps is from 1 to 256")
 			}
-			s, err := parseSong(a.Str("sections"), a.Int("barsteps"))
+			s, err := parseSong(a.Str("sections"), a.Int("barSteps"))
 			if err != nil {
 				return Value{}, err
 			}
@@ -312,7 +312,7 @@ func init() {
 				return parts[i].at(p)
 			})), nil
 		}})
-	add(&Func{Name: "bysection", Result: TAny, Doc: "other generators in other sections of a song: bysection(form, [\"Intro, Verse\", \"Drop\"], [every(4), euclid(16, 9)]) plays the first in the intro and the verse and the second in the drop (a section that is in no name plays nothing). It takes a value from the generator of the section for every step, so it is for rhythms; restart: true starts a generator from its start whenever its section comes",
+	add(&Func{Name: "bySection", Result: TAny, Doc: "other generators in other sections of a song: bySection(form, [\"Intro, Verse\", \"Drop\"], [every(4), euclid(16, 9)]) plays the first in the intro and the verse and the second in the drop (a section that is in no name plays nothing). It takes a value from the generator of the section for every step, so it is for rhythms; restart: true starts a generator from its start whenever its section comes",
 		Params: []Param{{"song", TSong, nil}, {"sections", ListOf(TStr), nil}, {"gens", anyList, nil}, {"restart", TBool, defBool(false)}},
 		Call: func(a Args) (Value, error) {
 			s := a.value("song").V.(*Song)
@@ -342,6 +342,6 @@ func init() {
 				F: func(g []dsl.Gen[float64]) dsl.Gen[float64] { return sectionsOf(s, which, g, r) },
 				C: func(g []dsl.Gen[[]float64]) dsl.Gen[[]float64] { return sectionsOf(s, which, g, r) },
 				N: func(g []dsl.Gen[[]blocks.Note]) dsl.Gen[[]blocks.Note] { return sectionsOf(s, which, g, r) },
-			}.of(a.value("gens"), "bysection")
+			}.of(a.value("gens"), "bySection")
 		}})
 }

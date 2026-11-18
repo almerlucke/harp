@@ -184,12 +184,12 @@ func init() {
 		Call:   func(a Args) (Value, error) { return sigV(dsl.Spread(a.Sig("x"), a.Num("width"))), nil }})
 
 	// ---- psalm's blocks
-	add(&Func{Name: "lowpass", Result: TSig, Doc: "psalm's state variable lowpass: cutoff in Hz (a signal moves it), res from 0 to 1. A filter for every channel",
+	add(&Func{Name: "lowPass", Result: TSig, Doc: "psalm's state variable lowpass: cutoff in Hz (a signal moves it), res from 0 to 1. A filter for every channel",
 		Params: []Param{{"x", TSig, nil}, {"cutoff", TSig, nil}, {"res", TSig, def(0.5)}},
 		Call: func(a Args) (Value, error) {
 			return sigV(blocks.Lowpass(a.Sig("x"), a.Sig("cutoff"), a.Sig("res"))), nil
 		}})
-	add(&Func{Name: "highpass", Result: TSig, Doc: "psalm's state variable highpass: cutoff in Hz, res from 0 to 1",
+	add(&Func{Name: "highPass", Result: TSig, Doc: "psalm's state variable highpass: cutoff in Hz, res from 0 to 1",
 		Params: []Param{{"x", TSig, nil}, {"cutoff", TSig, nil}, {"res", TSig, def(0.5)}},
 		Call: func(a Args) (Value, error) {
 			return sigV(blocks.Highpass(a.Sig("x"), a.Sig("cutoff"), a.Sig("res"))), nil
@@ -256,7 +256,7 @@ func init() {
 		}})
 	add(&Func{Name: "noise", Result: TSig, Doc: "white noise from -1 to 1 (WhiteNoise); every noise is a noise of its own",
 		Call: func(a Args) (Value, error) { return sigV(dsl.Noise()), nil }})
-	add(&Func{Name: "lfnoise", Result: TSig, Doc: "a new random value from -1 to 1, freq times a second: in straight lines between them (LFNoise1), or in steps with interp: false (LFNoise0). With control: true as SuperCollider's .kr: one value for every block of 64 samples, so that it moves in steps of 1.5 ms",
+	add(&Func{Name: "lfNoise", Result: TSig, Doc: "a new random value from -1 to 1, freq times a second: in straight lines between them (LFNoise1), or in steps with interp: false (LFNoise0). With control: true as SuperCollider's .kr: one value for every block of 64 samples, so that it moves in steps of 1.5 ms",
 		Params: []Param{{"freq", TSig, nil}, {"interp", TBool, defBool(true)}, {"control", TBool, defBool(false)}},
 		Call: func(a Args) (Value, error) {
 			if a.value("control").V.(bool) {
@@ -291,7 +291,7 @@ func init() {
 			}
 			return sigV(dsl.XLine(a.Num("start"), a.Num("end"), a.Num("seconds"))), nil
 		}})
-	add(&Func{Name: "exprange", Result: TSig, Doc: "maps a signal from -1..1 to lo..hi along an exponential curve, the way pitch is heard (exprange). Neither can be 0",
+	add(&Func{Name: "expRange", Result: TSig, Doc: "maps a signal from -1..1 to lo..hi along an exponential curve, the way pitch is heard (expRange). Neither can be 0",
 		Params: []Param{{"x", TSig, nil}, {"lo", TNum, nil}, {"hi", TNum, nil}},
 		Call: func(a Args) (Value, error) {
 			if a.Num("lo") == 0 || a.Num("hi") == 0 || (a.Num("lo") < 0) != (a.Num("hi") < 0) {
@@ -316,7 +316,7 @@ func init() {
 			}
 			return sigV(dsl.Dup(a.Sig("x"), a.Int("n"))), nil
 		}})
-	add(&Func{Name: "bandpass", Result: TSig, Doc: "psalm's state variable bandpass: cutoff in Hz, res from 0 to 1 (near 1 it is narrow). Its gain at the cutoff is the Q, which is higher than a unity bandpass (Resonz)",
+	add(&Func{Name: "bandPass", Result: TSig, Doc: "psalm's state variable bandpass: cutoff in Hz, res from 0 to 1 (near 1 it is narrow). Its gain at the cutoff is the Q, which is higher than a unity bandpass (Resonz)",
 		Params: []Param{{"x", TSig, nil}, {"cutoff", TSig, nil}, {"res", TSig, def(0.5)}},
 		Call: func(a Args) (Value, error) {
 			return sigV(blocks.Bandpass(a.Sig("x"), a.Sig("cutoff"), a.Sig("res"))), nil
@@ -421,7 +421,7 @@ func init() {
 		Call: func(a Args) (Value, error) {
 			return numV(a.Num("lo") + (a.Num("hi")-a.Num("lo"))*dsl.Random()), nil
 		}})
-	add(&Func{Name: "exprand", Result: TNum, Doc: "a random number from lo up to hi, with the same chance for every ratio (ExpRand), decided when the patch is built. Neither can be 0",
+	add(&Func{Name: "expRand", Result: TNum, Doc: "a random number from lo up to hi, with the same chance for every ratio (ExpRand), decided when the patch is built. Neither can be 0",
 		Params: []Param{{"lo", TNum, nil}, {"hi", TNum, nil}},
 		Call: func(a Args) (Value, error) {
 			lo, hi := a.Num("lo"), a.Num("hi")
@@ -461,10 +461,10 @@ func init() {
 		}})
 
 	// ---- more of SuperCollider's UGens
-	add(&Func{Name: "linexp", Result: TSig, Doc: "maps a signal from the range inlo..inhi to lo..hi along an exponential curve (LinExp); lo and hi can be signals; the input is not clipped",
-		Params: []Param{{"x", TSig, nil}, {"inlo", TNum, nil}, {"inhi", TNum, nil}, {"lo", TSig, nil}, {"hi", TSig, nil}},
+	add(&Func{Name: "linExp", Result: TSig, Doc: "maps a signal from the range inLo..inHi to lo..hi along an exponential curve (LinExp); lo and hi can be signals; the input is not clipped",
+		Params: []Param{{"x", TSig, nil}, {"inLo", TNum, nil}, {"inHi", TNum, nil}, {"lo", TSig, nil}, {"hi", TSig, nil}},
 		Call: func(a Args) (Value, error) {
-			return sigV(dsl.LinExp(a.Sig("x"), a.Num("inlo"), a.Num("inhi"), a.Sig("lo"), a.Sig("hi"))), nil
+			return sigV(dsl.LinExp(a.Sig("x"), a.Num("inLo"), a.Num("inHi"), a.Sig("lo"), a.Sig("hi"))), nil
 		}})
 	add(&Func{Name: "clip2", Result: TSig, Doc: "limits a signal to -level..level (clip2)",
 		Params: []Param{{"x", TSig, nil}, {"level", TSig, def(1)}},
@@ -487,7 +487,7 @@ func init() {
 }
 
 func init() {
-	add(&Func{Name: "scsaw", Result: TSig, Doc: "SuperCollider's Saw as SuperCollider works it out: half the size, falling, the frequency read once in 64 samples, and it rings when the frequency jumps (saw does not). To mimic a patch of SuperCollider",
+	add(&Func{Name: "scSaw", Result: TSig, Doc: "SuperCollider's Saw as SuperCollider works it out: half the size, falling, the frequency read once in 64 samples, and it rings when the frequency jumps (saw does not). To mimic a patch of SuperCollider",
 		Params: []Param{{"freq", TSig, nil}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCSaw(a.Sig("freq"))), nil }}) //nolint
 }

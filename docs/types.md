@@ -19,7 +19,7 @@ harp keeps two rates apart, and the checker tells you when they are mixed up by 
 | voice | `notes(...)` (has `.pitch` and `.gate`) |
 | scale | `minor` |
 | song | `song("Intro 4, Verse 8")`: the sections of a piece ([The form of a piece](form.md)) |
-| score | `phrase(...)`, `midifile(...)`: notes with a start and a length ([Scores](scores.md)) |
+| score | `phrase(...)`, `midiFile(...)`: notes with a start and a length ([Scores](scores.md)) |
 | function | a `fn` of yours |
 
 ## What can be used where
@@ -35,7 +35,7 @@ Where a function wants one kind, a value of another is converted if the language
 | score | generator of notes | the notes of each step, again and again (for a synth) |
 | generator of numbers | signal | a signal that steps: a new value every step, held |
 
-Anything else is an error that names the kinds: `lowpass: cutoff: expected a signal, got a string`.
+Anything else is an error that names the kinds: `lowPass: cutoff: expected a signal, got a string`.
 
 A generator that has a **name** is one stream: used as a signal in several places it is pulled once a step and every place has the same values. Two separate calls (`mutate(...)` twice) are two streams. See [Generators](generators.md).
 
@@ -57,6 +57,6 @@ Ways to change the number of channels, on purpose:
 | `pan(x, pos)` | mono into stereo, `pos` from -1 to 1, equal power |
 | `spread(x, width)` | n channels spread over the stereo field |
 
-`saw([110, 110.5])` is two oscillators, one per frequency. `lowpass(stereo, cutoff: 800)` filters each side with its own filter, one cutoff for both.
+`saw([110, 110.5])` is two oscillators, one per frequency. `lowPass(stereo, cutoff: 800)` filters each side with its own filter, one cutoff for both.
 
 `out` can be any number of channels; `harp play` sends mono to every output and a stereo patch to the first two outputs. A live edit cannot change the number of channels ([Live editing](live-editing.md)).

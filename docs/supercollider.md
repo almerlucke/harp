@@ -33,11 +33,11 @@ The report has, per channel, the level, the best alignment and correlation, the 
 
 Some SuperCollider sounds depend on how its units work, not only on what they are. These functions are ports of SuperCollider's code, for translations that must match:
 
-`scsaw` `scsawsync` `scsin` `sclpf` `schpf` `scrlpf` `scpeq` `scdelayn` `scdelayc` `freeverb2` and `env` (SuperCollider's `EnvGen`). See the [reference](reference.md#supercolliders-own-algorithms).
+`scSaw` `scSawSync` `scSin` `scLpf` `scHpf` `scRlpf` `scPeq` `scDelayN` `scDelayC` `freeverb2` and `env` (SuperCollider's `EnvGen`). See the [reference](reference.md#supercolliders-own-algorithms).
 
 What was found:
 
-- SuperCollider reads most parameters once per **block of 64 samples**: control signals (`.kr`), filter frequencies, the frequency of `Saw`, gates, and the time messages apply. `lfnoise(..., control: true)` and `ramp(..., control: true)` do the same.
+- SuperCollider reads most parameters once per **block of 64 samples**: control signals (`.kr`), filter frequencies, the frequency of `Saw`, gates, and the time messages apply. `lfNoise(..., control: true)` and `ramp(..., control: true)` do the same.
 - `Saw` is a leaky integrated pulse train: half the size, falling, and it **rings** (peaks many times its size) when its frequency jumps. harp's `saw` does not. A patch that sweeps a saw fast sounds different with each.
 - `Pulse` is half the size, has no DC and is turned over; harp's `pulse` is the conventional one (`rectangle` has no DC).
 - A new synth starts with its filters holding the first input sample, `DelayC` has a minimum delay of 1 sample, `SinOsc` has a whole-number phase (8 Hz is 9 ppm off).

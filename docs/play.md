@@ -8,7 +8,7 @@ bpm = 110
 fn pluck(gate, note, bright) {
   f = hz(note)
   saw([f * 0.997, f * 1.003])
-    .lowpass(cutoff: bright, res: 0.25)
+    .lowPass(cutoff: bright, res: 0.25)
     * env(gate, [0 1 0], [0.003 0.4], -4) * 0.2
 }
 
@@ -69,13 +69,13 @@ Edit them while the patch plays: the notes that were made already get the new fe
 
 ## Chords
 
-A field can be a chord: a generator of chords (`triads(...)`, `chords`-style lists, `voicelead(...)`) or a list of chords. Every note of the rhythm then plays **all the notes of the chord**, on the same step, each as a run of the instrument with that note in the field. The other fields are the same for all of them.
+A field can be a chord: a generator of chords (`triads(...)`, `chords`-style lists, `voiceLead(...)`) or a list of chords. Every note of the rhythm then plays **all the notes of the chord**, on the same step, each as a run of the instrument with that note in the field. The other fields are the same for all of them.
 
 ```harp
 fn pad(gate, note) {
-  saw([hz(note) * 0.997, hz(note) * 1.003]).lowpass(cutoff: 1200, res: 0.2) * env(gate, [0 1 0], [0.05 1.5], -2) * 0.08
+  saw([hz(note) * 0.997, hz(note) * 1.003]).lowPass(cutoff: 1200, res: 0.2) * env(gate, [0 1 0], [0.05 1.5], -2) * 0.08
 }
-changes = voicelead(triads(a2, minor, progression("classical")), 48, 72)
+changes = voiceLead(triads(a2, minor, progression("classical")), 48, 72)
 out = play(pad, rhythm: every(16), legato: 0.9, fields: [changes], voices: 4)
 ```
 
@@ -87,7 +87,7 @@ Notes go to the voices in turn. Each voice is a run of the instrument built once
 
 ## Every note is a new synth
 
-The nodes of the instrument that carry state and are made as harp's custom nodes start again from their start on the rise of the gate, as a new synth does in SuperCollider: the filters (`lowpass`, `highpass`, `bandpass`, `bpf`), `echo`, `comb`, `reverb`, `freeverb2`, `env`, and the `sc*` functions. Plain oscillators and noise (`sine`, `saw`, `noise`, `lfo`, ...) keep running, so a note starts at whatever phase they are at; use `scsawsync` or `scsin` where the start must be exact.
+The nodes of the instrument that carry state and are made as harp's custom nodes start again from their start on the rise of the gate, as a new synth does in SuperCollider: the filters (`lowPass`, `highPass`, `bandPass`, `bpf`), `echo`, `comb`, `reverb`, `freeverb2`, `env`, and the `sc*` functions. Plain oscillators and noise (`sine`, `saw`, `noise`, `lfo`, ...) keep running, so a note starts at whatever phase they are at; use `scSawSync` or `scSin` where the start must be exact.
 
 Build what should *carry over* (a reverb tail, say) outside the instrument and put it on the output of `play`.
 
@@ -95,5 +95,5 @@ Notes start in the 64-sample block their time falls in, as SuperCollider's messa
 
 ## Limits
 
-- Notes are only as exact as their nodes: for a restart that is the same every time, use `scsawsync`, `env` and the `sc*` functions ([SuperCollider](supercollider.md)).
+- Notes are only as exact as their nodes: for a restart that is the same every time, use `scSawSync`, `env` and the `sc*` functions ([SuperCollider](supercollider.md)).
 - A signal field must have one channel.

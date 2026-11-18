@@ -235,7 +235,7 @@ func TestALiveSessionOnTheOldExamples(t *testing.T) {
 		}},
 		{"supercollider/11_gabber_rave.harp", []edit{
 			{"kick bend", "[1 1 1 1 1 0.4 1 1 0.4 1]", "[1 1 1 1 1 0.5 1 1 0.5 1]"},
-			{"hoover level", "dbamp(-20)", "dbamp(-22)"},
+			{"hoover level", "dbAmp(-20)", "dbAmp(-22)"},
 		}},
 	} {
 		t.Run(c.file, func(t *testing.T) {
@@ -259,7 +259,7 @@ func TestALiveSessionOnTheOldExamples(t *testing.T) {
 
 // a patch that has another number of channels is refused, and what plays goes on
 func TestALiveEditThatChangesTheChannelsIsRefused(t *testing.T) {
-	src := "bpm = 120\nsteps = 4\nseed = 1\nout = saw(110).lowpass(cutoff: 800, res: 0.3).gain(0.2)\n"
+	src := "bpm = 120\nsteps = 4\nseed = 1\nout = saw(110).lowPass(cutoff: 800, res: 0.3).gain(0.2)\n"
 	s := startSession(t, "mono", src)
 	s.play(1)
 	if err := s.edit("stereo", strings.Replace(src, ".gain(0.2)", ".gain(0.2).dup()", 1)); err == nil || !strings.Contains(err.Error(), "channels") {

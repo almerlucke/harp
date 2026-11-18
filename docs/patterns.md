@@ -9,7 +9,7 @@ Rhythms, melodies and chords can be written as text. The syntax is that of the p
 ```harp
 bpm = 110
 steps = 4
-kick = drumsynth(melody([drum("kick")], pattern("x..x ..x. x... ..x.")), kit: "909")
+kick = drumSynth(melody([drum("kick")], pattern("x..x ..x. x... ..x.")), kit: "909")
 out = kick.gain(0.5)
 ```
 
@@ -42,7 +42,7 @@ Plain steps and rests give a rhythm of booleans, like every other rhythm of harp
 | `C3*2`, `C3?25`, `C3%2/4`, `C3!` | as in a pattern. `%` conditions play the text as many times as they need (`passes:`) |
 | `@1 @2 @3 @4` | the root, the next tone, the fifth, the seventh of the chord of that moment; `@-1` the tone below the root, `@b` the bass, `@c` the whole chord. `'` after one an octave up, `,` an octave down |
 
-The chords come from `chords: "Am F C G"`, a bar each (`barsteps:`, 16). A figure written once follows them:
+The chords come from `chords: "Am F C G"`, a bar each (`barSteps:`, 16). A figure written once follows them:
 
 ```harp
 bpm = 100

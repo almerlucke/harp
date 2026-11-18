@@ -22,7 +22,7 @@ The sound is stereo. A note that comes while all the voices are busy takes over 
 | `shaper` | waveshaping and phase distortion: cz-like leads, fm basses, pads |
 | `organ` | a tonewheel organ: drawbars, percussion, vibrato, a Leslie speaker |
 | `dx` | FM in the way of the Yamaha DX7 and TX81Z: electric pianos, bells, brass, and the patches of a DX7 SysEx file |
-| `drumsynth` | drums that are made, not played from recordings: kits of 808, 909, electro, trap, industrial |
+| `drumSynth` | drums that are made, not played from recordings: kits of 808, 909, electro, trap, industrial |
 | `grains`, `wavetable` | made from a sound or a table, below |
 
 `preset:` is the name of a preset in snake case: the function of psalm without `Preset` (`GrandPreset` is `"grand"`, `ChurchBell` is `"church_bell"`). The names are in [Presets](presets.md); `harp presets modal` lists one synth's.
@@ -58,33 +58,33 @@ For a sound of your own on every note (an `fn` with oscillators, filters and env
 
 Synths that play recordings (`sampler`, `streamer`) are in [Recordings](recordings.md). With these, every synth of psalm is in harp.
 
-## Organ, dx and drumsynth
+## Organ, dx and drumSynth
 
 **`organ(notes, preset: "jazz")`** is one instrument, not a set of voices: every note is a key of it (a chord is several keys, a note is held for its length), and the keys share its wheels, as on the real one. The preset is a registration; `drawbars: "888000000"` is one written as organists do, a digit from 0 to 8 for each of the nine drawbars; `leslie` (0 to 1) is how much rotary speaker there is and `speed` how fast it turns. There is no `voices`.
 
 **`dx(notes, preset: "e_piano", voices: 8)`** is FM: operators that modulate each other. Besides its own patches, it reads the patches of a DX7: `dx(notes, file: "rom1a.syx", patch: 10)` plays patch 10 (from 0) of a SysEx bank, and `harp check` says the name of it.
 
-**`drumsynth(notes, kit: "808")`** plays drums by their General MIDI key: a note is a drum. `drum("kick")` gives the key by name, so a pattern is written with names:
+**`drumSynth(notes, kit: "808")`** plays drums by their General MIDI key: a note is a drum. `drum("kick")` gives the key by name, so a pattern is written with names:
 
 ```harp
 bpm = 100
 steps = 4
-kick = drumsynth(melody([drum("kick")], pattern("x..x..x. x...x..."), velocity: 1, length: 1), kit: "trap")
-hats = drumsynth(melody([drum("hat")], every(2), velocity: 0.5, length: 1), kit: "trap")
+kick = drumSynth(melody([drum("kick")], pattern("x..x..x. x...x..."), velocity: 1, length: 1), kit: "trap")
+hats = drumSynth(melody([drum("hat")], every(2), velocity: 0.5, length: 1), kit: "trap")
 out = (kick + hats).gain(0.5)
 ```
 
-The voices of one `drumsynth` are made together, so that a closed hat stops an open one. A kit has all the sounds; the names for `drum(...)`: `kick` (35), `rim`, `snare`, `clap`, `tomLow`, `tomMid`, `tomHigh`, `hat` (42), `open` (46), `crash`, `ride`, `rideBell`, `tambourine`, `cowbell`, `shaker`, `bongoHigh`, `bongoLow`, `congaMute`, `congaHigh`, `congaLow`, `timbaleHigh`, `timbaleLow`, `agogoHigh`, `agogoLow`, `clave`, `woodblockHigh`, `woodblockLow`, `triangleMute`, `triangle`. For several drums at once, use `chords` (a kick and a hat on the same step) or one `drumsynth` for each.
+The voices of one `drumSynth` are made together, so that a closed hat stops an open one. A kit has all the sounds; the names for `drum(...)`: `kick` (35), `rim`, `snare`, `clap`, `tomLow`, `tomMid`, `tomHigh`, `hat` (42), `open` (46), `crash`, `ride`, `rideBell`, `tambourine`, `cowbell`, `shaker`, `bongoHigh`, `bongoLow`, `congaMute`, `congaHigh`, `congaLow`, `timbaleHigh`, `timbaleLow`, `agogoHigh`, `agogoLow`, `clave`, `woodblockHigh`, `woodblockLow`, `triangleMute`, `triangle`. For several drums at once, use `chords` (a kick and a hat on the same step) or one `drumSynth` for each.
 
 ## Made from a sound
 
 Two synths take a sound and make the instrument of it.
 
-**`grains(notes, file, root: 60, preset: "choir_pad")`** cuts a recording into short grains; a note is a stream of them at its pitch. `root` is the note at which the recording is at its own pitch. A preset sets the character (`frozen_drone` holds one moment, `shimmer`, `glass_keys`, `pluck`, `stutter`, `texture`); `position` (0 to 1, where in the recording), `scan` (how fast that moves: 0 holds, 1 is the original speed), `spray`, `density`, `size` (a grain, in ms) and `pitchspread` change what the preset set.
+**`grains(notes, file, root: 60, preset: "choir_pad")`** cuts a recording into short grains; a note is a stream of them at its pitch. `root` is the note at which the recording is at its own pitch. A preset sets the character (`frozen_drone` holds one moment, `shimmer`, `glass_keys`, `pluck`, `stutter`, `texture`); `position` (0 to 1, where in the recording), `scan` (how fast that moves: 0 holds, 1 is the original speed), `spray`, `density`, `size` (a grain, in ms) and `pitchSpread` change what the preset set.
 
 **`wavetable(notes, table: "basic", preset: "pad")`** morphs through the frames of a table, with unison, a sub oscillator and a filter. The table is a sound file of single cycles (`size:` samples a cycle, 2048 is usual) or one that psalm makes: `sync`, `fm`, `fold`, `pwm`, `vowels`, `drawbars`, `filter` and more (`frames:` of them, `amount:` for the one number of the table: the sync ratio, the fm index, the pulse width; the list is in [the reference](reference.md)). `position` is where in the table.
 
-**Moving wavetables.** `position`, `cutoff` and `resonance` can be a signal instead of a number: it moves the table, the filter and its resonance while the notes sound, a new value every 1.5 ms. `warp` (bends the cycle; `warpmode: "sync"` and others say how), `detune`, `spread` (the width of the unison) and `sub` are signals from 0 to 1 that set how much of the preset's own setting there is (up to four of these can be signals). Any signal does: a slow `lfo(0.05).range(0, 1)`, an `env`, or a generator through `seq`: `seq(remap(chaos("lorenz"), -20, 20, 0.1, 0.9))` has the table follow the Lorenz attractor.
+**Moving wavetables.** `position`, `cutoff` and `resonance` can be a signal instead of a number: it moves the table, the filter and its resonance while the notes sound, a new value every 1.5 ms. `warp` (bends the cycle; `warpMode: "sync"` and others say how), `detune`, `spread` (the width of the unison) and `sub` are signals from 0 to 1 that set how much of the preset's own setting there is (up to four of these can be signals). Any signal does: a slow `lfo(0.05).range(0, 1)`, an `env`, or a generator through `seq`: `seq(remap(chaos("lorenz"), -20, 20, 0.1, 0.9))` has the table follow the Lorenz attractor.
 
 ```harp
 notes = melody(degrees(a3, minor, [0 2 4 7]), every(8), length: 7)

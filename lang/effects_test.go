@@ -8,7 +8,7 @@ import (
 )
 
 func TestEffectsOfPsalmAreFunctions(t *testing.T) {
-	for _, name := range []string{"chorus", "flanger", "phaser", "tremolo", "rotary", "widener", "ringmod", "crusher", "saturate", "tape", "pingpong",
+	for _, name := range []string{"chorus", "flanger", "phaser", "tremolo", "rotary", "widener", "ringMod", "crusher", "saturate", "tape", "pingPong",
 		"shimmer", "freeverb", "granulator", "compressor", "gate", "transient", "eq", "vocoder"} {
 		f, ok := funcs[name]
 		if !ok {
@@ -127,8 +127,8 @@ func synthCall(synth, preset string) string {
 	switch synth {
 	case "organ":
 		return fmt.Sprintf("organ(notes, preset: %q)", preset)
-	case "drumsynth":
-		return fmt.Sprintf("drumsynth(notes, kit: %q, voices: 2)", preset)
+	case "drumSynth":
+		return fmt.Sprintf("drumSynth(notes, kit: %q, voices: 2)", preset)
 	case "grains":
 		return fmt.Sprintf("grains(notes, preset: %q, voices: 2, file: \"tone.wav\")", preset)
 	}

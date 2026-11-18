@@ -124,18 +124,18 @@ func TestALiveEditWithAnotherPhraseStartsItAgain(t *testing.T) {
 }
 
 func TestALiveEditKeepsTheStateOfTheOscillatorsAndFilters(t *testing.T) {
-	a := "bpm = 120\nsteps = 4\nout = saw(110).lowpass(cutoff: 800, res: 0.3).gain(0.5)"
+	a := "bpm = 120\nsteps = 4\nout = saw(110).lowPass(cutoff: 800, res: 0.3).gain(0.5)"
 	l := startLive(t, a)
 	l.play(3000)
 	// another cutoff and gain: the same nodes
-	l.swapTo("bpm = 120\nsteps = 4\nout = saw(110).lowpass(cutoff: 1200, res: 0.3).gain(0.25)")
+	l.swapTo("bpm = 120\nsteps = 4\nout = saw(110).lowPass(cutoff: 1200, res: 0.3).gain(0.25)")
 	kept, fresh := l.r.LastSwap()
 	if kept < 2 || fresh != 0 {
 		t.Errorf("kept %d, new %d: the saw and the lowpass should both be kept", kept, fresh)
 	}
 	l.play(3000) // a change takes over before the next one
 	// another oscillator: it is new, and the filter after it is the same filter, with its memory, given another input
-	l.swapTo("bpm = 120\nsteps = 4\nout = square(110).lowpass(cutoff: 1200, res: 0.3).gain(0.25)")
+	l.swapTo("bpm = 120\nsteps = 4\nout = square(110).lowPass(cutoff: 1200, res: 0.3).gain(0.25)")
 	kept, fresh = l.r.LastSwap()
 	if kept != 1 || fresh != 1 {
 		t.Errorf("kept %d, new %d after another oscillator: the filter is kept, the oscillator is new (%v)", kept, fresh, l.r.LastRestarted())

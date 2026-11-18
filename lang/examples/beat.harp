@@ -1,0 +1,85 @@
+// A trap and breakbeat groove with everything the pattern text has: rolls, triplets, stutters, chances, fills that only play at the end of a section,
+// hats that roll, a snare that rushes, an 808 that follows the chords, a groove and lanes that make the shakers breathe.
+//
+//   harp check examples/beat.harp
+//   harp play examples/beat.harp
+//
+// 140 bpm in half time: the snare is on the third beat. Edit it while it plays (harp play -watch): the patterns (x is a hit, x3 a roll, [x x x] a
+// triplet, ?40 a chance, %fill only in the last bar of a section), the song, the groove, the lanes.
+
+bpm = 140
+steps = 4
+seed = 12
+
+// ---- the chords, a bar each, for the bass, the pad and the stabs: A minor with a ninth, F major seventh, G with a sixth
+prog = "Am9 Am9 Fmaj7 G6"
+
+// ---- the form: 36 bars
+form = song("Intro 4, Groove 8, Drop 8, Break 4, Drop 8, Outro 4")
+
+// ---- the kick: a short one for the punch (it goes on the hits of the 808 below); sparser in the groove, syncopated in the drop; none in the break
+kick_groove = "x... .... ..x. .... | x... .... ..x. ..x."
+kick_drop = "x..x ..x. ..x. ...x | x..x ..x. ...x x..."
+kicks = bySection(form, ["Groove, Outro", "Drop"], [pattern(kick_groove), pattern(kick_drop)], restart: true)
+kick = drumSynth(melody([drum("kick")], kicks, velocity: [1 0.8 0.9 0.75]), kit: "909", voices: 2)
+  .gain(0.5 * during(form, "Groove, Drop, Outro"))
+
+// ---- the 808: the root of each chord (Am Am F G) on the same hits of the drop, long (the number after * is how many steps), a sub bass
+subs = wavetable(part("@b*3 @b*3 @b*4 @b*5 @b | @b*3 @b*3 @b*4 @b*5 @b | @b*3 @b*3 @b*4 @b*5 @b | @b*3 @b*3 @b*4 @b*5 @b",
+    chords: prog, key: "A minor", bass: 33, velocity: 0.9, legato: 1),
+  table: "basic", preset: "sub_bass", voices: 2)
+  .gain(0.55 * during(form, "Drop", glide: 1))
+
+// ---- the snare: half time, on the third beat; in the last bar of every section it rushes (%fill: a roll of three, a triplet, a roll) instead
+snare = drumSynth(melody([drum("snare")], pattern("........ x....... | ........ x... x%fill x3%fill [x x x]%fill x3%fill", song: form), velocity: [1 0.85]), kit: "trap", voices: 3)
+  .gain(0.5 * during(form, "Groove, Drop, Outro"))
+// a clap with it, and ghost notes of the snare, by chance, so no bar is the same
+clap = drumSynth(melody([drum("clap")], pattern("........ x....... | ........ x.......") , velocity: 0.9), kit: "trap", voices: 2)
+  .gain(1.4 * during(form, "Drop"))
+ghosts = drumSynth(melody([drum("snare")], pattern("..x?40 ...x?60 ..x?30 .... | ...x?50 ..x?30 .x?70 .x?40 .."), velocity: [0.3 0.4 0.25]), kit: "trap", voices: 2)
+  .gain(1.5 * during(form, "Groove, Drop"))
+
+// ---- the hats: eighths with a few sixteenths in the groove; in the drop they roll (x3: three hits in a step, [x x x]: a triplet) and the roll
+// gets faster at the end of four bars; velocities that go round against the pattern
+hats_groove = drumSynth(melody([drum("hat")], pattern("x x x?60 x | x x x x?70 | x x x?60 x | x x x x?70"), velocity: [0.8 0.45 0.6 0.45]), kit: "trap", voices: 2)
+  .gain(1.6 * during(form, "Intro, Groove, Outro"))
+hats_drop = drumSynth(melody([drum("hat") drum("hat") drum("hat") drum("open")], pattern("x x?80 x x | x x x [x x x] | x x?70 x x | x x x3 x | x x x x?60 | x x[x x] x x | x x x x | x3 x3 [x x x] x3"), velocity: [0.85 0.4 0.6 0.4 0.7 0.35]), kit: "trap", voices: 4)
+  .gain(1.6 * during(form, "Drop"))
+
+// ---- a tom that stutters: the pitches go up and down and each is played twice; a rushing tom fill in the last bar of a section
+toms_notes = stutter(order([45 50 52 47], "up and down"), 2)
+fn tom(gate, note) {
+  f = hz(note)
+  sine(f * (1 + 0.8 * env(gate, [1 0], [0.08], -4))) * env(gate, [0 1 0], [0.002 0.3], -4) * 0.5
+}
+toms = play(tom, rhythm: pattern("................ | ................ | ................ | ............ x%fill x3%fill [x x x]%fill", song: form), legato: 0.4,
+  fields: [toms_notes], swing: 0.1)
+  .dup().gain(1.2 * during(form, "Groove, Drop, Break"))
+
+// ---- shakers that breathe: a groove (the feel of dilla) and lanes of 3 and 5 steps against the bar of 16, so that the chances and the loudness
+// do not come back together for 15 steps
+fn shake(gate) { noise().highPass(cutoff: 6500, res: 0.2) * env(gate, [0 1 0], [0.005 0.05], -3) * 0.35 }
+shaker = play(shake, rhythm: pattern("x x x x"), legato: 0.3, groove: "dilla", humanize: 0.02,
+  lanes: "prob: 100 60 80; vel: 100 70 50 80 60")
+  .dup().gain(1.4 * during(form, "Groove, Drop, Break"))
+
+// ---- the pad: a table of random harmonics (it is made from the seed, so it is a sound that is only this piece's) that moves: its position, its filter (it
+// follows the form: shut in the intro, open in the drop, closing in the break), its width and its detune. The chords have a ninth and are led
+// smoothly from one to the next
+pad = wavetable(chords(changes(prog, key: "A minor", lowest: 45, lead: true), every(16), velocity: 0.6, length: 15),
+  table: "random", amount: 21, preset: "evolving_pad", voices: 6,
+  position: lfo(0.0137).range(0.1, 0.9),
+  cutoff: curve(form, "Intro: 500 -> 1400 smooth, Groove: 1400 -> 2400, Drop: 3400, Break: 3400 -> 600 smooth, Outro: 1800 -> 300"),
+  spread: lfo(0.021).range(0.4, 1), detune: lfo(0.013).range(0.15, 0.7))
+  .gain(0.17 * curve(form, "Intro: 0.4 -> 1 smooth, Groove: 0.8, Drop: 1, Break: 1, Outro: 1 -> 0 smooth"))
+
+// ---- the stabs: the chord of the bar (@c), on the grid of the kick: on four of its hits (steps 3 and 6, and 11 of the first bar and of the second) and
+// as an answer in the gaps (14, and 15 of the second bar), the last as a roll of two: a stutter. A sync table that opens on each stab
+stabs = wavetable(part(". . . @c . . @c . . . . @c . . @c^2 . | . . . @c . . @c . . . . @c . . . @c^2 | . . . @c . . @c . . . . @c . . @c^2 . | . . . @c . . @c . . . . @c . . . @c^2",
+    chords: prog, key: "A minor", register: 57, velocity: 0.75, legato: 0.45),
+  table: "sync", preset: "stab", voices: 8, cutoff: lfo(0.11).range(1800, 5200))
+  .gain(0.18 * during(form, "Drop"))
+  .echo(max: 1, time: [0.321, 0.43], feedback: 0.3, mix: 0.2)
+
+drums = kick + snare + clap + ghosts + hats_groove + hats_drop + toms + shaker
+out = (drums + subs + pad + stabs).reverb(mix: 0.08, decay: 1.8).gain(0.55)

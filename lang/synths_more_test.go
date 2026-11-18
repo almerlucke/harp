@@ -109,7 +109,7 @@ func TestTheDrumSynthPlaysDrumsByKey(t *testing.T) {
 		return n
 	}
 	hit := func(name string) []float64 {
-		return renderPatch(t, "bpm = 120\nout = drumsynth(melody([drum(\""+name+"\")], every(64), velocity: 1, length: 1), kit: \"808\", voices: 4)\n", 1)[0]
+		return renderPatch(t, "bpm = 120\nout = drumSynth(melody([drum(\""+name+"\")], every(64), velocity: 1, length: 1), kit: \"808\", voices: 4)\n", 1)[0]
 	}
 	kick, hat := hit("kick"), hit("hat")
 	if energy(kick[100:4000]) < 1e-6 || energy(hat[100:4000]) < 1e-8 {
@@ -119,8 +119,8 @@ func TestTheDrumSynthPlaysDrumsByKey(t *testing.T) {
 		t.Errorf("a hat is not higher than a kick: %d and %d crossings", zero(hat[200:3700]), zero(kick[200:3700]))
 	}
 	// a closed hat stops an open one: an open hat on step 0 and a closed one on step 1 (a step is 0.125 s at 120 bpm and 4 steps a beat)
-	open := renderPatch(t, "bpm = 120\nout = drumsynth(melody([drum(\"open\")], every(64), velocity: 1, length: 1), voices: 4)\n", 1.5)[0]
-	stopped := renderPatch(t, "bpm = 120\nout = drumsynth(melody([drum(\"open\") drum(\"hat\")], pattern(\"xx..............\"), velocity: 1, length: 1), voices: 4)\n", 1.5)[0]
+	open := renderPatch(t, "bpm = 120\nout = drumSynth(melody([drum(\"open\")], every(64), velocity: 1, length: 1), voices: 4)\n", 1.5)[0]
+	stopped := renderPatch(t, "bpm = 120\nout = drumSynth(melody([drum(\"open\") drum(\"hat\")], pattern(\"xx..............\"), velocity: 1, length: 1), voices: 4)\n", 1.5)[0]
 	tail := func(x []float64) float64 { return energy(x[int(0.22*44100):int(0.4*44100)]) } // after the closed hat has died away, where the open one still sounds
 	if tail(open) < 1e-7 {
 		t.Fatalf("the open hat does not sound in the window: %v", tail(open))
@@ -129,8 +129,8 @@ func TestTheDrumSynthPlaysDrumsByKey(t *testing.T) {
 		t.Errorf("the closed hat did not stop the open one: %v against %v", tail(stopped), tail(open))
 	}
 	for src, want := range map[string]string{
-		`drumsynth(notes, kit: "909x")`:  "no kit",
-		`drumsynth(notes, kit: "tr808")`: "no kit",
+		`drumSynth(notes, kit: "909x")`:  "no kit",
+		`drumSynth(notes, kit: "tr808")`: "no kit",
 		`drum("kik")`:                    "did you mean kick",
 	} {
 		_, err := Compile("notes = melody([36], every(4))\nx = " + src + "\nout = sine(1).dup()\n")

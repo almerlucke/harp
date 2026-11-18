@@ -24,7 +24,7 @@ voice  = notes(melody, euclid(16, 7), length: 0.6)
 beat   = 60 / bpm
 
 lead = saw([voice.pitch * 0.997, voice.pitch * 1.023])
-  .lowpass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)
+  .lowPass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)
   .gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
   .spread(width: 0.6)
   .gain(0.4)
@@ -141,7 +141,7 @@ func TestSignalsAndChannels(t *testing.T) {
 		{"out = saw([220, 330, 440])", 3},
 		{"out = saw(220) * [1 0.5]", 2},
 		{"out = [1 2] + [3 4]", 2},
-		{"out = sine([220 330]).lowpass(800)", 2},
+		{"out = sine([220 330]).lowPass(800)", 2},
 		{"out = sine([220 330]).spread()", 2},
 		{"out = saw([220 330 440]).spread(width: 0.5)", 2},
 		{"out = sine(220) + sine(330) * 0.5 - 0.1", 1},
@@ -161,9 +161,9 @@ func TestSignalsAndChannels(t *testing.T) {
 }
 
 func TestMethodsAndFunctionsAreTheSame(t *testing.T) {
-	a := mustBuild(t, "out = saw(220).lowpass(800, res: 0.3).gain(0.5)")
-	b := mustBuild(t, "out = gain(lowpass(saw(220), 800, res: 0.3), 0.5)")
-	c := mustBuild(t, "out = gain(x: lowpass(x: saw(freq: 220), cutoff: 800, res: 0.3), amount: 0.5)")
+	a := mustBuild(t, "out = saw(220).lowPass(800, res: 0.3).gain(0.5)")
+	b := mustBuild(t, "out = gain(lowPass(saw(220), 800, res: 0.3), 0.5)")
+	c := mustBuild(t, "out = gain(x: lowPass(x: saw(freq: 220), cutoff: 800, res: 0.3), amount: 0.5)")
 	_, ra := dsl.Patch{}.Render(a.Out, 0.1)
 	for _, o := range []*Patch{b, c} {
 		_, r := dsl.Patch{}.Render(o.Out, 0.1)
@@ -199,13 +199,13 @@ func TestErrors(t *testing.T) {
 		at        Pos
 		mentions  []string
 	}{
-		{"unknown function", "out = lowpas(saw(220), 800)", Pos{1, 7}, []string{"no function lowpas", "did you mean lowpass?"}},
-		{"unknown method", "out = saw(220).lowpas(800)", Pos{1, 15}, []string{"no function lowpas", "did you mean lowpass?"}},
-		{"unknown parameter", "out = lowpass(saw(220), cutof: 800)", Pos{1, 25}, []string{"no parameter cutof", "did you mean cutoff?", "lowpass(x: signal"}},
+		{"unknown function", "out = lowpas(saw(220), 800)", Pos{1, 7}, []string{"no function lowpas", "did you mean lowPass?"}},
+		{"unknown method", "out = saw(220).lowpas(800)", Pos{1, 15}, []string{"no function lowpas", "did you mean lowPass?"}},
+		{"unknown parameter", "out = lowPass(saw(220), cutof: 800)", Pos{1, 25}, []string{"no parameter cutof", "did you mean cutoff?", "lowPass(x: signal"}},
 		{"missing argument", "out = saw()", Pos{1, 7}, []string{"saw needs freq"}},
 		{"too many arguments", "out = saw(220, 330)", Pos{1, 16}, []string{"saw takes 1 arguments"}},
-		{"given twice", "out = lowpass(saw(220), 800, cutoff: 900)", Pos{1, 30}, []string{"cutoff is given twice"}},
-		{"positional after named", "out = lowpass(saw(220), cutoff: 800, 0.5)", Pos{1, 38}, []string{"positional argument can't come after a named one"}},
+		{"given twice", "out = lowPass(saw(220), 800, cutoff: 900)", Pos{1, 30}, []string{"cutoff is given twice"}},
+		{"positional after named", "out = lowPass(saw(220), cutoff: 800, 0.5)", Pos{1, 38}, []string{"positional argument can't come after a named one"}},
 		{"undefined name", "melody = [1 2]\nout = melodi", Pos{2, 7}, []string{"melodi is not defined", "did you mean melody?"}},
 		{"function as a value", "out = saw", Pos{1, 7}, []string{"saw is a function", "saw(...)"}},
 		{"redefined", "x = 1\nx = 2\nout = x", Pos{2, 1}, []string{"x is already defined, at 1:1"}},
@@ -260,12 +260,12 @@ func TestErrors(t *testing.T) {
 
 func TestFunctionsAreListed(t *testing.T) {
 	list := Functions()
-	for _, name := range []string{"saw", "lowpass", "echo", "reverb", "subtractive", "supersaw", "euclid", "chords", "notes", "adsr"} {
+	for _, name := range []string{"saw", "lowPass", "echo", "reverb", "subtractive", "supersaw", "euclid", "chords", "notes", "adsr"} {
 		if !strings.Contains(list, name+"(") {
 			t.Errorf("%s is not listed", name)
 		}
 	}
-	if !strings.Contains(list, "lowpass(x: signal, cutoff: signal, res: signal = 0.5) -> signal") {
+	if !strings.Contains(list, "lowPass(x: signal, cutoff: signal, res: signal = 0.5) -> signal") {
 		t.Errorf("the signature of lowpass:\n%s", list)
 	}
 	if len(subtractivePresets) != 88 || len(supersawPresets) != 37 {
@@ -458,7 +458,7 @@ func TestIfIsLazy(t *testing.T) {
 }
 
 func TestBuildTimeRandomness(t *testing.T) {
-	src := "seed = %d\nout = [rand(0, 1), exprand(1, 100), choose([10, 20, 30]), if coin(0.5) { 1 } else { 0 }].mix()"
+	src := "seed = %d\nout = [rand(0, 1), expRand(1, 100), choose([10, 20, 30]), if coin(0.5) { 1 } else { 0 }].mix()"
 	same := func(a, b int) bool {
 		return value(t, strings.Replace(src, "%d", string(rune('0'+a)), 1)) == value(t, strings.Replace(src, "%d", string(rune('0'+b)), 1))
 	}
@@ -470,10 +470,10 @@ func TestBuildTimeRandomness(t *testing.T) {
 	}
 	// the ranges
 	for seed := 1; seed < 40; seed++ {
-		p := mustBuild(t, "seed = "+string(rune('0'+seed%10))+"\nfn r(x) { exprand(2, 8) }\nout = repeat(r, 5, 0)")
+		p := mustBuild(t, "seed = "+string(rune('0'+seed%10))+"\nfn r(x) { expRand(2, 8) }\nout = repeat(r, 5, 0)")
 		_, ch := dsl.Patch{SampleRate: 100}.Render(p.Out, 0.1)
 		if v := ch[0][3]; v < 2 || v > 8 {
-			t.Errorf("exprand(2, 8) gave %v", v)
+			t.Errorf("expRand(2, 8) gave %v", v)
 		}
 	}
 }
@@ -496,7 +496,7 @@ func TestFunctionErrors(t *testing.T) {
 		{"fn two(a, b) { a }\nout = repeat(two, 3, 0)", "one argument"},
 		{"out = repeat(sine, 3, 0)", ""},
 		{"out = choose([])", "empty"},
-		{"out = exprand(0, 5)", "above 0"},
+		{"out = expRand(0, 5)", "above 0"},
 		{"fn sine(x) { x }\nout = sine(2)", ""}, // a function of the program may have the name of a function of the language
 	} {
 		_, err := build(t, c.src)
@@ -516,7 +516,7 @@ func TestFunctionErrors(t *testing.T) {
 	}
 	// a mistake inside a function is at its own line
 	_, err := build(t, "fn f(x) {\n  y = lowpas(x, 100)\n  y\n}\nout = f(sine(1))")
-	if err == nil || !strings.Contains(err.Error(), "2:") || !strings.Contains(err.Error(), "did you mean lowpass") {
+	if err == nil || !strings.Contains(err.Error(), "2:") || !strings.Contains(err.Error(), "did you mean lowPass") {
 		t.Errorf("a mistake inside a function: %v", err)
 	}
 }

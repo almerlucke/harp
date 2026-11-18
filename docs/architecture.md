@@ -36,7 +36,7 @@ Synths are voices of psalm played by one host (`blocks/synth.go`: notes from a l
 
 ## SuperCollider ports
 
-`dsl/sc*.go` are ports of SuperCollider's unit generators, written from its source, so a translation can match it wave for wave (`scsaw`, filters, delays, `EnvGen`, `FreeVerb2`). They read their parameters once per 64-sample block, as SuperCollider does. `lang/sc` runs `sclang` and `scsynth` offline; `lang/compare` is the comparison.
+`dsl/sc*.go` are ports of SuperCollider's unit generators, written from its source, so a translation can match it wave for wave (`scSaw`, filters, delays, `EnvGen`, `FreeVerb2`). They read their parameters once per 64-sample block, as SuperCollider does. `lang/sc` runs `sclang` and `scsynth` offline; `lang/compare` is the comparison.
 
 ## Tests
 

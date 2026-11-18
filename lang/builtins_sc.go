@@ -73,22 +73,22 @@ func init() {
 			}
 			return sigV(dsl.EnvGen(a.Sig("gate"), spec, a.value("control").V.(bool))), nil
 		}})
-	add(&Func{Name: "scsawsync", Result: TSig, Doc: "scsaw that starts again from phase 0 when sync rises above 0, as a new synth of SuperCollider does for every note",
+	add(&Func{Name: "scSawSync", Result: TSig, Doc: "scSaw that starts again from phase 0 when sync rises above 0, as a new synth of SuperCollider does for every note",
 		Params: []Param{{"freq", TSig, nil}, {"sync", TSig, nil}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCSawSync(a.Sig("freq"), a.Sig("sync"))), nil }})
-	add(&Func{Name: "scsin", Result: TSig, Doc: "SuperCollider's SinOsc as it works it out: a table of 8192 values, a phase that is a whole number (so the frequency is a little off), the start phase in radians",
+	add(&Func{Name: "scSin", Result: TSig, Doc: "SuperCollider's SinOsc as it works it out: a table of 8192 values, a phase that is a whole number (so the frequency is a little off), the start phase in radians",
 		Params: []Param{{"freq", TSig, nil}, {"phase", TNum, def(0)}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCSinOsc(a.Sig("freq"), a.Num("phase"))), nil }})
-	add(&Func{Name: "sclpf", Result: TSig, Doc: "SuperCollider's LPF: a second order lowpass, cutoff in Hz",
+	add(&Func{Name: "scLpf", Result: TSig, Doc: "SuperCollider's LPF: a second order lowpass, cutoff in Hz",
 		Params: []Param{{"x", TSig, nil}, {"freq", TSig, nil}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCLPF(a.Sig("x"), a.Sig("freq"))), nil }})
-	add(&Func{Name: "schpf", Result: TSig, Doc: "SuperCollider's HPF: a second order highpass, cutoff in Hz",
+	add(&Func{Name: "scHpf", Result: TSig, Doc: "SuperCollider's HPF: a second order highpass, cutoff in Hz",
 		Params: []Param{{"x", TSig, nil}, {"freq", TSig, nil}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCHPF(a.Sig("x"), a.Sig("freq"))), nil }})
-	add(&Func{Name: "scrlpf", Result: TSig, Doc: "SuperCollider's RLPF: a resonant lowpass, rq the reciprocal of Q (1 is flat, 0.5 resonates)",
+	add(&Func{Name: "scRlpf", Result: TSig, Doc: "SuperCollider's RLPF: a resonant lowpass, rq the reciprocal of Q (1 is flat, 0.5 resonates)",
 		Params: []Param{{"x", TSig, nil}, {"freq", TSig, nil}, {"rq", TSig, def(1)}},
 		Call:   func(a Args) (Value, error) { return sigV(dsl.SCRLPF(a.Sig("x"), a.Sig("freq"), a.Sig("rq"))), nil }})
-	add(&Func{Name: "scpeq", Result: TSig, Doc: "SuperCollider's BPeakEQ: boosts or cuts db decibel around freq, rq the bandwidth as a part of freq",
+	add(&Func{Name: "scPeq", Result: TSig, Doc: "SuperCollider's BPeakEQ: boosts or cuts db decibel around freq, rq the bandwidth as a part of freq",
 		Params: []Param{{"x", TSig, nil}, {"freq", TSig, nil}, {"rq", TSig, def(1)}, {"db", TSig, def(0)}},
 		Call: func(a Args) (Value, error) {
 			return sigV(dsl.SCBPeakEQ(a.Sig("x"), a.Sig("freq"), a.Sig("rq"), a.Sig("db"))), nil
@@ -103,9 +103,9 @@ func init() {
 				return sigV(f(a.Sig("x"), a.Num("max"), a.Sig("time"))), nil
 			}})
 	}
-	delay("scdelayn", "SuperCollider's DelayN: a delay of time seconds (up to max), cut to whole samples",
+	delay("scDelayN", "SuperCollider's DelayN: a delay of time seconds (up to max), cut to whole samples",
 		func(x dsl.Sig, m float64, t dsl.Sig) dsl.Sig { return dsl.SCDelayN(x, m, t) })
-	delay("scdelayc", "SuperCollider's DelayC: a delay of time seconds (up to max), with cubic interpolation, for a time that moves",
+	delay("scDelayC", "SuperCollider's DelayC: a delay of time seconds (up to max), with cubic interpolation, for a time that moves",
 		func(x dsl.Sig, m float64, t dsl.Sig) dsl.Sig { return dsl.SCDelayC(x, m, t) })
 	one := func(name, doc string, f func(dsl.Sig) dsl.Sig) {
 		add(&Func{Name: name, Result: TSig, Doc: doc, Params: []Param{{"x", TSig, nil}},
@@ -114,8 +114,8 @@ func init() {
 	one("tanh", "the hyperbolic tangent: a soft clip between -1 and 1", dsl.Tanh)
 	one("atan", "the arc tangent: a soft clip between -pi/2 and pi/2", dsl.Atan)
 	one("sign", "-1, 0 or 1: the sign", dsl.Sign)
-	one("midiratio", "the ratio of frequencies that many semitones apart: 12 is 2", dsl.MidiRatio)
-	add(&Func{Name: "dbamp", Result: TNum, Doc: "decibels as an amplitude: -6 is 0.5 (about), 0 is 1",
+	one("midiRatio", "the ratio of frequencies that many semitones apart: 12 is 2", dsl.MidiRatio)
+	add(&Func{Name: "dbAmp", Result: TNum, Doc: "decibels as an amplitude: -6 is 0.5 (about), 0 is 1",
 		Params: []Param{{"db", TNum, nil}},
 		Call:   func(a Args) (Value, error) { return numV(math.Pow(10, a.Num("db")/20)), nil }})
 	add(&Func{Name: "freeverb2", Result: TSig, Doc: "SuperCollider's FreeVerb2: the reverb of Freeverb for a signal of two channels; mix, room and damp from 0 to 1",

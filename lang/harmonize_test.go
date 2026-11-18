@@ -79,7 +79,7 @@ func TestHarmonizeIsAScoreForSynthsAndSaysWhatItMade(t *testing.T) {
 	if info := strings.Join(p.Info, "\n"); !strings.Contains(info, "I V I in C major") {
 		t.Errorf("harp check says: %q", info)
 	}
-	ch := renderPatch(t, "bpm = 120\nx = harmonize(60, degrees: [0 3 4 0], chordsteps: 8)\nout = subtractive(x, preset: \"pad\", voices: 8)\n", 3)
+	ch := renderPatch(t, "bpm = 120\nx = harmonize(60, degrees: [0 3 4 0], chordSteps: 8)\nout = subtractive(x, preset: \"pad\", voices: 8)\n", 3)
 	if e := energy(ch[0][4000:60000]); e < 1e-5 {
 		t.Errorf("silent: %v", e)
 	}
@@ -94,7 +94,7 @@ func TestMistakesInHarmonize(t *testing.T) {
 		`harmonize(60, cadence: "halt")`:        "did you mean half",
 		`harmonize(60, sevenths: 2)`:            "chance",
 		`harmonize(60, degrees: [0], voice: 7)`: "4 voices",
-		`harmonize(60, chordsteps: 0)`:          "chordsteps",
+		`harmonize(60, chordSteps: 0)`:          "chordSteps",
 	} {
 		_, err := Compile("seed = 1\nx = " + src + "\nout = sine(440).dup()\n")
 		if err == nil || !strings.Contains(err.Error(), want) {

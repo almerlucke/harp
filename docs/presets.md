@@ -2,7 +2,7 @@
 
 <!-- made by `harp presets -md`: do not edit by hand (a test says when it is out of date) -->
 
-A synth takes `preset: "name"`: `modal(notes, preset: "church_bell")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumsynth(notes, kit: "trap")`.
+A synth takes `preset: "name"`: `modal(notes, preset: "church_bell")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumSynth(notes, kit: "trap")`.
 
 ## subtractive (88)
 
@@ -44,7 +44,7 @@ ballad, ballpark, blues_grit, bright_solo, carnival, cathedral, chime, chorus_v1
 
 accordion, acid_bass, air_flute, alien_bubbles, banjo_twang, baroque_harpsi, bass, bell, bell_pad, bell_shimmer, brass, brass_section, bright_grand, celesta, chance_mallet, choir_pad, church_bell, church_organ, clarinet, clavinet, crystal_glock, drawbar_organ, dyno_keys, e_piano, even_abs_pad, evolving_pad, filter_pluck, flute, fm_bass, fm_lead, fm_organ, fm_piano, french_horn, fretless_bass, fretless_fm, funk_clav, gamelan_bell, glass_keys, glass_pad, glide_lead, glockenspiel, grand_piano, half_sine_organ, harp, harp_fm, harpsichord, hat_fm, hollow_reed, honky_tonk, horn_solo, ice_pad, kalimba, kick_fm, koto, koto_pluck, laser_zap, lead, log_saw_brass, mallet, metallic, music_box, music_box_fm, nasal_oboe, nylon_guitar, nylon_pick, oboe, organ, overdrive_guitar, pad, pan_flute, pan_pipes, percussive_organ, pipe_organ, pizzicato, pluck, pulse_clav, pure_sine, pwm_lead, reed_organ, riser_sweep, rubber_bass, saw_lead, saxophone, sforzando_brass, sitar, slap_bass, slap_fm, snare_fm, soft_brass, soft_piano, solo_trumpet, square_lead, steel_celesta, steel_drum, steel_guitar, strings, sub_bass, sweep_pad, sweep_strings, sync_lead, synth_bass, synth_brass, taiko, tenor_sax, thumb_kalimba, timpani, timpani_fm, tine_keys, tom_fm, trumpet, tube_chime, tubular_bells, upright_bass, velocity_fm, vibes_fm, vowel_ah, warm_pad, warm_strings, wheel_keys, wheel_pad, wind_gust, wood_bass, wood_block_fm, wood_clarinet, wood_marimba, woodblock, wurly_keys, xylophone
 
-## drumsynth (5)
+## drumSynth (5)
 
 808, 909, electro, industrial, trap
 

@@ -36,7 +36,7 @@ melody = degrees(a3, minor, mutate([0 2 4 7 4 2], swap: 0.4))
 voice  = notes(melody, euclid(16, 7), length: 0.6)
 
 out = saw(voice.pitch)
-  .lowpass(cutoff: lfo(0.2).range(400, 3000), res: 0.4)
+  .lowPass(cutoff: lfo(0.2).range(400, 3000), res: 0.4)
   .gain(adsr(0.005, 0.15, 0.4, 0.2).on(voice.gate))
   .gain(0.3)
   .dup()

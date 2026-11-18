@@ -6,9 +6,9 @@ psalm has a library of effects; harp hosts them as functions. They are made from
 |---|---|
 | `chorus` `flanger` `phaser` `tremolo` | modulation: copies that move, a sweeping delay or filter, a level or place that moves |
 | `rotary` | a rotary speaker, slow or fast |
-| `widener` `ringmod` | stereo width; ring modulation or frequency shift |
+| `widener` `ringMod` | stereo width; ring modulation or frequency shift |
 | `crusher` `saturate` `tape` | bit crushing; clipping, folding, tube; tape delay with wow and flutter |
-| `pingpong` `shimmer` `freeverb` | a delay that bounces; a reverb that goes up an octave; the Freeverb |
+| `pingPong` `shimmer` `freeverb` | a delay that bounces; a reverb that goes up an octave; the Freeverb |
 | `granulator` | the sound cut in grains, scattered, shifted, frozen |
 | `compressor` `gate` `transient` `eq` | dynamics and tone |
 | `vocoder` | the spectrum of one sound on another |
@@ -17,7 +17,7 @@ Each function's settings are in the [reference](reference.md#effects-of-psalm), 
 
 ```harp
 out = saw([110.0, 110.7])
-  .lowpass(cutoff: 900)
+  .lowPass(cutoff: 900)
   .chorus(rate: 0.5, depth: 4, mix: 0.4)
   .tape(time: 320, feedback: 0.4, mix: 0.3)
   .gain(0.2)
@@ -45,7 +45,7 @@ Settings you leave out keep psalm's defaults. A setting that is out of range is 
 `compressor` and `gate` listen to their input, or to another signal if you give `sidechain:`:
 
 ```harp
-bass = saw(55).lowpass(cutoff: 400).gain(0.3)
+bass = saw(55).lowPass(cutoff: 400).gain(0.3)
 kick = sine(60).gain(0.5) * pulses(every(4), length: 0.2)
 
 out = bass.compressor(threshold: -30, ratio: 12, attack: 2, release: 120, sidechain: kick) + kick.dup()

@@ -14,7 +14,7 @@ bright = [800 2400 1200 3600 1600]
 fn pluck(gate, note, cutoff) {
   freq = hz(note)
   tone = saw([freq * 0.997, freq * 1.003])
-  body = tone.lowpass(cutoff: cutoff, res: 0.4)
+  body = tone.lowPass(cutoff: cutoff, res: 0.4)
   body * env(gate, [0 1 0], [0.003 0.4], -4, release: 1) * 0.4
 }
 

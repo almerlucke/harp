@@ -405,6 +405,13 @@ func (e *evaluator) call(c *Call) (Value, error) {
 	if !ok {
 		f, ok = funcs[c.Name]
 	}
+	if !ok { // a name that was written in one word: it is the function that it is now called
+		if now, renamed := renamedFuncs[c.Name]; renamed {
+			if f, ok = funcs[now]; ok {
+				e.renamedNote(c.Name, now)
+			}
+		}
+	}
 	if !ok {
 		names := make([]string, 0, len(funcs)+len(e.fns))
 		for n := range funcs {
@@ -447,6 +454,14 @@ func (e *evaluator) call(c *Call) (Value, error) {
 				names[k] = p.Name
 				if p.Name == g.name {
 					i = k
+				}
+			}
+			if now, renamed := renamedParams[g.name]; i < 0 && renamed { // the old spelling of a parameter
+				for k, p := range f.Params {
+					if p.Name == now {
+						i = k
+						e.renamedNote(g.name, now)
+					}
 				}
 			}
 			if i < 0 {

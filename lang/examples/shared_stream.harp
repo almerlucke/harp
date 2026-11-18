@@ -13,7 +13,7 @@ stream = seq(degrees(a2, minor, mutate([0 2 4 7 9 7 4 2], swap: 0.3)))
 fn pluck(gate, note) {
   f = hz(note)
   tone = saw([f * 0.997, f * 1.004])
-  body = tone.lowpass(cutoff: 600 + 3000 * env(gate, [0 1 0], [0.003 0.3], -4), res: 0.2)
+  body = tone.lowPass(cutoff: 600 + 3000 * env(gate, [0 1 0], [0.003 0.3], -4), res: 0.2)
   body * env(gate, [0 1 0], [0.003 0.3], -4) * 0.25
 }
 
@@ -22,6 +22,6 @@ pitch = stream + 24
 notes = play(pluck, rhythm: euclid(16, 11), legato: 0.5, fields: [pitch], voices: 3)
 
 // the drone is the stream itself, an octave down, and its filter opens with the same values
-drone = saw(hz(stream - 12)).lowpass(cutoff: glide(hz(stream + 24), ms: 90), res: 0.25).gain(0.18)
+drone = saw(hz(stream - 12)).lowPass(cutoff: glide(hz(stream + 24), ms: 90), res: 0.25).gain(0.18)
 
 out = (notes + drone).reverb(mix: 0.2, decay: 1.8)

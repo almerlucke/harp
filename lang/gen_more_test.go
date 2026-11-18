@@ -8,7 +8,7 @@ import (
 func TestNumberSequencesAndTime(t *testing.T) {
 	for src, want := range map[string]string{
 		`fibonacci(8)`:                     "0 1 1 2 3 5 0 5 5 2 7 1 0",
-		`thuemorse()`:                      "0 1 1 0 1 0 0 1",
+		`thueMorse()`:                      "0 1 1 0 1 0 0 1",
 		`primes()`:                         "2 3 5 7 11 13",
 		`collatz(6)`:                       "6 3 10 5 16 8 4 2 1 6",
 		`divisible(fibonacci(8), 2)`:       "x..x..x..x..",

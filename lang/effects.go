@@ -73,7 +73,11 @@ func registerEffect(info blocks.EffectInfo) {
 	if info.Blocks {
 		text += ". It works in blocks of 64 samples, so the sound is 1.5 ms late"
 	}
-	add(&Func{Name: info.Name, Result: TSig, Doc: text, Params: ps, Call: func(a Args) (Value, error) {
+	name := info.Name
+	if now, ok := renamedFuncs[name]; ok { // pingpong is pingPong: the effect keeps psalm's name, the function is camelCase
+		name = now
+	}
+	add(&Func{Name: name, Result: TSig, Doc: text, Params: ps, Call: func(a Args) (Value, error) {
 		ins := make([]dsl.Sig, len(info.Inputs))
 		for k, name := range inputNames {
 			v := a.value(name)

@@ -99,11 +99,11 @@ func TestAPartIsAMelodyAndItsRhythm(t *testing.T) {
 	}
 	// chord tones that follow the chords: Am for a bar of 4 steps, then F
 	for src, want := range map[string]string{
-		`part("@1 @3 @1' @c @1 @3 @2 @4", chords: "Am F", barsteps: 4)`: "0:57/0.9 1:64/0.9 2:69/0.9 3:57/0.9 3:60/0.9 3:64/0.9 4:53/0.9 5:60/0.9 6:57/0.9 7:65/0.9",
-		`part("@b @b", chords: "Am F", barsteps: 1)`:                    "0:45/0.9 1:41/0.9",
-		`part("@-1 @1", chords: "C", barsteps: 2)`:                      "0:43/0.9 1:48/0.9",
-		`part("@1 @1", chords: "i VI", key: "A minor", barsteps: 1)`:    "0:57/0.9 1:53/0.9",
-		`part("@1 @1", chords: ". C", barsteps: 1)`:                     "1:48/0.9",
+		`part("@1 @3 @1' @c @1 @3 @2 @4", chords: "Am F", barSteps: 4)`: "0:57/0.9 1:64/0.9 2:69/0.9 3:57/0.9 3:60/0.9 3:64/0.9 4:53/0.9 5:60/0.9 6:57/0.9 7:65/0.9",
+		`part("@b @b", chords: "Am F", barSteps: 1)`:                    "0:45/0.9 1:41/0.9",
+		`part("@-1 @1", chords: "C", barSteps: 2)`:                      "0:43/0.9 1:48/0.9",
+		`part("@1 @1", chords: "i VI", key: "A minor", barSteps: 1)`:    "0:57/0.9 1:53/0.9",
+		`part("@1 @1", chords: ". C", barSteps: 1)`:                     "1:48/0.9",
 	} {
 		if got := scoreText(t, src); got != want {
 			t.Errorf("%s:\n got  %s\n want %s", src, got, want)

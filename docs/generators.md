@@ -39,7 +39,7 @@ A generator with a **name** is one stream:
 
 ```
 p = mutate([0 2 4 7], swap: 0.5)
-out = [lowpass(x, cutoff: hz(p + 60)), pan(y, p / 10)]   // the same values in both places
+out = [lowPass(x, cutoff: hz(p + 60)), pan(y, p / 10)]   // the same values in both places
 ```
 
 Written twice, `mutate(...)` is two independent streams. This holds for generators used as signals and for `pulses` with the same rhythm and length.
@@ -48,7 +48,7 @@ Written twice, `mutate(...)` is two independent streams. This holds for generato
 
 `seed = 21` makes the patch sound the same every time it plays. Two kinds of random numbers:
 
-- **at build time**, once, when the patch is read: `rand(lo, hi)`, `exprand(lo, hi)`, `coin(p)`, `choose(list)`. Used in `fn` and `if` to build a patch that is different for every seed.
+- **at build time**, once, when the patch is read: `rand(lo, hi)`, `expRand(lo, hi)`, `coin(p)`, `choose(list)`. Used in `fn` and `if` to build a patch that is different for every seed.
 - **while it plays**: `mutate` draws as it goes.
 
 With a `seed`, a patch that is read again (a live edit) draws the same build numbers again, so saving a file changes nothing unless you changed something. Without one, harp picks a seed when the patch first loads and keeps it for the edits after.

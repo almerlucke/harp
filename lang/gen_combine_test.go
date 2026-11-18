@@ -41,13 +41,13 @@ func TestCombiningGenerators(t *testing.T) {
 }
 
 func TestRandomGeneratorsAreSeededAndInRange(t *testing.T) {
-	a := pull(t, "anyof([degrees(60, major, [0]), degrees(72, major, [0])])", 16)
-	b := pull(t, "anyof([degrees(60, major, [0]), degrees(72, major, [0])])", 16)
+	a := pull(t, "anyOf([degrees(60, major, [0]), degrees(72, major, [0])])", 16)
+	b := pull(t, "anyOf([degrees(60, major, [0]), degrees(72, major, [0])])", 16)
 	if a != b {
 		t.Errorf("the same seed gives another stream: %s and %s", a, b)
 	}
 	if !strings.Contains(a, "60") || !strings.Contains(a, "72") {
-		t.Errorf("anyof picks one of them: %s", a)
+		t.Errorf("anyOf picks one of them: %s", a)
 	}
 	// weights: a is three times as likely as b, and a weight of 0 is never chosen
 	w := pull(t, "chance([degrees(60, major, [0]), degrees(72, major, [0])], [1 0])", 20)
@@ -58,7 +58,7 @@ func TestRandomGeneratorsAreSeededAndInRange(t *testing.T) {
 	if h := strings.Count(pull(t, "maybe(every(1), 0.5)", 200), "x"); h < 60 || h > 140 {
 		t.Errorf("half of 200: %d", h)
 	}
-	for _, src := range []string{"uniform(3, 4)", "deal([1 2 3 4])", "shotgun(degrees(60, major, [0 1 2 3]), 0.5)", "norepeat(uniform(1, 1.0001))", "distinct(degrees(60, major, mutate([0 1 2 3], 1)), 4)"} {
+	for _, src := range []string{"uniform(3, 4)", "deal([1 2 3 4])", "shotgun(degrees(60, major, [0 1 2 3]), 0.5)", "noRepeat(uniform(1, 1.0001))", "distinct(degrees(60, major, mutate([0 1 2 3], 1)), 4)"} {
 		pull(t, src, 12) // no panic, no hang
 	}
 	if d := pull(t, "deal([1 2 3 4])", 4); len(strings.Fields(d)) != 4 || strings.Count(d, "1") != 1 || strings.Count(d, "4") != 1 {
@@ -76,7 +76,7 @@ func TestCombiningMistakesAreSaid(t *testing.T) {
 		"out = both([]).dup()":                                       "no rhythms",
 		"out = meter([0], 0).dup()":                                  "1 to 64",
 		"out = sieve(8, [3, 4], [1]).dup()":                          "as many starts",
-		"out = norepeat(every(2)).dup()":                             "does not take",
+		"out = noRepeat(every(2)).dup()":                             "does not take",
 		"out = alternate([every(2), degrees(60, major, [0])]).dup()": "kind of the first",
 	} {
 		_, err := Compile(src)

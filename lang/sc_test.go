@@ -193,7 +193,7 @@ func TestSC4Decay2Pings(t *testing.T) {
 	}
 }
 
-// 5: Resonz.ar(WhiteNoise.ar(0.5), LFNoise1.kr(1).exprange(200, 5000), 0.05)
+// 5: Resonz.ar(WhiteNoise.ar(0.5), LFNoise1.kr(1).expRange(200, 5000), 0.05)
 func TestSC5ResonantNoise(t *testing.T) {
 	src := scSource(t, "5_resonant_noise.harp")
 	a, b := scRender(t, src, 4), scRender(t, src, 4)
@@ -205,7 +205,7 @@ func TestSC5ResonantNoise(t *testing.T) {
 	}
 	// with the center held at 1000 Hz the noise is a narrow band there: the energy at 1000 Hz is far above
 	// that an octave on either side, and the band has a gain of 0 dB at the center
-	held := strings.Replace(src, "lfnoise(1).exprange(200, 5000)", "1000", 1)
+	held := strings.Replace(src, "lfNoise(1).expRange(200, 5000)", "1000", 1)
 	n := scRender(t, held, 4)[0][int(0.5*scSR):]
 	center, below, above := goertzel(n, 1000), goertzel(n, 500), goertzel(n, 2000)
 	if center < 30*below || center < 30*above {

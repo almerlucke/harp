@@ -109,7 +109,7 @@ func TestPlayStartsEveryNoteAnew(t *testing.T) {
 	src := `
 bpm = 210
 steps = 4
-fn inst(gate) { scsin(100, 0) * gate }
+fn inst(gate) { scSin(100, 0) * gate }
 out = play(inst, dur: [4], legato: 0.5)
 `
 	x := renderPatch(t, src, 2)[0]
@@ -135,11 +135,11 @@ out = play(inst, dur: [4], legato: 0.5)
 }
 
 func TestFillGeomDbamp(t *testing.T) {
-	if v := value(t, "out = dbamp(-20)"); math.Abs(v-0.1) > 1e-12 {
-		t.Errorf("dbamp(-20) is %v", v)
+	if v := value(t, "out = dbAmp(-20)"); math.Abs(v-0.1) > 1e-12 {
+		t.Errorf("dbAmp(-20) is %v", v)
 	}
-	if v := value(t, "out = dbamp(0)"); v != 1 {
-		t.Errorf("dbamp(0) is %v", v)
+	if v := value(t, "out = dbAmp(0)"); v != 1 {
+		t.Errorf("dbAmp(0) is %v", v)
 	}
 	channels := func(src string) []float64 {
 		ch := renderPatch(t, src, 0.1)

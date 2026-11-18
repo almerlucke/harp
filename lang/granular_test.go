@@ -91,7 +91,7 @@ func TestAWavetableMovesWithASignal(t *testing.T) {
 		t.Errorf("the cutoff opens: %v then %v", brightness(cut[20000:40000]), brightness(cut[120000:140000]))
 	}
 	// warp, detune, spread and sub are signals from 0 to 1 as well, and a warp mode can be asked for
-	for _, args := range []string{`warp: lfo(0.5).range(0, 1), warpmode: "sync"`, `detune: lfo(0.3).range(0, 1)`, `spread: lfo(0.3).range(0, 1), sub: lfo(0.2).range(0, 1)`} {
+	for _, args := range []string{`warp: lfo(0.5).range(0, 1), warpMode: "sync"`, `detune: lfo(0.3).range(0, 1)`, `spread: lfo(0.3).range(0, 1), sub: lfo(0.2).range(0, 1)`} {
 		x := renderPatch(t, "bpm = 120\n"+note+"out = wavetable(notes, table: \"sync\", preset: \"pad\", "+args+", voices: 2)\n", 1.5)[0]
 		if energy(x[10000:60000]) < 1e-5 {
 			t.Errorf("%s is silent", args)
@@ -99,7 +99,7 @@ func TestAWavetableMovesWithASignal(t *testing.T) {
 	}
 	for src, want := range map[string]string{
 		`wavetable(notes, position: [lfo(1), lfo(2)])`: "one channel",
-		`wavetable(notes, warpmode: "twist")`:          "one of",
+		`wavetable(notes, warpMode: "twist")`:          "one of",
 		`wavetable(notes, position: "high")`:           "position",
 	} {
 		_, err := Compile("notes = melody([60], every(4))\nout = " + src + "\n")

@@ -16,7 +16,7 @@ patch.harp: changed, it takes over at the next step (55 nodes go on with their s
 A patch with a mistake is reported with its line and ignored; the old one keeps playing:
 
 ```
-patch.harp:12:9: there is no function lowpas (did you mean lowpass?)
+patch.harp:12:9: there is no function lowpas (did you mean lowPass?)
 (not changed: the old patch plays on)
 ```
 

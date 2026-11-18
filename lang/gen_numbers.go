@@ -170,15 +170,15 @@ func init() {
 			return Value{TGenFloat, &axisGen{it, a.Int("axis")}}, nil
 		}})
 	add(&Func{Name: "remap", Result: TGenFloat, Doc: "a generator of numbers moved from one range to another: remap(chaos(\"lorenz\"), -20, 20, 48, 72)",
-		Params: []Param{{"gen", TGenFloat, nil}, {"inlo", TNum, nil}, {"inhi", TNum, nil}, {"lo", TNum, nil}, {"hi", TNum, nil}},
+		Params: []Param{{"gen", TGenFloat, nil}, {"inLo", TNum, nil}, {"inHi", TNum, nil}, {"lo", TNum, nil}, {"hi", TNum, nil}},
 		Call: func(a Args) (Value, error) {
-			if err := finite(a, "inlo", "inhi", "lo", "hi"); err != nil {
+			if err := finite(a, "inLo", "inHi", "lo", "hi"); err != nil {
 				return Value{}, err
 			}
-			if a.Num("inlo") == a.Num("inhi") {
-				return Value{}, fmt.Errorf("inlo and inhi are the same")
+			if a.Num("inLo") == a.Num("inHi") {
+				return Value{}, fmt.Errorf("inLo and inHi are the same")
 			}
-			return Value{TGenFloat, &remapGen{a.value("gen").V.(dsl.Gen[float64]), a.Num("inlo"), a.Num("inhi"), a.Num("lo"), a.Num("hi")}}, nil
+			return Value{TGenFloat, &remapGen{a.value("gen").V.(dsl.Gen[float64]), a.Num("inLo"), a.Num("inHi"), a.Num("lo"), a.Num("hi")}}, nil
 		}})
 
 	// ---- chance

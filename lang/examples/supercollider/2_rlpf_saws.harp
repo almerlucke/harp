@@ -9,4 +9,4 @@
 // where res = 1 - rq/2 (0.9 is a Q of 5 too)
 
 out = saw([100, 101]).gain(0.05)
-  .lowpass(cutoff: lfo(0.2).range(300, 3000), res: 0.9)
+  .lowPass(cutoff: lfo(0.2).range(300, 3000), res: 0.9)

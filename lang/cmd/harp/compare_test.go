@@ -120,7 +120,7 @@ func TestCompareErrors(t *testing.T) {
 	// a mistake in the harp patch is shown with its line, as everywhere
 	bad := filepath.Join(t.TempDir(), "bad.harp")
 	os.WriteFile(bad, []byte("// SuperCollider\n//   { SinOsc.ar(440) }\nout = lowpas(sine(440), 800)\n"), 0o644)
-	if _, err := run(t, bad); err == nil || !strings.Contains(err.Error(), "did you mean lowpass") || !strings.Contains(err.Error(), "3 | out = lowpas") {
+	if _, err := run(t, bad); err == nil || !strings.Contains(err.Error(), "did you mean lowPass") || !strings.Contains(err.Error(), "3 | out = lowpas") {
 		t.Errorf("a mistake in the patch: %v", err)
 	}
 }
@@ -146,7 +146,7 @@ func TestCompareSeeds(t *testing.T) {
 	}
 	// a patch of one sort, with a level that is on the one side: not the same sort
 	patch := filepath.Join(t.TempDir(), "p.harp")
-	os.WriteFile(patch, []byte("// SuperCollider\n//   { SinOsc.ar(exprand(100, 1000), 0, 0.05) ! 2 }\nout = sine(exprand(100, 1000)).gain(0.2).dup()\n"), 0o644)
+	os.WriteFile(patch, []byte("// SuperCollider\n//   { SinOsc.ar(exprand(100, 1000), 0, 0.05) ! 2 }\nout = sine(expRand(100, 1000)).gain(0.2).dup()\n"), 0o644)
 	out, err = run(t, patch, "-seeds", "10", "-seconds", "2")
 	if err != nil || !strings.Contains(out, "Not the same sort") || !strings.Contains(out, "different") {
 		t.Errorf("%v\n%s", err, out)

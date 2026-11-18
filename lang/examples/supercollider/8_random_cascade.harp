@@ -27,7 +27,7 @@
 //   }
 //
 // The random choices are made when the patch is built, so every seed is another patch. g.(f, 4) is f
-// after itself 2^4 = 16 times: repeat(stage, 16, ...). The saw is scsaw: SuperCollider's own, because this
+// after itself 2^4 = 16 times: repeat(stage, 16, ...). The saw is scSaw: SuperCollider's own, because this
 // patch moves the frequency so fast that SuperCollider's Saw rings (peaks of 20 and more); the saw of harp
 // does not, and the patch would sound other than it does there.
 //
@@ -45,13 +45,13 @@
 seed = 8
 
 fn stage(saw) {
-  rate = exprand(0.1, 2)
+  rate = expRand(0.1, 2)
   freq = if coin(0.6) {
-    lfnoise([rate, rate], control: true).exprange(0.01, 10)
+    lfNoise([rate, rate], control: true).expRange(0.01, 10)
   } else {
-    lfnoise([rate, rate], control: true).exprange(10, 50)
+    lfNoise([rate, rate], control: true).expRange(10, 50)
   }
-  u = ramp(linexp(saw, -1, 1, freq, freq * lfnoise([rate, rate], control: true).exprange(2, 10)), control: true)
+  u = ramp(linExp(saw, -1, 1, freq, freq * lfNoise([rate, rate], control: true).expRange(2, 10)), control: true)
   v = if coin(0.5) {
     u * choose([1 - saw, reverse(saw)])
   } else {
@@ -60,5 +60,5 @@ fn stage(saw) {
   clip2(v, 1)
 }
 
-freq = repeat(stage, 16, ramp([0.2, 0.22], control: true)).exprange(6, 11000)
-out = bpf(product(scsaw(freq)), [70, 800, 9000, 5242], 0.2).mix().dup() * 0.3
+freq = repeat(stage, 16, ramp([0.2, 0.22], control: true)).expRange(6, 11000)
+out = bpf(product(scSaw(freq)), [70, 800, 9000, 5242], 0.2).mix().dup() * 0.3

@@ -7,7 +7,7 @@
 //	melody = degrees(a3, minor, mutate([7 9 11 9 8 7 4 7], swap: 0.6))
 //	voice  = notes(melody, euclid(16, 7), length: 0.6)
 //	lead   = saw([voice.pitch * 0.997, voice.pitch * 1.023])
-//	  .lowpass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)
+//	  .lowPass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)
 //	  .gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
 //	out = lead * 0.4
 //

@@ -114,7 +114,7 @@ func TestAPatternMutatesAndDrifts(t *testing.T) {
 
 func TestAPatternInASong(t *testing.T) {
 	// %fill: only in the last bar of a section (a song of 2 bars of 4 steps, then 1 bar)
-	got := hitsText(t, "form = song(\"A 2, B 1\", barsteps: 4)\nx = pattern(\"x%fill . . .\", song: form)", 12)
+	got := hitsText(t, "form = song(\"A 2, B 1\", barSteps: 4)\nx = pattern(\"x%fill . . .\", song: form)", 12)
 	if got != ". . . . 0.00 . . . 0.00 . . ." {
 		t.Errorf("%s", got)
 	}
@@ -172,7 +172,7 @@ func TestHitsInsideAStepArePlayed(t *testing.T) {
 		t.Errorf("%s", got)
 	}
 	// ... and a synth plays them late by their offsets: a short drum on every hit of a roll of two
-	hat := renderPatch(t, "bpm = 150\nsteps = 4\nout = drumsynth(melody([drum(\"hat\")], pattern(\"x2 . . .\"), velocity: 1, length: 1), voices: 4)\n", 1)[0]
+	hat := renderPatch(t, "bpm = 150\nsteps = 4\nout = drumSynth(melody([drum(\"hat\")], pattern(\"x2 . . .\"), velocity: 1, length: 1), voices: 4)\n", 1)[0]
 	e := func(a, b int) float64 { return energy(hat[a:b]) }
 	if e(2205, 2205+600) < 10*e(1300, 1900) || e(100, 700) < 10*e(1300, 1900) {
 		t.Errorf("a hit on 0 and one half a step later: %v %v and between %v", e(100, 700), e(2205, 2805), e(1300, 1900))

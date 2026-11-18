@@ -94,7 +94,7 @@ func init() {
 			}
 			return scoreV(events, t), nil
 		}})
-	add(&Func{Name: "midifile", Result: TScore, Doc: "a score from a MIDI file: its notes, in the steps of this patch (steps a beat; the tempo is that of the patch). track picks one track (counted from 0), -1 takes all of them together. harp check says how many tracks and notes there are. Look at the tracks one at a time to give each its own synth",
+	add(&Func{Name: "midiFile", Result: TScore, Doc: "a score from a MIDI file: its notes, in the steps of this patch (steps a beat; the tempo is that of the patch). track picks one track (counted from 0), -1 takes all of them together. harp check says how many tracks and notes there are. Look at the tracks one at a time to give each its own synth",
 		Params: []Param{{"file", TStr, nil}, {"track", TNum, def(-1)}},
 		Call: func(a Args) (Value, error) {
 			path, err := a.ev.findFile(a.Str("file"))
@@ -123,9 +123,9 @@ func init() {
 			}
 			return scoreV(ev, a.Num("length")), nil
 		}})
-	add(&Func{Name: "chordtones", Result: TScore, Doc: "a melody over chords, one chord to a bar: on the first step of each beat a note of the chord (the first of the bar strongest), between them steps along the scale, and the last step of a bar a chord tone again. chords is a list of chords (lists of notes), repeated if there are more bars. By chance: seed it",
-		Params: []Param{{"chords", ListOf(ListOf(TNum)), nil}, {"root", TNum, nil}, {"scale", TScale, nil}, {"bars", TNum, def(0)}, {"barsteps", TNum, def(16)}, {"beatsteps", TNum, def(4)},
-			{"maxleap", TNum, def(3)}, {"low", TNum, def(60)}, {"high", TNum, def(84)}},
+	add(&Func{Name: "chordTones", Result: TScore, Doc: "a melody over chords, one chord to a bar: on the first step of each beat a note of the chord (the first of the bar strongest), between them steps along the scale, and the last step of a bar a chord tone again. chords is a list of chords (lists of notes), repeated if there are more bars. By chance: seed it",
+		Params: []Param{{"chords", ListOf(ListOf(TNum)), nil}, {"root", TNum, nil}, {"scale", TScale, nil}, {"bars", TNum, def(0)}, {"barSteps", TNum, def(16)}, {"beatSteps", TNum, def(4)},
+			{"maxLeap", TNum, def(3)}, {"low", TNum, def(60)}, {"high", TNum, def(84)}},
 		Call: func(a Args) (Value, error) {
 			var cs []chord.Chord
 			for i, c := range a.value("chords").Items() {
@@ -146,19 +146,19 @@ func init() {
 			if bars == 0 {
 				bars = len(cs)
 			}
-			if bars < 1 || bars > 1024 || a.Int("barsteps") < 1 || a.Int("beatsteps") < 1 || a.Int("barsteps")%a.Int("beatsteps") != 0 || a.Num("high")-a.Num("low") < 12 {
-				return Value{}, fmt.Errorf("bars is from 1 to 1024, barsteps a multiple of beatsteps, and high at least an octave above low")
+			if bars < 1 || bars > 1024 || a.Int("barSteps") < 1 || a.Int("beatSteps") < 1 || a.Int("barSteps")%a.Int("beatSteps") != 0 || a.Num("high")-a.Num("low") < 12 {
+				return Value{}, fmt.Errorf("bars is from 1 to 1024, barSteps a multiple of beatSteps, and high at least an octave above low")
 			}
 			var ev []note.Event
 			if err := safely(func() {
-				ev = melody.ChordTonesList(cs, bars, melody.Config{Scale: s, BarSteps: a.Int("barsteps"), BeatSteps: a.Int("beatsteps"), MaxLeap: a.Int("maxleap"), Low: a.Num("low"), High: a.Num("high")})
+				ev = melody.ChordTonesList(cs, bars, melody.Config{Scale: s, BarSteps: a.Int("barSteps"), BeatSteps: a.Int("beatSteps"), MaxLeap: a.Int("maxLeap"), Low: a.Num("low"), High: a.Num("high")})
 			}); err != nil {
 				return Value{}, err
 			}
-			return scoreV(ev, float64(bars*a.Int("barsteps"))), nil
+			return scoreV(ev, float64(bars*a.Int("barSteps"))), nil
 		}})
-	add(&Func{Name: "fugue", Result: TScore, Doc: "the exposition of a fugue: a subject (pitches that are all notes of the key, and a duration in steps for each) enters in each of the voices in turn, as the subject and as the answer in the fifth, against a countersubject that is written for it by the rules of counterpoint. voice picks one voice (0 is the highest) to give its own synth, -1 takes all of them together. root and scale are the key; barsteps is the length of a bar. By chance: seed it",
-		Params: []Param{{"subject", ListOf(TNum), nil}, {"durations", ListOf(TNum), nil}, {"voices", TNum, def(3)}, {"root", TNum, nil}, {"scale", TScale, nil}, {"voice", TNum, def(-1)}, {"barsteps", TNum, def(16)}},
+	add(&Func{Name: "fugue", Result: TScore, Doc: "the exposition of a fugue: a subject (pitches that are all notes of the key, and a duration in steps for each) enters in each of the voices in turn, as the subject and as the answer in the fifth, against a countersubject that is written for it by the rules of counterpoint. voice picks one voice (0 is the highest) to give its own synth, -1 takes all of them together. root and scale are the key; barSteps is the length of a bar. By chance: seed it",
+		Params: []Param{{"subject", ListOf(TNum), nil}, {"durations", ListOf(TNum), nil}, {"voices", TNum, def(3)}, {"root", TNum, nil}, {"scale", TScale, nil}, {"voice", TNum, def(-1)}, {"barSteps", TNum, def(16)}},
 		Call: func(a Args) (Value, error) {
 			p, err := numbersOf(a.value("subject"), "subject")
 			if err != nil {
@@ -171,7 +171,7 @@ func init() {
 			if len(p) != len(d) {
 				return Value{}, fmt.Errorf("%d pitches and %d durations: a duration for each", len(p), len(d))
 			}
-			if a.Int("voices") < 1 || a.Int("voices") > 8 || a.Int("barsteps") < 1 {
+			if a.Int("voices") < 1 || a.Int("voices") > 8 || a.Int("barSteps") < 1 {
 				return Value{}, fmt.Errorf("voices is from 1 to 8")
 			}
 			key, err := scaleFrom(a.Num("root"), scaleSteps(a, "scale"))
@@ -181,7 +181,7 @@ func init() {
 			var f *fugue.Fugue
 			if err := safely(func() {
 				sub := fugue.SubjectFromPitches(key, p, d)
-				f, _ = fugue.Exposition(sub, a.Int("voices"), key, fugue.Config{StepsPerBar: float64(a.Int("barsteps"))})
+				f, _ = fugue.Exposition(sub, a.Int("voices"), key, fugue.Config{StepsPerBar: float64(a.Int("barSteps"))})
 			}); err != nil {
 				return Value{}, fmt.Errorf("the subject: %v (every pitch of it is a note of the key)", err)
 			}
@@ -354,7 +354,7 @@ func init() {
 		}
 		return e.Velocity
 	})
-	add(&Func{Name: "chordsof", Result: TGenChord, Doc: "the notes of a score that start together, as chords, one for each step that a note starts on, going round: the chord field of play, with onsets as its rhythm: play(inst, rhythm: onsets(s), fields: [chordsof(s)], voices: 4). A step with one note is a chord of one",
+	add(&Func{Name: "chordsOf", Result: TGenChord, Doc: "the notes of a score that start together, as chords, one for each step that a note starts on, going round: the chord field of play, with onsets as its rhythm: play(inst, rhythm: onsets(s), fields: [chordsOf(s)], voices: 4). A step with one note is a chord of one",
 		Params: []Param{{"score", TScore, nil}},
 		Call: func(a Args) (Value, error) {
 			s := scoreOf(a, "score")

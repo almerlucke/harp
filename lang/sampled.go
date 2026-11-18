@@ -122,9 +122,9 @@ func init() {
 			e.patch.Info = append(e.patch.Info, report...)
 			return sigV(blocks.Sampler(inst, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
 		}})
-	add(&Func{Name: "streamer", Result: TSig, Doc: "psalm's streamer playing notes with a long recording that is read from disk while it plays (the memory it takes is its first half second): file is a sound file; key is the note at which it plays at its own pitch (a note above plays it faster); loop makes it go round (between loopstart and loopend, in seconds) while the key is down; hold lets the end of a note release it; start and end take a part of the file (seconds). Stereo out",
+	add(&Func{Name: "streamer", Result: TSig, Doc: "psalm's streamer playing notes with a long recording that is read from disk while it plays (the memory it takes is its first half second): file is a sound file; key is the note at which it plays at its own pitch (a note above plays it faster); loop makes it go round (between loopStart and loopEnd, in seconds) while the key is down; hold lets the end of a note release it; start and end take a part of the file (seconds). Stereo out",
 		Params: []Param{{"notes", TGenNotes, nil}, {"file", TStr, nil}, {"key", TNum, def(60)}, {"loop", TBool, defBool(false)}, {"hold", TBool, defBool(false)},
-			{"speed", TNum, def(1)}, {"start", TNum, def(0)}, {"end", TNum, def(0)}, {"loopstart", TNum, def(0)}, {"loopend", TNum, def(0)},
+			{"speed", TNum, def(1)}, {"start", TNum, def(0)}, {"end", TNum, def(0)}, {"loopStart", TNum, def(0)}, {"loopEnd", TNum, def(0)},
 			{"release", TNum, def(0.1)}, {"vol", TNum, def(0)}, {"pan", TNum, def(0)}, {"voices", TNum, def(4)}},
 		Call: func(a Args) (Value, error) {
 			e := a.ev
@@ -141,7 +141,7 @@ func init() {
 			}
 			for _, kv := range []struct {
 				name, param string
-			}{{"speed", "speed"}, {"start", "start"}, {"end", "end"}, {"loopstart", "loopstart"}, {"loopend", "loopend"}, {"release", "release"}, {"vol", "vol"}, {"pan", "pan"}} {
+			}{{"speed", "speed"}, {"start", "start"}, {"end", "end"}, {"loopstart", "loopStart"}, {"loopend", "loopEnd"}, {"release", "release"}, {"vol", "vol"}, {"pan", "pan"}} {
 				x := a.Num(kv.param)
 				if math.IsNaN(x) || math.IsInf(x, 0) {
 					return Value{}, fmt.Errorf("%s is not a number", kv.param)

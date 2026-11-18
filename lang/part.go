@@ -142,17 +142,17 @@ func lcm(a, b int) int {
 }
 
 func init() {
-	add(&Func{Name: "part", Result: TScore, Doc: "a melody and its rhythm in one text, as a score: part(\"C3 Eb3 G3 - Bb3 . G3 Eb3\"), a step each. A note is a name (C3, Eb3, f#4; C4 is 60) or a number, . a rest, - the note before held a step longer, C3+Eb3+G3 a chord, [C3 D3 Eb3] a group that fills a step, C3^3 a roll of three, *2 how many steps, ?25 a chance, %2/4 only some passes through it (the text is played passes times: 0 gives as many as the conditions need), ! as in a pattern. chords (\"Am F C G\": symbols, or roman numerals in key, a bar each of barsteps) gives chord tones to write: @1 the root, @2 the next tone, @3 the fifth, @4 the seventh, @-1 the tone below the root, @b the bass, @c the whole chord, ' after one an octave up and , down: \"@1 @3 @5 @3\" follows the chords. register is the lowest note of @1 (48), bass of @b (36). legato is how much of its step a note is held (0.9)",
-		Params: []Param{{"text", TStr, nil}, {"chords", TStr, defStr("")}, {"key", TStr, defStr("C major")}, {"barsteps", TNum, def(16)}, {"register", TNum, def(48)}, {"bass", TNum, def(36)},
+	add(&Func{Name: "part", Result: TScore, Doc: "a melody and its rhythm in one text, as a score: part(\"C3 Eb3 G3 - Bb3 . G3 Eb3\"), a step each. A note is a name (C3, Eb3, f#4; C4 is 60) or a number, . a rest, - the note before held a step longer, C3+Eb3+G3 a chord, [C3 D3 Eb3] a group that fills a step, C3^3 a roll of three, *2 how many steps, ?25 a chance, %2/4 only some passes through it (the text is played passes times: 0 gives as many as the conditions need), ! as in a pattern. chords (\"Am F C G\": symbols, or roman numerals in key, a bar each of barSteps) gives chord tones to write: @1 the root, @2 the next tone, @3 the fifth, @4 the seventh, @-1 the tone below the root, @b the bass, @c the whole chord, ' after one an octave up and , down: \"@1 @3 @5 @3\" follows the chords. register is the lowest note of @1 (48), bass of @b (36). legato is how much of its step a note is held (0.9)",
+		Params: []Param{{"text", TStr, nil}, {"chords", TStr, defStr("")}, {"key", TStr, defStr("C major")}, {"barSteps", TNum, def(16)}, {"register", TNum, def(48)}, {"bass", TNum, def(36)},
 			{"velocity", TNum, def(0.8)}, {"legato", TNum, def(0.9)}, {"passes", TNum, def(0)}},
 		Call: func(a Args) (Value, error) {
 			hits, steps, err := parseTextPattern(a.Str("text"), true)
 			if err != nil {
 				return Value{}, err
 			}
-			ctx := &partContext{barSteps: a.Num("barsteps"), register: a.Num("register"), bass: a.Num("bass")}
+			ctx := &partContext{barSteps: a.Num("barSteps"), register: a.Num("register"), bass: a.Num("bass")}
 			if ctx.barSteps < 1 {
-				return Value{}, fmt.Errorf("barsteps is 1 or more")
+				return Value{}, fmt.Errorf("barSteps is 1 or more")
 			}
 			if c := a.Str("chords"); c != "" {
 				if ctx.chords, ctx.total, err = parseChanges(c, a.Str("key")); err != nil {

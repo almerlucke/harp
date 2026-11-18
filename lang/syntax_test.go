@@ -80,12 +80,12 @@ func TestParseChainsAndStatements(t *testing.T) {
 	src := `
 melody = degrees(a3, minor, mutate([7 9 11 9 8 7 4 7], swap: 0.6))
 lead = saw([voice.pitch * 0.997, voice.pitch * 1.023])
-  .lowpass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)   // a filter
+  .lowPass(cutoff: lfo(0.3).range(300, 4000), res: 0.5)   // a filter
   .gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
 out = lead * 0.4
 `
 	want := `melody = degrees(a3, minor, mutate([7 9 11 9 8 7 4 7], swap: 0.6))
-lead = saw([(voice.pitch * 0.997) (voice.pitch * 1.023)]).lowpass(cutoff: lfo(0.3).range(300, 4000), res: 0.5).gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
+lead = saw([(voice.pitch * 0.997) (voice.pitch * 1.023)]).lowPass(cutoff: lfo(0.3).range(300, 4000), res: 0.5).gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
 out = (lead * 0.4)`
 	if got := parse(t, src); got != want {
 		t.Errorf("got\n%s\nwant\n%s", got, want)
@@ -169,9 +169,9 @@ func TestSharpsAndComments(t *testing.T) {
 }
 
 func TestErrorShowsTheLine(t *testing.T) {
-	e := &Error{Pos: Pos{2, 5}, Msg: "unknown function lowpas", Hint: "did you mean lowpass?"}
+	e := &Error{Pos: Pos{2, 5}, Msg: "unknown function lowpas", Hint: "did you mean lowPass?"}
 	got := e.Show("a = 1\nb = lowpas(a)\nc = 3")
-	want := "2:5: unknown function lowpas (did you mean lowpass?)\n2 | b = lowpas(a)\n        ^"
+	want := "2:5: unknown function lowpas (did you mean lowPass?)\n2 | b = lowpas(a)\n        ^"
 	if got != want {
 		t.Errorf("got\n%s\nwant\n%s", got, want)
 	}
@@ -240,7 +240,7 @@ func TestAMistakeAtTheEndOfALongProgramIsQuick(t *testing.T) {
 
 // the text of a comment is never program: a dot in it is not a call that goes on from the line before
 func TestCommentsAreWholeAndNeverRead(t *testing.T) {
-	for _, c := range []string{".d}", "{ SinOsc.ar(exprand(100, 1000), 0, 0.05) ! 2 }", "a.b(c)", ".", "x = 1", "fn f(a) { a }"} {
+	for _, c := range []string{".d}", "{ SinOsc.ar(expRand(100, 1000), 0, 0.05) ! 2 }", "a.b(c)", ".", "x = 1", "fn f(a) { a }"} {
 		for _, src := range []string{
 			"seed = 1\n// " + c + "\nout = sine(1).dup()\n",
 			"seed = 1 // " + c + "\nout = sine(1).dup()\n",

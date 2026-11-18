@@ -26,10 +26,10 @@ They take generators of any kind (rhythms, degrees, pitches, chords, notes) and 
 | | |
 |---|---|
 | `alternate([a, b])` | one value from each in turn |
-| `anyof([a, b])`, `chance([a, b], [3 1])` | one at random, with weights |
+| `anyOf([a, b])`, `chance([a, b], [3 1])` | one at random, with weights |
 | `sections([a, b], [64 32])` | one after the other, for so many steps |
 | `stutter(g, 2)` | each value more than once |
-| `shotgun`, `norepeat`, `distinct` | drop values, forbid repeats |
+| `shotgun`, `noRepeat`, `distinct` | drop values, forbid repeats |
 | `stack([a, b])`, `flatten(chords)` | voices into chords, chords into notes |
 | `deal(list)`, `pick(list)`, `order(list, "converge")`, `uniform(lo, hi)` | a shuffled deck, any one, the orders of a list, random numbers |
 
@@ -39,7 +39,7 @@ They take generators of any kind (rhythms, degrees, pitches, chords, notes) and 
 
 ```harp
 cutoff = remap(chaos("lorenz"), -20, 20, 300, 2600)
-out = saw(110).lowpass(cutoff: seq(cutoff), res: 0.3).gain(0.1).dup()
+out = saw(110).lowPass(cutoff: seq(cutoff), res: 0.3).gain(0.1).dup()
 ```
 
 ## Rules and chance
@@ -60,15 +60,15 @@ out = saw(110).lowpass(cutoff: seq(cutoff), res: 0.3).gain(0.1).dup()
 | `scale([0 2 3 7 8])`, `equal(24)`, `just([...])` | scales and tunings of your own; more named scales (`phrygian`, `blues`, `wholetone`, `mode2`, ...) |
 | `stepwise(60, major)`, `snap(g, root, scale)` | a walk over a scale, notes moved onto a scale |
 | `chord(a3, "minor7")`, `triads(a2, minor, degrees)` | chords, and the chords on scale degrees |
-| `voicelead(chords)` | smooth voice leading |
+| `voiceLead(chords)` | smooth voice leading |
 | `arp(notes, mode: "converge")` | an arpeggio |
 | `progression("pop")` | chord changes by chance (pop, classical, jazz, blues) |
-| `tonerow()`, `rowform(row, "retro")` | twelve tone rows |
+| `toneRow()`, `rowForm(row, "retro")` | twelve tone rows |
 | `counterpoint(cantus)` | a line against another, by the rules of strict counterpoint |
 
 ## Number sequences and durations
 
-`fibonacci`, `thuemorse`, `primes`, `collatz`, `jump` (a way through a list), and for `dur:` of [play](play.md): `split(4, 0.25, 0.5, 2)` (a length cut into related parts) and `metric(4, 3)`.
+`fibonacci`, `thueMorse`, `primes`, `collatz`, `jump` (a way through a list), and for `dur:` of [play](play.md): `split(4, 0.25, 0.5, 2)` (a length cut into related parts) and `metric(4, 3)`.
 
 An example that uses a good part of them: `examples/generators_more.harp`.
 

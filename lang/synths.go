@@ -58,7 +58,7 @@ func init() {
 		"shaper":      presetNames(shaperPresets),
 		"organ":       presetNames(organPresets),
 		"dx":          presetNames(dxPresets),
-		"drumsynth":   presetNames(drumsynth.Kits),
+		"drumSynth":   presetNames(drumsynth.Kits),
 		"grains":      presetNames(grainPresets),
 		"wavetable":   presetNames(wavetablePresets),
 	} {
@@ -77,8 +77,8 @@ var _ = waveguide.Config{}
 func PresetsMarkdown() string {
 	var b strings.Builder
 	b.WriteString("# Presets of the synths\n\n<!-- made by `harp presets -md`: do not edit by hand (a test says when it is out of date) -->\n\n")
-	b.WriteString("A synth takes `preset: \"name\"`: `modal(notes, preset: \"church_bell\")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumsynth(notes, kit: \"trap\")`.\n")
-	for _, synth := range []string{"subtractive", "supersaw", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "dx", "drumsynth", "grains", "wavetable"} {
+	b.WriteString("A synth takes `preset: \"name\"`: `modal(notes, preset: \"church_bell\")`. The names are those of the presets of psalm, in snake case. The drum synth has kits instead: `drumSynth(notes, kit: \"trap\")`.\n")
+	for _, synth := range []string{"subtractive", "supersaw", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "dx", "drumSynth", "grains", "wavetable"} {
 		names := presetTables[synth]
 		fmt.Fprintf(&b, "\n## %s (%d)\n\n%s\n", synth, len(names), strings.Join(names, ", "))
 	}
@@ -89,6 +89,9 @@ func PresetsMarkdown() string {
 func Presets(synth string) (string, error) {
 	if synth == "" {
 		return PresetsMarkdown(), nil
+	}
+	if now, renamed := renamedFuncs[synth]; renamed {
+		synth = now
 	}
 	names, ok := presetTables[synth]
 	if !ok {

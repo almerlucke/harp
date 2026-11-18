@@ -22,23 +22,23 @@
 //
 // Every note is a new synth in SuperCollider: its saw starts at the start of the cycle, its envelopes
 // at their start. In harp the instrument is a function (a new run of it for every note), play gives it
-// the gate, and the numbers of the note (ffreq and bend) as signals; scsawsync and env start again on
+// the gate, and the numbers of the note (ffreq and bend) as signals; scSawSync and env start again on
 // the rise of the gate. Notes go to two voices in turn, as the end of a note goes on while the next starts.
 
 bpm = 210
 steps = 4
 
 fn gabberkick(gate, ffreq, bend) {
-  freq = 60 * midiratio(env(gate, [0 1 0], [0.001 0.08], -1) * 48 * bend)
-  saw = scsawsync(freq, gate)
-  snd = tanh(saw * 100) + (sign(saw) - saw) * dbamp(-8)
-  high = schpf(snd, 300)
-  lfo = [scsin(8, 0), scsin(8, 0.5 * pi)].range(0, 0.01)
-  high2 = dup(high, 2) + scdelayc(high, 0.01, lfo) * dbamp(-2)
-  low = dup(sclpf(snd, 100), 2) + high2
-  res = scrlpf(low, 7000, 2)
-  eq = scpeq(res, ffreq * env(gate, [1 0.8], [0.3], shape: "exp", control: true), 0.5, 15)
-  eq * env(gate, [0 1 0], [0.001 0.05], -4, release: 1) * dbamp(-23)
+  freq = 60 * midiRatio(env(gate, [0 1 0], [0.001 0.08], -1) * 48 * bend)
+  saw = scSawSync(freq, gate)
+  snd = tanh(saw * 100) + (sign(saw) - saw) * dbAmp(-8)
+  high = scHpf(snd, 300)
+  lfo = [scSin(8, 0), scSin(8, 0.5 * pi)].range(0, 0.01)
+  high2 = dup(high, 2) + scDelayC(high, 0.01, lfo) * dbAmp(-2)
+  low = dup(scLpf(snd, 100), 2) + high2
+  res = scRlpf(low, 7000, 2)
+  eq = scPeq(res, ffreq * env(gate, [1 0.8], [0.3], shape: "exp", control: true), 0.5, 15)
+  eq * env(gate, [0 1 0], [0.001 0.05], -4, release: 1) * dbAmp(-23)
 }
 
 out = play(gabberkick, dur: [1 1 1 1 0.75 0.25 0.5 0.75 0.25 0.5], legato: 0.8,

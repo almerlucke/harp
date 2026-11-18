@@ -47,7 +47,7 @@ func TestChordsOfDifferentSizesAndWithOtherFields(t *testing.T) {
 }
 
 func TestAScoreWithChordsForPlay(t *testing.T) {
-	src := chordHead + "s = together([phrase([1 2], [2]), phrase([10 20], [2])])\nout = play(inst, rhythm: onsets(s), legato: 0.5, fields: [chordsof(s)], voices: 2)"
+	src := chordHead + "s = together([phrase([1 2], [2]), phrase([10 20], [2])])\nout = play(inst, rhythm: onsets(s), legato: 0.5, fields: [chordsOf(s)], voices: 2)"
 	x := renderPatch(t, src, 1)[0]
 	if v := x[300]; v != 11 {
 		t.Errorf("the notes together on step 0: %v (wanted 11)", v)
@@ -62,11 +62,11 @@ func TestChordsInPlayMistakes(t *testing.T) {
 		"out = play(inst, rhythm: every(1), fields: [[[1 2 3] [4 5 6]]], voices: 2)":   "needs voices: 3",
 		"out = play(inst, rhythm: every(1), fields: [[[1 2] [3 4]], [[1 2] [3 4]]])":   "only one field",
 		"out = play(inst, rhythm: every(1), fields: [[[1 2] [3 4]]], voices: 2)":       "",
-		"out = play(inst, rhythm: every(1), fields: [chordsof(phrase([60 62], [1]))])": "",
+		"out = play(inst, rhythm: every(1), fields: [chordsOf(phrase([60 62], [1]))])": "",
 	} {
 		_, err := Compile("fn inst(gate, n) { gate * n }\n" + src + "\n")
 		if src == "" || want == "" {
-			if err != nil && !strings.Contains(src, "chordsof") {
+			if err != nil && !strings.Contains(src, "chordsOf") {
 				t.Errorf("%s: %v", src, err)
 			}
 			continue

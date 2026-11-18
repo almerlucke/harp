@@ -39,7 +39,7 @@ func TestChordsAndLeading(t *testing.T) {
 		t.Errorf("sevenths: %s", got)
 	}
 	// the voice leader keeps the chords near each other: no voice leaps more than a fifth between chords
-	led := pull(t, `voicelead(triads(57, minor, [0 5 3 4 0 5 3 4]), 48, 72)`, 8)
+	led := pull(t, `voiceLead(triads(57, minor, [0 5 3 4 0 5 3 4]), 48, 72)`, 8)
 	prev := []float64(nil)
 	for _, c := range strings.Split(strings.Trim(led, "[]"), "] [") {
 		var cur []float64
@@ -70,7 +70,7 @@ func TestArpeggiosProgressionsAndRows(t *testing.T) {
 		t.Errorf("a dominant goes to the tonic in the classical style: %s", got)
 	}
 	// a tone row has each pitch class once; its retrograde is the row backwards, its inversion is the mirror
-	r := evalLast(t, "seed = 3\nx = tonerow()").Items()
+	r := evalLast(t, "seed = 3\nx = toneRow()").Items()
 	seen := map[float64]bool{}
 	for _, v := range r {
 		seen[v.Float()] = true
@@ -78,10 +78,10 @@ func TestArpeggiosProgressionsAndRows(t *testing.T) {
 	if len(r) != 12 || len(seen) != 12 {
 		t.Errorf("a row: %v", r)
 	}
-	if got := listText(t, `rowform([0 2 7 1], "retro")`); got != "1 7 2 0" {
+	if got := listText(t, `rowForm([0 2 7 1], "retro")`); got != "1 7 2 0" {
 		t.Errorf("retrograde: %s", got)
 	}
-	if got := listText(t, `rowform([0 2 7], "prime", 5)`); got != "5 7 12" {
+	if got := listText(t, `rowForm([0 2 7], "prime", 5)`); got != "5 7 12" {
 		t.Errorf("transposed: %s", got)
 	}
 	// counterpoint: a consonant line against the cantus, as long as the cantus, starting on a perfect consonance
@@ -100,7 +100,7 @@ func TestArpeggiosProgressionsAndRows(t *testing.T) {
 		}
 	}
 	// a melody that walks stays in range, and snapped numbers are notes of the scale
-	for _, v := range within(t, `stepwise(60, major, lo: -3, hi: 3, step: 1, leap: 0.3, maxleap: 3)`, 100, 55, 67) {
+	for _, v := range within(t, `stepwise(60, major, lo: -3, hi: 3, step: 1, leap: 0.3, maxLeap: 3)`, 100, 55, 67) {
 		if v != float64(int(v)) {
 			t.Errorf("a note of C major is a whole number: %v", v)
 		}
@@ -125,7 +125,7 @@ func TestMistakesInPitch(t *testing.T) {
 		`triads(60, major, [0], size: 1)`: "2 to 7",
 		`arp([60 64], mode: "sideways")`:  "one of",
 		`progression("polka")`:            "one of",
-		`rowform([1 2], "upside")`:        "one of",
+		`rowForm([1 2], "upside")`:        "one of",
 		`counterpoint([60.5 62])`:         "whole",
 	} {
 		_, err := Compile("seed = 1\nx = " + src + "\nout = sine(440).dup()\n")

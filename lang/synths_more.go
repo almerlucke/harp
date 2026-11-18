@@ -16,7 +16,7 @@ import (
 	"github.com/almerlucke/psalm/synths/organ"
 )
 
-// organ, dx and drumsynth: the last synths of psalm. The organ is one instrument (every note is a key of it), the FM synth can read the patches of
+// organ, dx and drumSynth: the last synths of psalm. The organ is one instrument (every note is a key of it), the FM synth can read the patches of
 // a DX7 (a SysEx file), and the drum synth plays drums that are made: a note is a drum, by its General MIDI key
 
 var (
@@ -121,7 +121,7 @@ func init() {
 		}})
 
 	kitNames := presetNames(drumsynth.Kits)
-	add(&Func{Name: "drumsynth", Result: TSig, Doc: "psalm's drum synthesizer: drums that are made, not played from recordings. kit is " + strings.Join(kitNames, ", ") + ". A note is a drum, by its General MIDI key: drum(\"kick\") is the number for a kick, drum(\"snare\"), drum(\"hat\"), drum(\"open\"), drum(\"clap\"), drum(\"tomLow\") and so on (the names are in docs/synths.md); melody([drum(\"kick\")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out",
+	add(&Func{Name: "drumSynth", Result: TSig, Doc: "psalm's drum synthesizer: drums that are made, not played from recordings. kit is " + strings.Join(kitNames, ", ") + ". A note is a drum, by its General MIDI key: drum(\"kick\") is the number for a kick, drum(\"snare\"), drum(\"hat\"), drum(\"open\"), drum(\"clap\"), drum(\"tomLow\") and so on (the names are in docs/synths.md); melody([drum(\"kick\")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out",
 		Params: []Param{{"notes", TGenNotes, nil}, {"kit", TStr, defStr("808")}, {"voices", TNum, def(8)}},
 		Call: func(a Args) (Value, error) {
 			kit, ok := drumsynth.Kits[a.Str("kit")]
@@ -141,7 +141,7 @@ func init() {
 		names = append(names, n)
 	}
 	sort.Strings(names)
-	add(&Func{Name: "drum", Result: TNum, Doc: "the General MIDI key of a drum, by its name, for drumsynth: " + strings.Join(names, ", "),
+	add(&Func{Name: "drum", Result: TNum, Doc: "the General MIDI key of a drum, by its name, for drumSynth: " + strings.Join(names, ", "),
 		Params: []Param{{"name", TStr, nil}},
 		Call: func(a Args) (Value, error) {
 			k, ok := drumKeys[a.Str("name")]

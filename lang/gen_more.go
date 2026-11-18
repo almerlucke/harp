@@ -75,7 +75,7 @@ func init() {
 			}
 			return Value{TGenInt, numseq.NewFibonacci(a.Int("mod"))}, nil
 		}})
-	add(&Func{Name: "thuemorse", Result: TGenInt, Doc: "the Thue-Morse sequence 0 1 1 0 1 0 0 1 ...: it never repeats and has no long runs. As degrees it is a fair melody of two notes, with divisible a rhythm",
+	add(&Func{Name: "thueMorse", Result: TGenInt, Doc: "the Thue-Morse sequence 0 1 1 0 1 0 0 1 ...: it never repeats and has no long runs. As degrees it is a fair melody of two notes, with divisible a rhythm",
 		Params: nil,
 		Call:   func(a Args) (Value, error) { return Value{TGenInt, numseq.NewThueMorse()}, nil }})
 	add(&Func{Name: "primes", Result: TGenInt, Doc: "the prime numbers 2 3 5 7 11 13 ...",
