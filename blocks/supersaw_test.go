@@ -151,7 +151,7 @@ func TestSupersawNeverAllocatesOnTheAudioThread(t *testing.T) {
 		voices int
 	}{{"free voices", 8}, {"every note takes over a voice", 1}} {
 		rt := &dsl.Rt{SampleRate: sr, StepSamples: stepSamples}
-		h := newHost(rt, func() *supersaw.Voice { return supersaw.New(supersaw.TrancePad()) }, 2, c.voices)
+		h := newHost(rt, func() *supersaw.Voice { return supersaw.New(supersaw.TrancePad()) }, 2, c.voices, nil)
 		note := []pendingNote{{msg: psalm.Message{"pitch": 60.0}, amp: 1, seconds: 5}, {msg: psalm.Message{"pitch": 67.0}, amp: 1, seconds: 5}}
 		h.apply(note)
 		var loudest float64

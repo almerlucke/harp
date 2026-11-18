@@ -1070,57 +1070,57 @@ How strong each step of a bar is, by the groups of a meter, as a list for the ac
 
 ### `subtractive`
 
-`subtractive(notes: generator of notes, preset: string = pad, voices: number = 8) -> signal`
+`subtractive(notes: generator of notes, preset: string = pad, voices: number = 8, ... 61 settings of the synth (harp settings subtractive)) -> signal`
 
-Psalm's subtractive synth playing notes, with one of its presets (see presets) and voices notes at once. Stereo out.
+Psalm's subtractive synth playing notes, with one of its presets (see presets) and voices notes at once. Stereo out. Every setting of the synth is a parameter (61 of them, with their ranges: harp settings subtractive, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `supersaw`
 
-`supersaw(notes: generator of notes, preset: string = trance_pad, voices: number = 8) -> signal`
+`supersaw(notes: generator of notes, preset: string = trance_pad, voices: number = 8, ... 25 settings of the synth (harp settings supersaw)) -> signal`
 
-Psalm's supersaw, the sound of the JP-8000, playing notes, with one of its presets and voices notes at once. Stereo out.
+Psalm's supersaw, the sound of the JP-8000, playing notes, with one of its presets and voices notes at once. Stereo out. Every setting of the synth is a parameter (25 of them, with their ranges: harp settings supersaw, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `modal`
 
-`modal(notes: generator of notes, preset: string = marimba, voices: number = 8) -> signal`
+`modal(notes: generator of notes, preset: string = marimba, voices: number = 8, ... 31 settings of the synth (harp settings modal)) -> signal`
 
-Psalm's modal synth: struck and bowed bars, bells, bottles, cymbals and gongs as sets of resonances (marimba, vibraphone, church bell, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets modal).
+Psalm's modal synth: struck and bowed bars, bells, bottles, cymbals and gongs as sets of resonances (marimba, vibraphone, church bell, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets modal). Every setting of the synth is a parameter (31 of them, with their ranges: harp settings modal, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `piano`
 
-`piano(notes: generator of notes, preset: string = grand, voices: number = 8) -> signal`
+`piano(notes: generator of notes, preset: string = grand, voices: number = 8, ... 25 settings of the synth (harp settings piano)) -> signal`
 
-Psalm's piano: hammers, strings and a soundboard, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets piano).
+Psalm's piano: hammers, strings and a soundboard, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets piano). Every setting of the synth is a parameter (25 of them, with their ranges: harp settings piano, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `waveguide`
 
-`waveguide(notes: generator of notes, preset: string = guitar, voices: number = 8) -> signal`
+`waveguide(notes: generator of notes, preset: string = guitar, voices: number = 8, ... 40 settings of the synth (harp settings waveguide)) -> signal`
 
-Psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets waveguide).
+Psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets waveguide). Every setting of the synth is a parameter (40 of them, with their ranges: harp settings waveguide, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `vocal`
 
-`vocal(notes: generator of notes, preset: string = solo, voices: number = 8) -> signal`
+`vocal(notes: generator of notes, preset: string = solo, voices: number = 8, ... 42 settings of the synth (harp settings vocal)) -> signal`
 
-Psalm's singing voice: a glottis and a vocal tract (solo, choir, humming, chants, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets vocal).
+Psalm's singing voice: a glottis and a vocal tract (solo, choir, humming, chants, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets vocal). Every setting of the synth is a parameter (42 of them, with their ranges: harp settings vocal, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `pulsar`
 
-`pulsar(notes: generator of notes, preset: string = vowel_lead, voices: number = 8) -> signal`
+`pulsar(notes: generator of notes, preset: string = vowel_lead, voices: number = 8, ... 40 settings of the synth (harp settings pulsar)) -> signal`
 
-Psalm's pulsar synthesis: trains of short pulses with formants (vowel leads, buzz bass, insects, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets pulsar).
+Psalm's pulsar synthesis: trains of short pulses with formants (vowel leads, buzz bass, insects, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets pulsar). Every setting of the synth is a parameter (40 of them, with their ranges: harp settings pulsar, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `shaper`
 
-`shaper(notes: generator of notes, preset: string = acid, voices: number = 8) -> signal`
+`shaper(notes: generator of notes, preset: string = acid, voices: number = 8, ... 67 settings of the synth (harp settings shaper)) -> signal`
 
-Psalm's waveshaping and phase distortion synth (cz leads, fm basses, pads, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets shaper).
+Psalm's waveshaping and phase distortion synth (cz leads, fm basses, pads, ...), playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets shaper). Every setting of the synth is a parameter (67 of them, with their ranges: harp settings shaper, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `organ`
 
-`organ(notes: generator of notes, preset: string = jazz, drawbars: string = , leslie: number = the preset's own, speed: number = the preset's own) -> signal`
+`organ(notes: generator of notes, preset: string = jazz, drawbars: string = , leslie: number = the preset's own, speed: number = the preset's own, ... 36 settings of the synth (harp settings organ)) -> signal`
 
-Psalm's tonewheel organ, one instrument: every note is a key of it (a chord is several keys, a note is held for its length), with its drawbars, percussion, vibrato and Leslie. The preset (harp presets organ) sets the registration; drawbars is the registration written as organists do, a digit from 0 to 8 for each of the nine drawbars ("888000000" is a jazz sound), leslie is how much of the rotary speaker there is (0 to 1) and speed how fast it turns (0 stopped, 0.5 slow, 1 fast). Stereo out.
+Psalm's tonewheel organ, one instrument: every note is a key of it (a chord is several keys, a note is held for its length), with its drawbars, percussion, vibrato and Leslie. The preset (harp presets organ) sets the registration; drawbars is the registration written as organists do, a digit from 0 to 8 for each of the nine drawbars ("888000000" is a jazz sound), leslie is how much of the rotary speaker there is (0 to 1) and speed how fast it turns (0 stopped, 0.5 slow, 1 fast). Stereo out. Every setting of the synth is a parameter (36 of them, with their ranges: harp settings organ, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `dx`
 
@@ -1142,15 +1142,15 @@ The General MIDI key of a drum, by its name, for drumSynth: agogoHigh, agogoLow,
 
 ### `grains`
 
-`grains(notes: generator of notes, file: string, root: number = 60, preset: string = choir_pad, voices: number = 6, position: number = the preset's own, scan: number = the preset's own, spray: number = the preset's own, density: number = the preset's own, size: number = the preset's own, pitchSpread: number = the preset's own) -> signal`
+`grains(notes: generator of notes, file: string, root: number = 60, preset: string = choir_pad, voices: number = 6, position: number = the preset's own, scan: number = the preset's own, spray: number = the preset's own, density: number = the preset's own, size: number = the preset's own, pitchSpread: number = the preset's own, ... 12 settings of the synth (harp settings grains)) -> signal`
 
-Psalm's granular synth: every note is a stream of short grains of a recording (a sound file), played at the pitch of the note; root is the note at which the recording is at its own pitch. The preset (harp presets grains) sets the character: position (0-1, where in the recording), scan (how fast that moves: 0 holds, 1 is the original speed), spray (seconds of spread), density (grains a second), size (a grain, in ms), pitchSpread (semitones) are the preset's own unless given. Stereo out.
+Psalm's granular synth: every note is a stream of short grains of a recording (a sound file), played at the pitch of the note; root is the note at which the recording is at its own pitch. The preset (harp presets grains) sets the character: position (0-1, where in the recording), scan (how fast that moves: 0 holds, 1 is the original speed), spray (seconds of spread), density (grains a second), size (a grain, in ms), pitchSpread (semitones) are the preset's own unless given. Stereo out. Every setting of the synth is a parameter (12 of them, with their ranges: harp settings grains, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `wavetable`
 
-`wavetable(notes: generator of notes, table: string = basic, preset: string = pad, voices: number = 6, position: anything = the preset's own, cutoff: anything = the preset's own, resonance: anything = the preset's own, warp: anything = the preset's own, warpMode: string = , detune: anything = the preset's own, spread: anything = the preset's own, sub: anything = the preset's own, size: number = 2048, frames: number = 32, amount: number = 0) -> signal`
+`wavetable(notes: generator of notes, table: string = basic, preset: string = pad, voices: number = 6, position: anything = the preset's own, cutoff: anything = the preset's own, resonance: anything = the preset's own, warp: anything = the preset's own, warpMode: string = , detune: anything = the preset's own, spread: anything = the preset's own, sub: anything = the preset's own, size: number = 2048, frames: number = 32, amount: number = 0, ... 35 settings of the synth (harp settings wavetable)) -> signal`
 
-Psalm's wavetable synth: an oscillator morphing through the frames of a table, with unison, a sub oscillator and a filter. The table is a sound file of single cycles of size samples each (2048 is usual), or one that psalm makes: basic, brightness, comb, drawbars, filter, fm, fold, odd_even, pwm, quantize, random, resonance, saturate, steps, sync, vowels (frames of them, and amount: the number of their own, like the sync ratio, the fm index or the pulse width; 0 is the usual one). The preset (harp presets wavetable) sets the rest. These can be a number, or a signal that moves them while the notes sound (lfo(0.1).range(0, 1), env(...), seq(...)): position (0 to 1, where in the table: the table moves), cutoff (Hz) and resonance of the filter, and, as a signal from 0 to 1 that is the amount of the preset's own setting: warp (bends the cycle: warpMode is benddown, bendup, fmb, fmsine, mirror, off, sync), detune (up to 100 cents), spread (the stereo width of the unison), sub (the level of the sub oscillator); up to 4 of those four can be signals. A signal is one channel. Stereo out.
+Psalm's wavetable synth: an oscillator morphing through the frames of a table, with unison, a sub oscillator and a filter. The table is a sound file of single cycles of size samples each (2048 is usual), or one that psalm makes: basic, brightness, comb, drawbars, filter, fm, fold, odd_even, pwm, quantize, random, resonance, saturate, steps, sync, vowels (frames of them, and amount: the number of their own, like the sync ratio, the fm index or the pulse width; 0 is the usual one). The preset (harp presets wavetable) sets the rest. These can be a number, or a signal that moves them while the notes sound (lfo(0.1).range(0, 1), env(...), seq(...)): position (0 to 1, where in the table: the table moves), cutoff (Hz) and resonance of the filter, and, as a signal from 0 to 1 that is the amount of the preset's own setting: warp (bends the cycle: warpMode is benddown, bendup, fmb, fmsine, mirror, off, sync), detune (up to 100 cents), spread (the stereo width of the unison), sub (the level of the sub oscillator); up to 4 of those four can be signals. A signal is one channel. Stereo out. Every setting of the synth is a parameter (35 of them, with their ranges: harp settings wavetable, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ## Recordings
 

@@ -295,8 +295,12 @@ func mismatch(v Value, want Type) error {
 
 // describe is the signature of a function, for messages and for the listing
 func describe(f *Func) string {
-	parts := make([]string, len(f.Params))
-	for i, p := range f.Params {
+	n := len(f.Params)
+	if f.Settings != "" {
+		n = f.NBase // the settings of a synth are many: they are said at the end
+	}
+	parts := make([]string, n)
+	for i, p := range f.Params[:n] {
 		s := p.Name + ": " + p.Type.String()
 		if p.Default != nil {
 			if x, ok := p.Default.V.(float64); ok && math.IsNaN(x) {
@@ -306,6 +310,9 @@ func describe(f *Func) string {
 			}
 		}
 		parts[i] = s
+	}
+	if f.Settings != "" {
+		parts = append(parts, fmt.Sprintf("... %d settings of the synth (harp settings %s)", len(f.Params)-n, f.Settings))
 	}
 	return strings.ReplaceAll(f.Name+"("+strings.Join(parts, ", ")+") -> "+f.Result.String(), "empty list", "list")
 }

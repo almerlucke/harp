@@ -11,6 +11,9 @@ import (
 
 	"github.com/almerlucke/psalm/blocks/oscillators/blosc"
 	"github.com/almerlucke/psalm/modules/effects/fdnreverb"
+	"github.com/almerlucke/psalm/params"
+	"github.com/almerlucke/psalm/synths/subtractive"
+	"github.com/almerlucke/psalm/synths/supersaw"
 )
 
 // Param is a parameter of a function of the language. A parameter with a Default can be left out.
@@ -28,6 +31,9 @@ type Func struct {
 	Result Type
 	Doc    string
 	Call   func(a Args) (Value, error)
+	// the settings of a synth (settings.go): its name, and how many of the parameters come before them
+	Settings string
+	NBase    int
 }
 
 // Args are the arguments of a call, by the name of the parameter, already of the type it asked for
@@ -35,6 +41,8 @@ type Args struct {
 	f    *Func
 	vals []Value
 	ev   *evaluator // where the call is made: a function of the program is worked out from here
+	// what the settings of a synth make of the call: for the host of the synth
+	synthOpts []blocks.SynthOption
 }
 
 func (a Args) value(name string) Value {
@@ -224,7 +232,7 @@ func init() {
 			if voices < 1 {
 				return Value{}, fmt.Errorf("a synth needs at least one voice")
 			}
-			return sigV(blocks.Subtractive(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.Subtractive(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
 	add(&Func{Name: "supersaw", Result: TSig, Doc: "psalm's supersaw, the sound of the JP-8000, playing notes, with one of its presets and voices notes at once. Stereo out",
 		Params: []Param{{"notes", TGenNotes, nil}, {"preset", TStr, defStr("trance_pad")}, {"voices", TNum, def(8)}},
@@ -237,8 +245,20 @@ func init() {
 			if voices < 1 {
 				return Value{}, fmt.Errorf("a synth needs at least one voice")
 			}
-			return sigV(blocks.Supersaw(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.Supersaw(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
+	attachSettings("subtractive", subtractive.Describe(subtractivePresets["pad"]()), func(a Args) (params.Set, bool) {
+		if make, ok := subtractivePresets[a.Str("preset")]; ok {
+			return subtractive.Describe(make()), true
+		}
+		return params.Set{}, false
+	})
+	attachSettings("supersaw", supersaw.Describe(supersawPresets["trance_pad"]()), func(a Args) (params.Set, bool) {
+		if make, ok := supersawPresets[a.Str("preset")]; ok {
+			return supersaw.Describe(make()), true
+		}
+		return params.Set{}, false
+	})
 }
 
 func init() {

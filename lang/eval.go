@@ -490,7 +490,7 @@ func (e *evaluator) call(c *Call) (Value, error) {
 		}
 		vals[i] = v
 	}
-	out, err := f.Call(Args{f, vals, e})
+	out, err := f.Call(Args{f: f, vals: vals, ev: e})
 	if err == nil {
 		out = fingerprinted(out, f.Name, vals)
 	}
@@ -516,5 +516,5 @@ func (e *evaluator) apply(f *Func, args ...Value) (Value, error) {
 		}
 		vals[i] = c
 	}
-	return f.Call(Args{f, vals, e})
+	return f.Call(Args{f: f, vals: vals, ev: e})
 }

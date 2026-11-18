@@ -12,6 +12,7 @@ import (
 	"harp/dsl"
 
 	"github.com/almerlucke/psalm/blocks/modmatrix"
+	"github.com/almerlucke/psalm/params"
 	"github.com/almerlucke/psalm/synths/grains"
 	"github.com/almerlucke/psalm/synths/wavetable"
 	"github.com/almerlucke/psalm/synths/wavetable/gen"
@@ -135,7 +136,7 @@ func init() {
 			setIf(a, "size", &cfg.GrainSize)
 			setIf(a, "pitchSpread", &cfg.PitchSpread)
 			what := fmt.Sprintf("%s | root %g | %s | %v %v %v %v %v %v", key, a.Num("root"), a.Str("preset"), cfg.Position, cfg.Scan, cfg.Spray, cfg.Density, cfg.GrainSize, cfg.PitchSpread)
-			return sigV(blocks.Grains(cfg, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.Grains(cfg, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
 	warpModes := map[string]wavetable.WarpMode{"off": wavetable.WarpOff, "bendup": wavetable.WarpBendUp, "benddown": wavetable.WarpBendDown, "sync": wavetable.WarpSync,
 		"mirror": wavetable.WarpMirror, "fmb": wavetable.WarpFMB, "fmsine": wavetable.WarpFMSine}
@@ -255,6 +256,18 @@ func init() {
 				}
 			}
 			what := fmt.Sprintf("%s | %s | %v %v %v %v %v %v %v | %s | %v", key, a.Str("preset"), cfg.Position, cfg.Cutoff, cfg.Resonance, cfg.Warp, cfg.Detune, cfg.Spread, cfg.SubLevel, a.Str("warpMode"), moved)
-			return sigV(blocks.Wavetable(cfg, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), mods)), nil
+			return sigV(blocks.Wavetable(cfg, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), mods, a.synthOpts...)), nil
 		}})
+	attachSettings("grains", grains.Describe(grainPresets["choir_pad"](nil, 60)), func(a Args) (params.Set, bool) {
+		if make, ok := grainPresets[a.Str("preset")]; ok {
+			return grains.Describe(make(nil, a.Num("root"))), true
+		}
+		return params.Set{}, false
+	})
+	attachSettings("wavetable", wavetable.Describe(wavetablePresets["pad"](nil)), func(a Args) (params.Set, bool) {
+		if make, ok := wavetablePresets[a.Str("preset")]; ok {
+			return wavetable.Describe(make(nil)), true
+		}
+		return params.Set{}, false
+	})
 }

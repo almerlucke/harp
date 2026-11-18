@@ -11,6 +11,7 @@ import (
 	"harp/blocks"
 	"harp/dsl"
 
+	"github.com/almerlucke/psalm/params"
 	"github.com/almerlucke/psalm/synths/drumsynth"
 	"github.com/almerlucke/psalm/synths/dx"
 	"github.com/almerlucke/psalm/synths/organ"
@@ -73,7 +74,7 @@ func init() {
 				}
 			}
 			what := fmt.Sprintf("%s | %s | %v | %v", a.Str("preset"), a.Str("drawbars"), cfg.Leslie, cfg.LeslieSpeed)
-			return sigV(blocks.Organ(cfg, what, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.Organ(cfg, what, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
 
 	add(&Func{Name: "dx", Result: TSig, Doc: "psalm's FM synth in the way of the Yamaha DX7 and TX81Z: operators that modulate each other (electric pianos, bells, brass, basses, pads, ...), playing notes with voices notes at once. The preset (harp presets dx) is one of its own patches; file is a DX7 SysEx bank (a .syx file of 32 patches) and patch the number of the patch in it, counted from 0, which takes the place of the preset. Stereo out",
@@ -150,4 +151,10 @@ func init() {
 			}
 			return numV(float64(k)), nil
 		}})
+	attachSettings("organ", organ.Describe(organPresets["jazz"]()), func(a Args) (params.Set, bool) {
+		if make, ok := organPresets[a.Str("preset")]; ok {
+			return organ.Describe(make()), true
+		}
+		return params.Set{}, false
+	}, "drawbars")
 }

@@ -7,6 +7,7 @@ import (
 	"harp/blocks"
 	"harp/dsl"
 
+	"github.com/almerlucke/psalm/params"
 	"github.com/almerlucke/psalm/synths/drumsynth"
 	"github.com/almerlucke/psalm/synths/modal"
 	"github.com/almerlucke/psalm/synths/piano"
@@ -18,7 +19,7 @@ import (
 
 // the synths of psalm that play notes: one function each, with the presets of the synth by name (presets_gen.go, made by internal/genpresets)
 
-func registerSynth[C any](name, doc, preset string, presets map[string]func() C, play func(C, int, dsl.Gen[[]blocks.Note]) dsl.Sig) {
+func registerSynth[C any](name, doc, preset string, presets map[string]func() C, play func(C, int, dsl.Gen[[]blocks.Note], ...blocks.SynthOption) dsl.Sig, describe func(C) params.Set) {
 	add(&Func{Name: name, Result: TSig, Doc: doc + ". Stereo out. The presets are in docs/presets.md (harp presets " + name + ")",
 		Params: []Param{{"notes", TGenNotes, nil}, {"preset", TStr, defStr(preset)}, {"voices", TNum, def(8)}},
 		Call: func(a Args) (Value, error) {
@@ -30,17 +31,23 @@ func registerSynth[C any](name, doc, preset string, presets map[string]func() C,
 			if voices < 1 || voices > 64 {
 				return Value{}, fmt.Errorf("voices is from 1 to 64")
 			}
-			return sigV(play(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(play(make(), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
+	attachSettings(name, describe(presets[preset]()), func(a Args) (params.Set, bool) {
+		if make, ok := presets[a.Str("preset")]; ok {
+			return describe(make()), true
+		}
+		return params.Set{}, false
+	})
 }
 
 func init() {
-	registerSynth("modal", "psalm's modal synth: struck and bowed bars, bells, bottles, cymbals and gongs as sets of resonances (marimba, vibraphone, church bell, ...), playing notes with voices notes at once", "marimba", modalPresets, blocks.Modal)
-	registerSynth("piano", "psalm's piano: hammers, strings and a soundboard, playing notes with voices notes at once", "grand", pianoPresets, blocks.Piano)
-	registerSynth("waveguide", "psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once", "guitar", waveguidePresets, blocks.Waveguide)
-	registerSynth("vocal", "psalm's singing voice: a glottis and a vocal tract (solo, choir, humming, chants, ...), playing notes with voices notes at once", "solo", vocalPresets, blocks.Vocal)
-	registerSynth("pulsar", "psalm's pulsar synthesis: trains of short pulses with formants (vowel leads, buzz bass, insects, ...), playing notes with voices notes at once", "vowel_lead", pulsarPresets, blocks.Pulsar)
-	registerSynth("shaper", "psalm's waveshaping and phase distortion synth (cz leads, fm basses, pads, ...), playing notes with voices notes at once", "acid", shaperPresets, blocks.Shaper)
+	registerSynth("modal", "psalm's modal synth: struck and bowed bars, bells, bottles, cymbals and gongs as sets of resonances (marimba, vibraphone, church bell, ...), playing notes with voices notes at once", "marimba", modalPresets, blocks.Modal, modal.Describe)
+	registerSynth("piano", "psalm's piano: hammers, strings and a soundboard, playing notes with voices notes at once", "grand", pianoPresets, blocks.Piano, piano.Describe)
+	registerSynth("waveguide", "psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once", "guitar", waveguidePresets, blocks.Waveguide, waveguide.Describe)
+	registerSynth("vocal", "psalm's singing voice: a glottis and a vocal tract (solo, choir, humming, chants, ...), playing notes with voices notes at once", "solo", vocalPresets, blocks.Vocal, vocal.Describe)
+	registerSynth("pulsar", "psalm's pulsar synthesis: trains of short pulses with formants (vowel leads, buzz bass, insects, ...), playing notes with voices notes at once", "vowel_lead", pulsarPresets, blocks.Pulsar, pulsar.Describe)
+	registerSynth("shaper", "psalm's waveshaping and phase distortion synth (cz leads, fm basses, pads, ...), playing notes with voices notes at once", "acid", shaperPresets, blocks.Shaper, shaper.Describe)
 }
 
 // presetTables are all the presets by the name of the synth: what harp presets prints

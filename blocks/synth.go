@@ -36,14 +36,14 @@ const synthChunk = dsl.BlockSize
 // chunk is made when it is complete, so that every note in it is known. Voices are made in an environment
 // of psalm with the sample rate of the program and random streams seeded with the same number
 // every time: the same patch sounds the same. At most 256 notes start in one chunk
-func Synth[V poly.Voice](newVoice func() V, channels, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
-	return synth("", newVoice, channels, voices, notes)
+func Synth[V poly.Voice](newVoice func() V, channels, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
+	return synth("", newVoice, channels, voices, notes, opts...)
 }
 
 // synth is Synth with a key that says which synth it is (what the voices are made from), for a program that takes over from another
 // (dsl.Runner.Swap): the same key and the same notes are the same synth, with its voices as they are. Empty: it is never kept
-func synth[V poly.Voice](key string, newVoice func() V, channels, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
-	return synthWith(synthOptions{}, key, newVoice, channels, voices, notes)
+func synth[V poly.Voice](key string, newVoice func() V, channels, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
+	return synthWith(synthOptions{}, key, newVoice, channels, voices, notes, opts...)
 }
 
 // synthOptions are what a kind of voice wants of the host
@@ -57,6 +57,32 @@ type synthOptions struct {
 	// mods are signals that move a setting of every voice while it sounds: the value of each at the start of a chunk of 64 samples is given
 	// to the voices as the value cabled in at the input Index (see Mod)
 	mods []Mod
+	// given are the settings that were asked for, by the key of their message: they are sent to every voice when it is made. defaults are what the
+	// preset has for every setting (to give back to a setting that is no longer asked for when a patch is edited). keyed are signals that move a
+	// setting by its key, in every chunk of 64 samples
+	given    Settings
+	defaults Settings
+	keyed    []KeyedMod
+}
+
+// SynthOption changes how a synth is made
+type SynthOption func(*synthOptions)
+
+// KeyedMod is a signal (one channel) that moves a setting of the voices by the key of its message: they get its value at the start of every
+// chunk of 64 samples (1.5 ms), as a message. A setting that is a knob can be moved, not a switch or a choice
+type KeyedMod struct {
+	Key string
+	Sig dsl.Sig
+}
+
+// WithSettings gives the voices of a synth settings by the key of their message (cutoff, ampAttack, filterMode: the settings that psalm
+// describes of the synth). given is what was asked for, defaults what the preset has for each setting (all of them, from Describe), keyed are the
+// signals that move settings. The settings are sent to a voice when it is made; a patch that is edited and has others sends them to the voices
+// that sound, which go on sounding, and the settings that are no longer asked for get what the preset has
+func WithSettings(given, defaults Settings, keyed []KeyedMod) SynthOption {
+	return func(o *synthOptions) {
+		o.given, o.defaults, o.keyed = given, defaults, keyed
+	}
 }
 
 // Mod is a signal (one channel) that is cabled into an input of the voices of a synth: they take its value at the start of every chunk of
@@ -67,11 +93,14 @@ type Mod struct {
 	Sig   dsl.Sig
 }
 
-func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, channels, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, channels, voices int, notes dsl.Gen[[]Note], more ...SynthOption) dsl.Sig {
 	if voices < 1 || channels < 1 {
 		panic("blocks: Synth: wants at least one voice and one channel")
 	}
-	st := &synthState{notes: notes, fp: dsl.Fingerprint(notes), opts: opts}
+	for _, o := range more {
+		o(&opts)
+	}
+	st := &synthState{notes: notes, fp: dsl.Fingerprint(notes), opts: opts, given: opts.given, defaults: opts.defaults, givenFP: fmt.Sprint(opts.given)}
 	if key != "" {
 		if st.fp != "" {
 			key = fmt.Sprintf("%s %d %d", key, channels, voices)
@@ -87,8 +116,15 @@ func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, c
 		}
 		inputs, modIdx = append(inputs, m.Sig), append(modIdx, m.Index)
 	}
-	if key != "" && len(modIdx) > 0 {
-		key = fmt.Sprintf("%s mods %v", key, modIdx)
+	var keyNames []string
+	for _, m := range opts.keyed {
+		if m.Sig.Channels() != 1 {
+			panic("blocks: Synth: a modulation is a signal of one channel")
+		}
+		inputs, keyNames = append(inputs, m.Sig), append(keyNames, m.Key)
+	}
+	if key != "" && (len(modIdx) > 0 || len(keyNames) > 0) {
+		key = fmt.Sprintf("%s mods %v %v", key, modIdx, keyNames)
 	}
 	return dsl.CustomN(dsl.SpecN{
 		Name:    "synth",
@@ -97,7 +133,16 @@ func synthWith[V poly.Voice](opts synthOptions, key string, newVoice func() V, c
 		Inputs:  inputs,
 		Outputs: channels,
 		New: func(rt *dsl.Rt) dsl.ProcessN {
-			h := newHost(rt, newVoice, channels, voices)
+			h := newHost(rt, newVoice, channels, voices, opts.given)
+			h.st = st
+			h.keyNames = keyNames
+			if len(keyNames) > 0 {
+				h.keyMsg = psalm.Message{}
+				for _, k := range keyNames {
+					h.keyMsg[k] = 0.0
+				}
+			}
+			h.keyBase = len(modIdx)
 			h.paced = opts.paced
 			h.single = opts.single
 			h.modIdx, h.modVal = modIdx, make([]any, len(modIdx))
@@ -119,6 +164,13 @@ type synthState struct {
 	notes  dsl.Gen[[]Note]
 	fp     string
 	retime bool
+	// the settings that were asked for (given) and what the preset has (defaults); a patch that takes over from this one and has others puts them in
+	// the voices that sound at the next chunk: dirty says there are some to send, and what
+	given    Settings
+	defaults Settings
+	givenFP  string
+	dirty    bool
+	send     psalm.Message
 }
 
 // pending makes the messages of the notes of one step
@@ -151,11 +203,28 @@ func (st *synthState) RebaseFrom(old any) (bool, func()) {
 	if !ok {
 		return false, nil
 	}
-	if st.fp != "" && st.fp == o.fp {
+	sameNotes := st.fp != "" && st.fp == o.fp
+	sameSettings := st.givenFP == o.givenFP
+	if sameNotes && sameSettings {
 		return true, nil
 	}
 	return true, func() {
-		o.notes, o.fp, o.retime = st.notes, st.fp, true
+		if !sameNotes {
+			o.notes, o.fp, o.retime = st.notes, st.fp, true
+		}
+		if !sameSettings {
+			// what the old patch had set and the new one does not goes back to what the preset has
+			msg := psalm.Message{}
+			for k := range o.given {
+				if v, ok := o.defaults[k]; ok {
+					msg[k] = v
+				}
+			}
+			for k, v := range st.given {
+				msg[k] = v
+			}
+			o.given, o.givenFP, o.send, o.dirty = st.given, st.givenFP, msg, true
+		}
 	}
 }
 
@@ -171,12 +240,12 @@ func (st *synthState) finish() { st.retime = false }
 // Subtractive is psalm's subtractive synth (two oscillators and a sub, noise, unison, a filter
 // with its own envelope, two lfos and a modulation matrix) with voices voices: cfg is one of its
 // presets (subtractive.PadPreset(), LeadPreset(), BassPreset()... there are many) or your own. See Synth
-func Subtractive(cfg subtractive.Config, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+func Subtractive(cfg subtractive.Config, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
 	channels := cfg.NumChannels
 	if channels == 0 {
 		channels = psalm.Stereo
 	}
-	return synth(fmt.Sprintf("subtractive %+v", cfg), func() *subtractive.Voice { return subtractive.New(cfg) }, channels, voices, notes)
+	return synth(fmt.Sprintf("subtractive %+v", cfg), func() *subtractive.Voice { return subtractive.New(cfg) }, channels, voices, notes, opts...)
 }
 
 // Supersaw is psalm's supersaw, the Roland JP-8000 sound: seven detuned saws around the note into
@@ -184,12 +253,12 @@ func Subtractive(cfg subtractive.Config, voices int, notes dsl.Gen[[]Note]) dsl.
 // presets (supersaw.TrancePad(), Hypersaw(), StringMachine()... there are 37) or your own. Every note
 // starts its saws at random phases, so no two notes sound the same, but the same patch always
 // sounds the same (the random streams are seeded). See Synth
-func Supersaw(cfg supersaw.Config, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+func Supersaw(cfg supersaw.Config, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
 	channels := cfg.NumChannels
 	if channels == 0 {
 		channels = psalm.Stereo
 	}
-	return synth(fmt.Sprintf("supersaw %+v", cfg), func() *supersaw.Voice { return supersaw.New(cfg) }, channels, voices, notes)
+	return synth(fmt.Sprintf("supersaw %+v", cfg), func() *supersaw.Voice { return supersaw.New(cfg) }, channels, voices, notes, opts...)
 }
 
 // pendingNote is a note as the control side makes it
@@ -229,9 +298,15 @@ type host[V poly.Voice] struct {
 	count  int64 // notes started
 	modIdx []int // the inputs of the voices that the modulations are cabled to
 	modVal []any // their values at the start of the chunk that is being played
+	// the signals that move a setting by its key: the message that every voice gets in every chunk, the keys in the order of the inputs after the
+	// modulations of modIdx, and the state of the synth (for the settings that a patch that is edited sends)
+	keyMsg   psalm.Message
+	keyNames []string
+	keyBase  int
+	st       *synthState
 }
 
-func newHost[V poly.Voice](rt *dsl.Rt, newVoice func() V, channels, voices int) *host[V] {
+func newHost[V poly.Voice](rt *dsl.Rt, newVoice func() V, channels, voices int, given Settings) *host[V] {
 	h := &host[V]{rt: rt, nch: channels, slots: make([]slot[V], voices), events: make([]noteEvent, 0, 256),
 		cfg: psalm.Config{SampleRate: rt.SampleRate, BufferSize: synthChunk, BPM: psalm.DefaultBPM, PPQ: psalm.DefaultPPQ},
 		mix: psalm.NewChannels(channels, synthChunk), fade: psalm.NewChannels(channels, synthChunk),
@@ -242,6 +317,13 @@ func newHost[V poly.Voice](rt *dsl.Rt, newVoice func() V, channels, voices int) 
 	inEnv(rt.SampleRate, func() {
 		for i := range h.slots {
 			h.slots[i] = slot[V]{voice: newVoice(), faded: -1}
+			if len(given) > 0 {
+				msg := psalm.Message{}
+				for k, v := range given {
+					msg[k] = v
+				}
+				h.slots[i].voice.ReceiveMessage(msg)
+			}
 		}
 	})
 	return h
@@ -275,6 +357,9 @@ func (h *host[V]) process(in [][]float64, out [][]float64, n int) {
 			for k := range h.modVal {
 				h.modVal[k] = in[k][i] // (one value for every voice: boxed once)
 			}
+			for k, name := range h.keyNames {
+				h.keyMsg[name] = in[h.keyBase+k][i]
+			}
 		}
 		j := int(p % synthChunk)
 		m := min(n-i, synthChunk-j)
@@ -295,6 +380,17 @@ func (h *host[V]) process(in [][]float64, out [][]float64, n int) {
 func (h *host[V]) render(c int64) {
 	start := c * synthChunk
 	end := start + synthChunk
+	if h.st != nil && h.st.dirty { // a patch that was edited has other settings: the voices that sound get them
+		for i := range h.slots {
+			h.slots[i].voice.ReceiveMessage(h.st.send)
+		}
+		h.st.dirty = false
+	}
+	if h.keyMsg != nil {
+		for i := range h.slots {
+			h.slots[i].voice.ReceiveMessage(h.keyMsg)
+		}
+	}
 	for k, v := range h.modVal {
 		if v == nil {
 			continue

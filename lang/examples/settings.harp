@@ -1,0 +1,20 @@
+// Every setting of a synth is a parameter (harp settings subtractive lists them). A number sets it, a name chooses, and a signal moves it
+// while the notes sound.
+bpm = 100
+steps = 4
+
+// a bass: the filter is a band pass that sweeps, the envelope is short and snappy
+bassNotes = melody([a1 a1 c2 a1 g1 a1 e2 a1], every(2), length: 3, velocity: [1 0.7 0.8 0.7])
+bass = subtractive(bassNotes, preset: "bass", voices: 2,
+    filterMode: "band pass",
+    cutoff: lfo(0.08).range(180, 1800),
+    resonance: 0.55,
+    ampAttack: 6, ampDecay: 220, ampSustain: 0.5, ampRelease: 120)
+
+// a pad: a slow attack and a long release, and the cutoff opens by a slow ramp
+padNotes = chords([[a3 c4 e4] [f3 a3 c4] [g3 b3 d4] [e3 g3 b3]], every(16), length: 16)
+pad = supersaw(padNotes, preset: "trance_pad", voices: 8,
+    ampAttack: 900, ampRelease: 1800,
+    cutoff: lfo(0.03).range(600, 5000))
+
+out = (bass.gain(0.7) + pad.gain(0.22)).reverb(mix: 0.15, decay: 2.2).gain(0.9)

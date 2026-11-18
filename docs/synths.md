@@ -50,6 +50,27 @@ A generator moves them by itself: `velocity: wander(0.4, 1)` is a player that is
 
 In a [score](scores.md), `phrase` takes the same: `velocity: [1 0.5 0.8]` and `legato: [1 0.5]` are a value for each pitch (a rest has one too).
 
+## Every setting
+
+A preset is a starting point. Every setting of a synth is a parameter of its function, with the name psalm gives it, and what is not given stays as the preset has it. `harp settings subtractive` lists them with their ranges (all synths: [settings.md](settings.md)).
+
+```harp
+n = melody([a2 a2 c3 a2], every(2), length: 3)
+out = subtractive(n, preset: "bass",
+    filterMode: "band pass", cutoff: lfo(0.2).range(200, 2500), resonance: 0.6,
+    ampAttack: 40, ampRelease: 600)
+```
+
+- a number sets it in every voice: `cutoff: 900`;
+- a name chooses (any writing: `"band pass"`, `"bandPass"`): `filterMode: "high pass"`;
+- `true` or `false` is a switch;
+- a signal, for a knob, moves it while the notes sound: `cutoff: lfo(0.1).range(300, 3000)`, `env(...)`, `seq(...)` (read once in every 64 samples, and the voices glide to it);
+- the envelopes have a parameter for each stage, in milliseconds (the sustain is a level from 0 to 1): `ampAttack`, `ampDecay`, `ampSustain`, `ampRelease`, and `filterAttack...`, `positionAttack...` for the synths that have those envelopes.
+
+A wrong value says what is allowed (`cutoff is from 20 to 20000 Hz: 99999 is not`), and a name that is nearly right is suggested. In a live edit a changed setting is changed in the notes that sound, and one that is taken out goes back to what the preset has.
+
+The modulation matrix, and the sets that are too big for parameters (the operators of `dx`, the drums of `drumSynth`), are not in the parameters yet.
+
 ## Your own instrument
 
 For a sound of your own on every note (an `fn` with oscillators, filters and envelopes), see [play](play.md).

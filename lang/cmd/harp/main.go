@@ -8,6 +8,7 @@
 //	                                            render it in harp and in SuperCollider and say how alike they are
 //	harp cache [clear]                          the folder of the mipmaps of recordings that are kept, and how big it is
 //	harp presets [synth|-md]                    the presets of the synths, by name
+//	harp settings [synth|-md]                   the settings of the synths: every parameter, with its range
 //	harp functions [-md]                        the functions of the language (-md: as the markdown reference of docs/)
 package main
 
@@ -141,6 +142,20 @@ func main() {
 			break
 		}
 		out, err := lang.Presets(synth)
+		if err != nil {
+			fail(err)
+		}
+		fmt.Print(out)
+	case "settings":
+		synth := ""
+		if len(os.Args) > 2 {
+			synth = os.Args[2]
+		}
+		if synth == "" || synth == "-md" {
+			fmt.Print(lang.SettingsMarkdown())
+			break
+		}
+		out, err := lang.SettingsOf(synth)
 		if err != nil {
 			fail(err)
 		}
