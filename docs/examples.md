@@ -11,6 +11,7 @@ In `lang/examples/`. Play one with `harp play lang/examples/NAME.harp` (copy it 
 | `shared_stream.harp` | one stream drives the notes of a `play` and the filter and pitch of a drone |
 | `psalm_pieces.harp` | the synths and effects of psalm together: a vibraphone, a choir, a plucked bass, a chorus moved by an lfo, a tremolo that pans, tape, shimmer |
 | `beat.harp` | a trap and breakbeat groove at 140 bpm in half time: rolls and triplets, a snare that rushes in the last bar of each section, hats that roll, a stuttering tom, an 808 that follows the chords, shakers with a groove and lanes |
+| `in_parts.harp` | a patch in four files (`use "in_parts/song.harp"`...): the form and chords, the drums, the instruments, and the mix; the files use each other and are read once |
 | `rainy_day.harp` | a synthwave song for a rainy day at 88 bpm in A minor: a slow pad, a pulsing bass, an arpeggio, a lead in the choruses, a snare in a gated reverb, and rain made of noise, drops on glass and a rumble |
 | `settings.harp` | a bass and a pad whose filter, resonance, envelopes and mode are set and moved from the patch, with the settings of the synths as parameters |
 | `forms.harp` | a song with sections, chords as text, a bass and a lead as parts that follow the chords, drums as patterns with rolls and triplets, and a played arpeggio with a groove and lanes |

@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -22,6 +23,10 @@ type Patch struct {
 	Info []string
 	// Dir is the folder of the patch: the files that it names (sounds, SFZ instruments) are looked for there first
 	Dir string
+	// File is the path of the patch when it is a file (CompileFile), and Files the files that it uses (use "drums.harp"), by their full path: a
+	// change in one of them is a change of the patch
+	File  string
+	Files []string
 }
 
 // Settings is the clock of the patch, as dsl wants it
@@ -41,6 +46,16 @@ func CompileDir(src, dir string) (*Patch, error) {
 	return buildPatch(prog, nil, dir)
 }
 
+// CompileFile is Compile for a patch that is a file: the folder of the file is where the files that it names are looked for, and the files that
+// it uses (use "drums.harp") are read from there; Patch.Files are all of them, for what watches them
+func CompileFile(src, path string) (*Patch, error) {
+	prog, err := Parse(src)
+	if err != nil {
+		return nil, err
+	}
+	return buildFile(prog, nil, path)
+}
+
 // Recompile is Compile for a patch that is edited while it plays (prev is the one that plays): the numbers that are drawn while it is
 // built are the same as for prev, so that a save that changes nothing changes nothing, and the generators that are running do not have
 // their random stream seeded again (a seed statement seeds only what is drawn while the patch is built)
@@ -49,13 +64,28 @@ func Recompile(src string, prev *Patch) (*Patch, error) {
 	if err != nil {
 		return nil, err
 	}
+	if prev.File != "" {
+		return buildFile(prog, prev, prev.File)
+	}
 	return buildPatch(prog, prev, prev.Dir)
+}
+
+func buildFile(prog *Program, prev *Patch, path string) (*Patch, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		abs = path
+	}
+	return buildPatchFile(prog, prev, filepath.Dir(abs), abs)
 }
 
 // Build checks and builds a program that was parsed
 func Build(prog *Program) (*Patch, error) { return buildPatch(prog, nil, "") }
 
 func buildPatch(prog *Program, prev *Patch, dir string) (*Patch, error) {
+	return buildPatchFile(prog, prev, dir, "")
+}
+
+func buildPatchFile(prog *Program, prev *Patch, dir, file string) (*Patch, error) {
 	start := uint64(time.Now().UnixNano())
 	if prev != nil {
 		start = prev.StartSeed
@@ -64,24 +94,44 @@ func buildPatch(prog *Program, prev *Patch, dir string) (*Patch, error) {
 	sharedSignals = map[any]dsl.Sig{} // a program starts with no generators made into signals
 	sharedGates = map[any]dsl.Sig{}
 	global := &scope{vars: map[string]varDef{}}
-	e := &evaluator{scope: global, global: global, fns: map[string]*Func{}, patch: &Patch{BPM: 120, StepsPerBeat: 4, StartSeed: start, Dir: dir}, live: prev != nil}
-	var out *Value
-	var outAt Pos
+	e := &evaluator{scope: global, global: global, fns: map[string]*Func{}, patch: &Patch{BPM: 120, StepsPerBeat: 4, StartSeed: start, Dir: dir, File: file}, live: prev != nil}
+	e.uses = &useState{loaded: map[string]bool{}, fnAt: map[string]Pos{}}
+	if file != "" {
+		e.uses.loaded[file], e.uses.stack = true, []string{file}
+	}
+	if err := e.run(prog, dir, false); err != nil {
+		return nil, err
+	}
+	if e.uses.out == nil {
+		return nil, &Error{Pos: Pos{Line: 1, Col: 1}, Msg: "the patch has no out: write out = ... with what is to be heard"}
+	}
+	e.patch.Out = e.uses.out.Sig()
+	return e.patch, nil
+}
+
+// run does the statements of a program, in order: those of the patch, and those of a file that it uses (used: then there is no out)
+func (e *evaluator) run(prog *Program, dir string, used bool) error {
 	for _, st := range prog.Stmts {
+		if st.Use != "" {
+			if err := e.use(st, dir); err != nil {
+				return err
+			}
+			continue
+		}
 		if st.Fn != nil { // fn name(...) { ... }: known from here on
 			if err := e.defineFn(st); err != nil {
-				return nil, err
+				return err
 			}
 			continue
 		}
 		v, err := e.expr(st.Value)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		switch st.Name {
 		case "bpm", "steps", "seed":
 			if v.T.Kind != KNum {
-				return nil, &Error{Pos: st.Value.At(), Msg: fmt.Sprintf("%s is a number, not a %s", st.Name, v.T)}
+				return &Error{Pos: st.Value.At(), Msg: fmt.Sprintf("%s is a number, not a %s", st.Name, v.T)}
 			}
 			f := v.Float()
 			switch {
@@ -97,32 +147,31 @@ func buildPatch(prog *Program, prev *Patch, dir string) (*Patch, error) {
 					dsl.Seed(e.patch.Seed) // what is made after this draws from the seeded stream
 				}
 			default:
-				return nil, &Error{Pos: st.Value.At(), Msg: fmt.Sprintf("%s = %v is not a possible value", st.Name, f)}
+				return &Error{Pos: st.Value.At(), Msg: fmt.Sprintf("%s = %v is not a possible value", st.Name, f)}
 			}
 			e.scope.vars[st.Name] = varDef{v, st.P}
 		case "out":
-			if out != nil {
-				return nil, &Error{Pos: st.P, Msg: fmt.Sprintf("out is already defined, at %s", outAt)}
+			if used {
+				return &Error{Pos: st.P, Msg: "out is only in the patch itself, not in a file that is used"}
+			}
+			if e.uses.out != nil {
+				return &Error{Pos: st.P, Msg: fmt.Sprintf("out is already defined, at %s", e.uses.outAt)}
 			}
 			c, err := coerce(v, TSig)
 			if err != nil {
-				return nil, &Error{Pos: st.Value.At(), Msg: "out is what is heard: " + err.Error()}
+				return &Error{Pos: st.Value.At(), Msg: "out is what is heard: " + err.Error()}
 			}
-			out, outAt = &c, st.P
+			e.uses.out, e.uses.outAt = &c, st.P
 		default:
 			if _, ok := consts[st.Name]; ok {
-				return nil, &Error{Pos: st.P, Msg: fmt.Sprintf("%s is a name of the language, it can't be changed", st.Name)}
+				return &Error{Pos: st.P, Msg: fmt.Sprintf("%s is a name of the language, it can't be changed", st.Name)}
 			}
 			if err := e.define(st.Name, v, st.P); err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-	if out == nil {
-		return nil, &Error{Pos: Pos{1, 1}, Msg: "the patch has no out: write out = ... with what is to be heard"}
-	}
-	e.patch.Out = out.Sig()
-	return e.patch, nil
+	return nil
 }
 
 type varDef struct {
@@ -137,9 +186,10 @@ type scope struct {
 }
 
 type evaluator struct {
-	live   bool   // the patch is built again while it plays (Recompile)
-	scope  *scope // where names are looked up and defined now
-	global *scope // the names of the program: what the functions can see besides their own
+	uses   *useState // the files that the patch uses, and what the statements of all of them share (only the evaluator of the patch has it)
+	live   bool      // the patch is built again while it plays (Recompile)
+	scope  *scope    // where names are looked up and defined now
+	global *scope    // the names of the program: what the functions can see besides their own
 	fns    map[string]*Func
 	patch  *Patch
 	depth  int // how many functions of the program are being worked out one in the other
@@ -164,7 +214,7 @@ func (e *evaluator) define(name string, v Value, at Pos) error {
 		return &Error{Pos: at, Msg: fmt.Sprintf("%s is a name of the language, it can't be changed", name)}
 	}
 	if prev, ok := e.scope.vars[name]; ok {
-		return &Error{Pos: at, Msg: fmt.Sprintf("%s is already defined, at %s", name, prev.at)}
+		return &Error{Pos: at, Msg: fmt.Sprintf("%s is already defined, at %s", name, e.where(prev.at))}
 	}
 	e.scope.vars[name] = varDef{v, at}
 	return nil
@@ -191,7 +241,10 @@ func (e *evaluator) names() []string {
 // does not see the names of the place it is called from
 func (e *evaluator) defineFn(st Stmt) error {
 	if _, ok := e.fns[st.Name]; ok {
-		return &Error{Pos: st.P, Msg: fmt.Sprintf("the function %s is already defined", st.Name)}
+		return &Error{Pos: st.P, Msg: fmt.Sprintf("the function %s is already defined, at %s", st.Name, e.where(e.fnWhere(st.Name)))}
+	}
+	if e.uses != nil {
+		e.uses.fnAt[st.Name] = st.P
 	}
 	seen := map[string]bool{}
 	params := make([]Param, len(st.Fn.Params))

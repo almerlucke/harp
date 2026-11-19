@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -21,6 +22,11 @@ func (e *Error) Error() string {
 
 // Show prints the error with the line of the source it is in, and a mark under the place
 func (e *Error) Show(src string) string {
+	if e.Pos.File != "" { // a mistake in a file that the patch uses: that file is where the line is
+		if b, err := os.ReadFile(e.Pos.File); err == nil {
+			src = string(b)
+		}
+	}
 	lines := strings.Split(strings.ReplaceAll(src, "\r\n", "\n"), "\n")
 	if e.Pos.Line < 1 || e.Pos.Line > len(lines) {
 		return e.Error()

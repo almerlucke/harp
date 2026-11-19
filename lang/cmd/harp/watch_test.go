@@ -116,3 +116,60 @@ func (w *syncWriter) Write(p []byte) (int, error) {
 	defer w.mu.Unlock()
 	return w.b.Write(p)
 }
+
+// a patch in two files: a change in the file that it uses is a change of the patch, a mistake in that file is told with its own name and line, and
+// a file that a change starts to use is watched too
+func TestWatchFollowsTheFilesThatAPatchUses(t *testing.T) {
+	dir := t.TempDir()
+	path, part := filepath.Join(dir, "main.harp"), filepath.Join(dir, "part.harp")
+	write(t, path, "use \"part.harp\"\nout = sine(f)\n")
+	write(t, part, "f = 220\n")
+	src, _ := os.ReadFile(path)
+	first, err := lang.CompileFile(string(src), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var s swaps
+	var log bytes.Buffer
+	var logMu sync.Mutex
+	done := make(chan struct{})
+	go func() {
+		watchFile(ctx, path, first, s.swap, &syncWriter{&log, &logMu}, 10*time.Millisecond)
+		close(done)
+	}()
+	time.Sleep(50 * time.Millisecond)
+	write(t, part, "f = 330\n")
+	waitFor(t, "the change of the file that is used", func() bool { return s.count() == 1 })
+	// a mistake in it: its own name and line, and nothing is swapped
+	write(t, part, "f = lowpas(sine(3), 800)\n")
+	waitFor(t, "the message about the mistake", func() bool {
+		logMu.Lock()
+		defer logMu.Unlock()
+		return strings.Contains(log.String(), "the old patch plays on")
+	})
+	logMu.Lock()
+	if !strings.Contains(log.String(), "part.harp:1:5") || strings.Contains(log.String(), "main.harp:part.harp") {
+		t.Errorf("the message: %q", log.String())
+	}
+	logMu.Unlock()
+	if s.count() != 1 {
+		t.Errorf("%d swaps", s.count())
+	}
+	write(t, part, "f = 440\n")
+	waitFor(t, "the change after the mistake", func() bool { return s.count() == 2 })
+	// a new file that the patch starts to use, with a mistake that is mended in that file alone
+	more := filepath.Join(dir, "more.harp")
+	write(t, more, "g = nothing\n")
+	write(t, path, "use \"part.harp\"\nuse \"more.harp\"\nout = sine(f * g)\n")
+	waitFor(t, "the mistake in the new file", func() bool {
+		logMu.Lock()
+		defer logMu.Unlock()
+		return strings.Count(log.String(), "the old patch plays on") >= 2
+	})
+	write(t, more, "g = 2\n")
+	waitFor(t, "the new file when it is mended", func() bool { return s.count() == 3 })
+	cancel()
+	<-done
+}

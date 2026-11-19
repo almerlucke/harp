@@ -39,6 +39,8 @@ patch.harp:12:9: there is no function lowpas (did you mean lowPass?)
 
 A save that changes nothing (a comment, spaces) gives bit-for-bit the same sound as not saving.
 
+A patch in several files (`use "drums.harp"`, see [the language](language.md)) is watched in all of its files: a save in any of them takes over, and a mistake in a used file is told with its own name and line while the old patch plays on. A file that a save starts to use is watched from then on, also when it has a mistake.
+
 ## Good to know
 
 - **Random numbers.** Put `seed = N` in the patch. Edits then draw the same build-time numbers (`rand`, `choose`, ...) and a save does not re-roll them. Without a `seed`, harp keeps the one it picked at the start. Running generators (`mutate`) are not reseeded by a save.

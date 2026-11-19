@@ -1,0 +1,13 @@
+// The form and the chords: what every part follows. Change them here and the drums and the instruments follow.
+bpm = 96
+steps = 4
+seed = 5
+
+// 28 bars: the sections have a name and their bars
+form = song("Intro 4, Verse 8, Chorus 8, Outro 4")
+
+// the chords, a bar each
+prog = "Am9 Fmaj7 Cmaj7 G6"
+
+// a function that every part can use: a level that follows the form
+fn level(sections, quiet, loud) { quiet + (loud - quiet) * during(form, sections, glide: 2) }

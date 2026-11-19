@@ -199,37 +199,37 @@ func TestErrors(t *testing.T) {
 		at        Pos
 		mentions  []string
 	}{
-		{"unknown function", "out = lowpas(saw(220), 800)", Pos{1, 7}, []string{"no function lowpas", "did you mean lowPass?"}},
-		{"unknown method", "out = saw(220).lowpas(800)", Pos{1, 15}, []string{"no function lowpas", "did you mean lowPass?"}},
-		{"unknown parameter", "out = lowPass(saw(220), cutof: 800)", Pos{1, 25}, []string{"no parameter cutof", "did you mean cutoff?", "lowPass(x: signal"}},
-		{"missing argument", "out = saw()", Pos{1, 7}, []string{"saw needs freq"}},
-		{"too many arguments", "out = saw(220, 330)", Pos{1, 16}, []string{"saw takes 1 arguments"}},
-		{"given twice", "out = lowPass(saw(220), 800, cutoff: 900)", Pos{1, 30}, []string{"cutoff is given twice"}},
-		{"positional after named", "out = lowPass(saw(220), cutoff: 800, 0.5)", Pos{1, 38}, []string{"positional argument can't come after a named one"}},
-		{"undefined name", "melody = [1 2]\nout = melodi", Pos{2, 7}, []string{"melodi is not defined", "did you mean melody?"}},
-		{"function as a value", "out = saw", Pos{1, 7}, []string{"saw is a function", "saw(...)"}},
-		{"redefined", "x = 1\nx = 2\nout = x", Pos{2, 1}, []string{"x is already defined, at 1:1"}},
-		{"a name of the language", "minor = 3\nout = 0", Pos{1, 1}, []string{"minor is a name of the language"}},
-		{"no out", "x = 1", Pos{1, 1}, []string{"no out"}},
-		{"out twice", "out = 1\nout = 2", Pos{2, 1}, []string{"out is already defined"}},
-		{"rate: a generator is not a signal", "out = saw(euclid(16, 7))", Pos{1, 11}, []string{"saw: freq: expected a signal, got a generator of booleans", "event rate"}},
-		{"rate: a signal is not a generator", "out = notes(saw(220), euclid(16, 7)).pitch", Pos{1, 13}, []string{"notes: melody: expected a generator of numbers, got a signal", "audio rate"}},
-		{"kinds of generators", "out = notes(euclid(4, 2), euclid(16, 7)).pitch", Pos{1, 13}, []string{"expected a generator of numbers, got a generator of booleans", "different things"}},
-		{"a string is not a number", `out = saw("a")`, Pos{1, 11}, []string{"expected a signal, got a string"}},
-		{"not whole", "out = notes(degrees(a3, minor, [0 2.5]), every(2)).pitch", Pos{1, 32}, []string{"item 2 of the list is not a whole number"}},
-		{"empty list", "out = saw([])", Pos{1, 11}, []string{"an empty list has no channels"}},
-		{"channels do not match", "out = [1 2] + [1 2 3]", Pos{1, 13}, []string{"signals of 2 and 3 channels"}},
-		{"operator on a generator", "out = euclid(4, 2) + 1", Pos{1, 20}, []string{"+ works on numbers and signals", "generator of booleans"}},
-		{"division by a signal", "out = saw(220) / saw(110)", Pos{1, 16}, []string{"divided by a number"}},
-		{"division by zero", "out = 1 / 0", Pos{1, 9}, []string{"division by zero"}},
-		{"no field", "v = notes([60], every(4))\nout = v.pich", Pos{2, 8}, []string{"a voice has no pich", "did you mean pitch?"}},
-		{"field of a number", "out = 3.x", Pos{1, 8}, []string{}},
-		{"a preset that is not there", `out = chords([a3], every(4)).subtractive(preset: "padd")`, Pos{1, 29}, []string{`no subtractive preset "padd"`, "did you mean pad?"}},
-		{"bpm is a number", "bpm = [1 2]\nout = 0", Pos{1, 7}, []string{"bpm is a number"}},
-		{"bpm is positive", "bpm = 0\nout = 0", Pos{1, 7}, []string{"not a possible value"}},
-		{"out is a signal", "out = euclid(4, 2)", Pos{1, 7}, []string{"out is what is heard", "expected a signal"}},
-		{"reverb of three channels", "out = [1 2 3].reverb()", Pos{1, 14}, []string{"takes one or two channels", "3"}},
-		{"euclid steps", "out = notes([60], euclid(0, 2)).pitch", Pos{1, 19}, []string{"steps must be at least 1"}},
+		{"unknown function", "out = lowpas(saw(220), 800)", Pos{Line: 1, Col: 7}, []string{"no function lowpas", "did you mean lowPass?"}},
+		{"unknown method", "out = saw(220).lowpas(800)", Pos{Line: 1, Col: 15}, []string{"no function lowpas", "did you mean lowPass?"}},
+		{"unknown parameter", "out = lowPass(saw(220), cutof: 800)", Pos{Line: 1, Col: 25}, []string{"no parameter cutof", "did you mean cutoff?", "lowPass(x: signal"}},
+		{"missing argument", "out = saw()", Pos{Line: 1, Col: 7}, []string{"saw needs freq"}},
+		{"too many arguments", "out = saw(220, 330)", Pos{Line: 1, Col: 16}, []string{"saw takes 1 arguments"}},
+		{"given twice", "out = lowPass(saw(220), 800, cutoff: 900)", Pos{Line: 1, Col: 30}, []string{"cutoff is given twice"}},
+		{"positional after named", "out = lowPass(saw(220), cutoff: 800, 0.5)", Pos{Line: 1, Col: 38}, []string{"positional argument can't come after a named one"}},
+		{"undefined name", "melody = [1 2]\nout = melodi", Pos{Line: 2, Col: 7}, []string{"melodi is not defined", "did you mean melody?"}},
+		{"function as a value", "out = saw", Pos{Line: 1, Col: 7}, []string{"saw is a function", "saw(...)"}},
+		{"redefined", "x = 1\nx = 2\nout = x", Pos{Line: 2, Col: 1}, []string{"x is already defined, at 1:1"}},
+		{"a name of the language", "minor = 3\nout = 0", Pos{Line: 1, Col: 1}, []string{"minor is a name of the language"}},
+		{"no out", "x = 1", Pos{Line: 1, Col: 1}, []string{"no out"}},
+		{"out twice", "out = 1\nout = 2", Pos{Line: 2, Col: 1}, []string{"out is already defined"}},
+		{"rate: a generator is not a signal", "out = saw(euclid(16, 7))", Pos{Line: 1, Col: 11}, []string{"saw: freq: expected a signal, got a generator of booleans", "event rate"}},
+		{"rate: a signal is not a generator", "out = notes(saw(220), euclid(16, 7)).pitch", Pos{Line: 1, Col: 13}, []string{"notes: melody: expected a generator of numbers, got a signal", "audio rate"}},
+		{"kinds of generators", "out = notes(euclid(4, 2), euclid(16, 7)).pitch", Pos{Line: 1, Col: 13}, []string{"expected a generator of numbers, got a generator of booleans", "different things"}},
+		{"a string is not a number", `out = saw("a")`, Pos{Line: 1, Col: 11}, []string{"expected a signal, got a string"}},
+		{"not whole", "out = notes(degrees(a3, minor, [0 2.5]), every(2)).pitch", Pos{Line: 1, Col: 32}, []string{"item 2 of the list is not a whole number"}},
+		{"empty list", "out = saw([])", Pos{Line: 1, Col: 11}, []string{"an empty list has no channels"}},
+		{"channels do not match", "out = [1 2] + [1 2 3]", Pos{Line: 1, Col: 13}, []string{"signals of 2 and 3 channels"}},
+		{"operator on a generator", "out = euclid(4, 2) + 1", Pos{Line: 1, Col: 20}, []string{"+ works on numbers and signals", "generator of booleans"}},
+		{"division by a signal", "out = saw(220) / saw(110)", Pos{Line: 1, Col: 16}, []string{"divided by a number"}},
+		{"division by zero", "out = 1 / 0", Pos{Line: 1, Col: 9}, []string{"division by zero"}},
+		{"no field", "v = notes([60], every(4))\nout = v.pich", Pos{Line: 2, Col: 8}, []string{"a voice has no pich", "did you mean pitch?"}},
+		{"field of a number", "out = 3.x", Pos{Line: 1, Col: 8}, []string{}},
+		{"a preset that is not there", `out = chords([a3], every(4)).subtractive(preset: "padd")`, Pos{Line: 1, Col: 29}, []string{`no subtractive preset "padd"`, "did you mean pad?"}},
+		{"bpm is a number", "bpm = [1 2]\nout = 0", Pos{Line: 1, Col: 7}, []string{"bpm is a number"}},
+		{"bpm is positive", "bpm = 0\nout = 0", Pos{Line: 1, Col: 7}, []string{"not a possible value"}},
+		{"out is a signal", "out = euclid(4, 2)", Pos{Line: 1, Col: 7}, []string{"out is what is heard", "expected a signal"}},
+		{"reverb of three channels", "out = [1 2 3].reverb()", Pos{Line: 1, Col: 14}, []string{"takes one or two channels", "3"}},
+		{"euclid steps", "out = notes([60], euclid(0, 2)).pitch", Pos{Line: 1, Col: 19}, []string{"steps must be at least 1"}},
 	} {
 		_, err := Compile(c.src)
 		if err == nil {
@@ -361,7 +361,7 @@ func TestPlayExampleFileIsThePlayPatch(t *testing.T) {
 func TestErrorsComeFromLeftToRight(t *testing.T) {
 	_, err := Compile("v = notes([60], every(4))\nout = saw(v.pich).lowpas(cutoff: 800)")
 	e, ok := err.(*Error)
-	if !ok || e.Pos != (Pos{2, 12}) || !strings.Contains(e.Msg, "a voice has no pich") {
+	if !ok || e.Pos != (Pos{Line: 2, Col: 12}) || !strings.Contains(e.Msg, "a voice has no pich") {
 		t.Errorf("the typo in the receiver is said before the unknown method: %v", err)
 	}
 	// and a syntax error is an Error like the others, with a place the source can be shown at

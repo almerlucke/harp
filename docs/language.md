@@ -61,6 +61,29 @@ fn pluck(gate, note) {
 
 The body is statements, then the value. A function sees its parameters and the names of the patch that are defined by the time it is called, not the variables of the place it is called from. It can call functions defined before it (and itself, up to 200 deep).
 
+## A patch in several files
+
+`use "file.harp"` puts the statements of another file at that place, as if they were written there. The names and the functions of the file are the patch's from there on, so a long piece can be cut in parts: the form and the chords in one file, the drums in another, the instruments in a third, and the patch itself with `out` and the mix.
+
+```text
+use "parts/song.harp"
+use "parts/drums.harp"
+use "parts/instruments.harp"
+
+out = (drums + instruments).reverb(mix: 0.15).gain(0.6)
+```
+
+- the name of a file is from the folder of the file that has the `use` (`parts/drums.harp` can say `use "song.harp"` for `parts/song.harp`);
+- a file that is used twice (the drums and the instruments both use `song.harp`) is read once;
+- **only the patch itself has `out`**; a file that is used with an `out` is refused;
+- a name or a function that is defined twice, in any of the files, is a mistake that says where both are (`prog is already defined, at song.harp:4:1`);
+- a file that uses itself, through others, is a mistake that shows the chain;
+- a mistake in a used file is shown with that file's name and line.
+
+`use`, like `fn`, `if` and `else`, is a word of the language: it can't be the name of something (`use is a word of the language, it can't be used as a name`).
+
+`bpm`, `steps` and `seed` can be in a used file too; the last one that is done is the one that counts. With `harp play`, a save in any of the files takes over like a save in the patch ([live editing](live-editing.md)). `examples/in_parts.harp` is a piece in four files.
+
 ## `if`
 
 ```

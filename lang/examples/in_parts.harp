@@ -1,0 +1,13 @@
+// A patch in several files. use "file" puts the statements of that file here: its names (form, prog, drums, instruments) and its function
+// (level) are this patch's, and the files can use each other (song.harp is used by the other two and read once). Only this file has out.
+//
+//   harp check examples/in_parts.harp
+//   harp play examples/in_parts.harp
+//
+// Edit any of the files while it plays (harp play -watch): a save in song.harp, drums.harp or instruments.harp takes over like a save here.
+
+use "in_parts/song.harp"
+use "in_parts/drums.harp"
+use "in_parts/instruments.harp"
+
+out = (drums + instruments).reverb(mix: 0.15, decay: 2.2).gain(0.6)

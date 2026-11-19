@@ -105,14 +105,14 @@ func TestParsePositions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p.Stmts[0].P != (Pos{1, 1}) || p.Stmts[1].P != (Pos{2, 1}) {
+	if p.Stmts[0].P != (Pos{Line: 1, Col: 1}) || p.Stmts[1].P != (Pos{Line: 2, Col: 1}) {
 		t.Errorf("statements at %v and %v", p.Stmts[0].P, p.Stmts[1].P)
 	}
 	call := p.Stmts[1].Value.(*Call)
-	if call.P != (Pos{2, 5}) || call.Args[0].P != (Pos{2, 7}) || call.Args[1].P != (Pos{3, 3}) {
+	if call.P != (Pos{Line: 2, Col: 5}) || call.Args[0].P != (Pos{Line: 2, Col: 7}) || call.Args[1].P != (Pos{Line: 3, Col: 3}) {
 		t.Errorf("call at %v, arguments at %v and %v", call.P, call.Args[0].P, call.Args[1].P)
 	}
-	if n := p.Stmts[0].Value.(*Num); n.P != (Pos{1, 5}) {
+	if n := p.Stmts[0].Value.(*Num); n.P != (Pos{Line: 1, Col: 5}) {
 		t.Errorf("number at %v", n.P)
 	}
 }
@@ -169,7 +169,7 @@ func TestSharpsAndComments(t *testing.T) {
 }
 
 func TestErrorShowsTheLine(t *testing.T) {
-	e := &Error{Pos: Pos{2, 5}, Msg: "unknown function lowpas", Hint: "did you mean lowPass?"}
+	e := &Error{Pos: Pos{Line: 2, Col: 5}, Msg: "unknown function lowpas", Hint: "did you mean lowPass?"}
 	got := e.Show("a = 1\nb = lowpas(a)\nc = 3")
 	want := "2:5: unknown function lowpas (did you mean lowPass?)\n2 | b = lowpas(a)\n        ^"
 	if got != want {

@@ -1,0 +1,9 @@
+// The drums. song.harp is used by the patch before this file, and is used here too (it is read once).
+use "song.harp"
+
+kick = drumSynth(melody([drum("kick")], pattern("x... .... x.x. ....")), kit: "808", voices: 2).gain(0.5 * during(form, "Verse, Chorus"))
+snare = drumSynth(melody([drum("snare")], pattern("....x... ....x... | ....x... ....x.x3")), kit: "909", voices: 2).gain(0.4 * during(form, "Verse, Chorus"))
+hats = drumSynth(melody([drum("hat") drum("hat") drum("open") drum("hat")], pattern("x x x x | x x x [x x x]"), velocity: [0.6 0.35 0.5 0.35]), kit: "808", voices: 3)
+  .gain(1.6 * level("Chorus", 0.5, 1) * during(form, "Verse, Chorus"))
+
+drums = kick + snare + hats

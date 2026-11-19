@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime/pprof"
 	"strings"
 	"time"
@@ -183,16 +182,24 @@ func load(fs *flag.FlagSet, args []string) (*lang.Patch, string) {
 	if err != nil {
 		fail(err)
 	}
-	patch, err := lang.CompileDir(string(src), filepath.Dir(path))
+	patch, err := lang.CompileFile(string(src), path)
 	if err != nil {
 		if e, ok := err.(*lang.Error); ok {
-			fmt.Fprintf(os.Stderr, "%s:%s\n", path, e.Show(string(src)))
+			fmt.Fprintln(os.Stderr, showError(path, string(src), e))
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stderr, "%s:%v\n", path, err)
 		os.Exit(1)
 	}
 	return patch, path
+}
+
+// showError is a mistake of a patch with the line it is in: the patch is named before it, and a file that the patch uses names itself
+func showError(path, src string, e *lang.Error) string {
+	if e.Pos.File != "" {
+		return e.Show(src)
+	}
+	return path + ":" + e.Show(src)
 }
 
 func fail(err error) {

@@ -1,0 +1,17 @@
+// The instruments, on the chords of song.harp.
+use "song.harp"
+
+pad = chords(changes(prog, key: "A minor", lowest: 48, lead: true), every(16), velocity: 0.6, length: 15)
+  .subtractive(preset: "juno_pad", voices: 8, ampAttack: 600, ampRelease: 1500)
+  .gain(0.22 * curve(form, "Intro: 0.3 -> 1 smooth, Verse: 0.8, Chorus: 1, Outro: 1 -> 0 smooth"))
+
+bass = part("@b . @b . @b . @b . @b . @b . @b . @b .", chords: prog, key: "A minor", bass: 33, velocity: 0.8, legato: 0.7)
+  .subtractive(preset: "moog_bass", voices: 2, cutoff: lfo(0.05).range(350, 700))
+  .gain(0.6 * during(form, "Verse, Chorus"))
+
+lead = part("@3' . . . . . @2' . | @1'' . . . . . . .", chords: prog, key: "A minor", register: 60, velocity: 0.75, legato: 1.1)
+  .subtractive(preset: "mono_lead", voices: 2)
+  .gain(0.8 * during(form, "Chorus", glide: 2))
+  .echo(max: 1, time: [0.62, 0.47], feedback: 0.4, mix: 0.25)
+
+instruments = pad + bass + lead

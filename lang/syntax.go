@@ -11,6 +11,9 @@
 //	  .gain(adsr(0.005, 0.15, 0.5, 0.2).on(voice.gate))
 //	out = lead * 0.4
 //
+// use is a word of the language, like fn and if. use "drums.harp" brings in the statements of another file, as if they were written there: its names and its functions are the patch's (a name
+// that is defined twice is a mistake, and says where both are). Only the patch itself has out.
+//
 // A function of your own is fn name(a, b) { statements and then the value }, and if cond { ... } else { ... } is
 // an expression: only the branch that is taken is worked out.
 //
@@ -21,9 +24,12 @@ package lang
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 
 	ebnf "github.com/almerlucke/exbana/v3"
@@ -37,10 +43,29 @@ import (
 	"github.com/almerlucke/exbana/v3/readers/runes"
 )
 
-// Pos is a place in the source, from 1
-type Pos struct{ Line, Col int }
+// Pos is a place in the source, from 1. File is the file it is in when that is a file that a patch uses (use "drums.harp"), and empty for the
+// patch itself
+type Pos struct {
+	Line, Col int
+	File      string
+}
 
-func (p Pos) String() string { return fmt.Sprintf("%d:%d", p.Line, p.Col) }
+func (p Pos) String() string {
+	if p.File != "" {
+		return fmt.Sprintf("%s:%d:%d", shortPath(p.File), p.Line, p.Col)
+	}
+	return fmt.Sprintf("%d:%d", p.Line, p.Col)
+}
+
+// shortPath is a path as it is shown: from the folder harp runs in when it is below it
+func shortPath(path string) string {
+	if wd, err := os.Getwd(); err == nil && wd != string(filepath.Separator) {
+		if rel, err := filepath.Rel(wd, path); err == nil && !strings.HasPrefix(rel, "..") {
+			return rel
+		}
+	}
+	return path
+}
 
 // Expr is an expression of the syntax tree
 type Expr interface {
@@ -114,12 +139,13 @@ type Arg struct {
 	Value Expr
 }
 
-// Stmt is name = expr, or with Fn set a function: fn name(params) { body }
+// Stmt is name = expr, or with Fn set a function: fn name(params) { body }, or with Use set the file whose statements come at this place
 type Stmt struct {
 	P     Pos
 	Name  string
 	Value Expr
 	Fn    *FnDef
+	Use   string // use "file.harp": the statements of that file come here
 }
 
 // FnDef is a function of the program: its parameters, and the block that is its value
@@ -199,6 +225,10 @@ func (e *If) String() string {
 func (p *Program) String() string {
 	var b strings.Builder
 	for _, s := range p.Stmts {
+		if s.Use != "" {
+			fmt.Fprintf(&b, "use %q\n", s.Use)
+			continue
+		}
 		if s.Fn != nil {
 			fmt.Fprintf(&b, "fn %s(%s) %s\n", s.Name, strings.Join(s.Fn.Params, ", "), s.Fn.Body)
 			continue
@@ -215,7 +245,7 @@ type (
 )
 
 // reserved are the words of the language that are not names
-var reserved = map[string]bool{"fn": true, "if": true, "else": true}
+var reserved = map[string]bool{"fn": true, "if": true, "else": true, "use": true}
 
 func reservedError(p Pos, s string) error {
 	return &Error{Pos: p, Msg: fmt.Sprintf("%s is a word of the language, it can't be used as a name", s)}
@@ -243,7 +273,13 @@ func parseNote(s string) (float64, bool) {
 }
 
 // at is where a match begins, counted from 1 (the positions of exbana start at 0)
-func at(m *match) Pos { return Pos{Line: m.Begin.Line + 1, Col: m.Begin.Col + 1} }
+func at(m *match) Pos { return Pos{Line: m.Begin.Line + 1, Col: m.Begin.Col + 1, File: parsingFile} }
+
+// parsingFile is the file that is being parsed (the positions of its syntax tree say it); parseMu lets one source be parsed at a time
+var (
+	parseMu     sync.Mutex
+	parsingFile string
+)
 
 func textOf(m *match, r reader) (string, error) {
 	rs, err := r.Range(m.Begin, m.End)
@@ -543,7 +579,19 @@ func grammar() pattern {
 		def.Body = body.(*Block)
 		return Stmt{P: at(m), Name: name.(string), Fn: def}, nil
 	})
-	topItem := rule.New("item", alt(fnDef, assignment)).SetEval(delegate)
+	// use "file.harp": the statements of the file come here (the file is read when the patch is built)
+	useStmt := rule.New("use", conc(keyword("use"), spaces1, str)).SetEval(func(m *match, r reader) (any, error) {
+		v, err := m.Components[2].Eval(r)
+		if err != nil {
+			return nil, err
+		}
+		name := v.(*Str).V
+		if strings.TrimSpace(name) == "" {
+			return nil, &Error{Pos: at(m), Msg: "use wants the name of a file: use \"drums.harp\""}
+		}
+		return Stmt{P: at(m), Use: name}, nil
+	})
+	topItem := rule.New("item", alt(useStmt, fnDef, assignment)).SetEval(delegate)
 	return rule.New("program", conc(ws, every(conc(topItem, ws)), end.New[rune, runes.Pos]().Printed("end of the program"))).
 		SetEval(func(m *match, r reader) (any, error) {
 			p := &Program{}
@@ -579,7 +627,13 @@ func foldBinary(m *match, r reader) (any, error) {
 }
 
 // Parse reads a source into a syntax tree. A syntax error says where it is and what was expected there
-func Parse(src string) (*Program, error) {
+func Parse(src string) (*Program, error) { return ParseFile(src, "") }
+
+// ParseFile is Parse for a source that is a file that a patch uses: the places in its tree and its errors say the file
+func ParseFile(src, file string) (*Program, error) {
+	parseMu.Lock()
+	defer parseMu.Unlock()
+	parsingFile = file
 	rd, err := runes.New(strings.NewReader(src))
 	if err != nil {
 		return nil, err
@@ -597,9 +651,9 @@ func Parse(src string) (*Program, error) {
 			if i := strings.Index(msg, ": "); i >= 0 {
 				msg = msg[i+2:]
 			}
-			return nil, &Error{Pos: Pos{Line: se.Pos.Line + 1, Col: se.Pos.Col + 1}, Msg: "syntax error: " + msg}
+			return nil, &Error{Pos: Pos{Line: se.Pos.Line + 1, Col: se.Pos.Col + 1, File: file}, Msg: "syntax error: " + msg}
 		}
-		return nil, &Error{Pos: Pos{1, 1}, Msg: "syntax error"}
+		return nil, &Error{Pos: Pos{Line: 1, Col: 1, File: file}, Msg: "syntax error"}
 	}
 	v, err := m.Eval(ebnf.Reader[rune, runes.Pos](ctx))
 	if err != nil {
