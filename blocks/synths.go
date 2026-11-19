@@ -89,14 +89,14 @@ func Organ(cfg organ.Config, what string, notes dsl.Gen[[]Note], opts ...SynthOp
 }
 
 // DX is psalm's FM synth, in the way of the Yamaha DX7 and TX81Z: operators and algorithms, with the patches of the DX7 (SysEx) or its own
-func DX(patch dx.Patch, what string, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
-	return synth("dx "+what, func() *dx.Voice { return dx.New(patch, psalm.Stereo) }, psalm.Stereo, voices, notes)
+func DX(patch dx.Patch, what string, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
+	return synth("dx "+what, func() *dx.Voice { return dx.New(patch, psalm.Stereo) }, psalm.Stereo, voices, notes, opts...)
 }
 
 // DrumSynth is psalm's drum synthesizer: a kit of drums that are made, not played from recordings (kick, snare, hats, toms, cymbals, claps, ...).
 // A note is a drum by its General MIDI key (36 kick, 38 snare, 42 closed hat, 46 open hat, ...); the voices are made together, so that an open hat
 // is stopped by a closed one
-func DrumSynth(cfg drumsynth.Config, what string, voices int, notes dsl.Gen[[]Note]) dsl.Sig {
+func DrumSynth(cfg drumsynth.Config, what string, voices int, notes dsl.Gen[[]Note], opts ...SynthOption) dsl.Sig {
 	var made []*drumsynth.Voice
 	next := 0
 	newVoice := func() *drumsynth.Voice {
@@ -107,5 +107,5 @@ func DrumSynth(cfg drumsynth.Config, what string, voices int, notes dsl.Gen[[]No
 		next++
 		return v
 	}
-	return synth("drumsynth "+what, newVoice, channelsOr(cfg.NumChannels), voices, notes)
+	return synth("drumsynth "+what, newVoice, channelsOr(cfg.NumChannels), voices, notes, opts...)
 }

@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"github.com/almerlucke/psalm/synths/drumsynth"
 	"math"
 	"os"
 	"strings"
@@ -219,4 +220,68 @@ func TestALiveEditOfAPartKeepsItsPlaceInTheMusic(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestDXAndDrumSynthTakeTheirSettings(t *testing.T) {
+	// dx: the level of the carrier and the algorithm change the sound; a name chooses the filter
+	dx := func(extra string) []float64 {
+		src := "bpm = 120\nsteps = 4\nn = melody([a3], every(64), velocity: 1, length: 30)\nout = dx(n, preset: \"glass_keys\", voices: 2" + extra + ")\n"
+		return renderPatch(t, src, 1)[0]
+	}
+	base := dx("")
+	if quiet := dx(", op1Level: 20, op2Level: 20, op3Level: 20, op4Level: 20, op5Level: 20, op6Level: 20"); rmsOf(quiet[4000:30000]) > 0.6*rmsOf(base[4000:30000]) {
+		t.Errorf("the levels of the operators: %v against %v", rmsOf(quiet[4000:30000]), rmsOf(base[4000:30000]))
+	}
+	if other := dx(", algorithm: 32"); bright(other[4000:30000]) == bright(base[4000:30000]) {
+		t.Error("the algorithm does not change the sound")
+	}
+	if _, err := Compile("out = dx(melody([a3], every(4)), filterType: \"ladder 24\", filterCutoff: 40, mods: \"velocity -> level 0.5\")\n"); err != nil {
+		t.Error(err)
+	}
+	// drumSynth: a longer decay of the kick, a higher pitch of the snare, the level of the whole
+	drum := func(extra string, what string) []float64 {
+		src := "bpm = 120\nsteps = 4\nn = melody([drum(\"" + what + "\")], every(64), velocity: 1, length: 1)\nout = drumSynth(n, kit: \"808\", voices: 2" + extra + ")\n"
+		return renderPatch(t, src, 1)[0]
+	}
+	short, long := drum(", kickDecay: 0.1", "kick"), drum(", kickDecay: 1.5", "kick")
+	if rmsOf(long[8000:20000]) < 3*rmsOf(short[8000:20000]) {
+		t.Errorf("kickDecay: %v against %v", rmsOf(long[8000:20000]), rmsOf(short[8000:20000]))
+	}
+	if loud := drum(", level: 2", "snare"); rmsOf(loud) < 1.6*rmsOf(drum("", "snare")) {
+		t.Errorf("level: %v", rmsOf(loud)/rmsOf(drum("", "snare")))
+	}
+	// a setting of a sound that the kit does not have is said
+	for name, kit := range drumsynth.Kits {
+		have := kit().Sounds
+		for _, snd := range []string{"cowbell", "clave", "triangle", "ride"} {
+			if _, ok := have[snd]; !ok {
+				_, err := Compile("out = drumSynth(melody([drum(\"kick\")], every(4)), kit: \"" + name + "\", " + snd + "Decay: 0.5)\n")
+				if err == nil || !strings.Contains(err.Error(), "not a setting of the kit") {
+					t.Errorf("%s has no %s: %v", name, snd, err)
+				}
+				return
+			}
+		}
+	}
+}
+
+// the sound of a synth is the same as before when no setting is given
+func TestWithNoSettingTheSoundIsThePresets(t *testing.T) {
+	a := renderPatch(t, "out = dx(melody([a3], every(8), length: 4), preset: \"glass_keys\", voices: 2)\n", 0.5)[0]
+	b := renderPatch(t, "out = dx(melody([a3], every(8), length: 4), preset: \"glass_keys\", voices: 2, op1Level: "+formatNum(dxPresetValue(t, "op1Level"))+")\n", 0.5)[0]
+	for i := range a {
+		if a[i] != b[i] {
+			t.Fatalf("the preset's own value as a setting is another sound, at sample %d", i)
+		}
+	}
+}
+
+func dxPresetValue(t *testing.T, key string) float64 {
+	t.Helper()
+	p := dxPresets["glass_keys"]()
+	v, ok := p.Get(key)
+	if !ok {
+		t.Fatalf("no %s", key)
+	}
+	return v
 }

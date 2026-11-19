@@ -71,7 +71,7 @@ A wrong value says what is allowed (`cutoff is from 20 to 20000 Hz: 99999 is not
 
 ### The modulation matrix
 
-The synths that have one (all but `organ` and `grains`) take it as one text, `mods`: a slot is `source -> destination amount`, slots are separated by `;`. The amount is from -1 to 1 (1 when left out) and says how far a full source moves the destination.
+The synths that have one (all but `organ`, `grains` and `drumSynth`) take it as one text, `mods`: a slot is `source -> destination amount`, slots are separated by `;`. The amount is from -1 to 1 (1 when left out) and says how far a full source moves the destination.
 
 ```harp
 n = melody([a2 a2 c3 a2], every(2), length: 3, velocity: [1 0.5 0.8 0.5])
@@ -85,7 +85,26 @@ out = subtractive(n, preset: "bass", lfo1Rate: 0.3,
 - the slots of the preset are replaced by the ones you write; start with `+` to add to them instead (`mods: "+ wheel -> cutoff 0.5"`);
 - a synth has 8 slots.
 
-The sets that are too big for parameters (the operators of `dx`, the drums of `drumSynth`) are not in the parameters yet.
+### `dx` and `drumSynth`
+
+These have many settings, and they are parameters like the others (`harp settings dx`, `harp settings drumSynth`).
+
+- **`dx`** has the numbers of a DX7, 0 to 99: `algorithm` (1 to 32), `feedback`, the pitch envelope (`pitchRate1`, `pitchLevel1`...), the filter, and for each operator `op1Coarse`, `op1Fine`, `op1Detune`, `op1Wave`, `op1Level`, `op1Rate1` to `op1Level4` (its envelope) and the rest, up to `op6`. `op1Ratio`, `op1Cents`, `op1Gain` and `modDepth` are for the presets that play on exact ratios (some of the presets do: their `algorithm` and levels are not used). It has the matrix, `mods`, and `ext1` to `ext4`.
+
+```harp
+n = melody([c3 e3 g3 c4], every(4), length: 6)
+out = dx(n, preset: "glass_keys", op2Level: 70, op2Rate3: 40, feedback: 4, lfoSpeed: 30, lfoPitchDepth: 8)
+```
+
+- **`drumSynth`** has `level` for the whole and, for each drum of the kit, `kickPitch`, `kickDecay`, `kickSweep`, `kickSweepTime`, `kickTone`, `kickSnap`, `kickDrive`, `kickLevel` and `kickPan` (the same for `snare`, `clap`, `hat`, `tomLow`, `cowbell`... the names of `drum(...)`). A drum that the kit does not have is refused, with the kit named.
+
+```harp
+kick = drumSynth(melody([drum("kick")], every(4)), kit: "808", kickDecay: 1.2, kickPitch: 48, kickSweep: 24, kickDrive: 0.3)
+snare = drumSynth(melody([drum("snare")], pattern("....x...")), kit: "909", snareTone: 0.7, snareSnap: 0.8, snarePan: -0.2)
+out = kick + snare
+```
+
+A signal can move any knob of them while the notes sound (`kickDrive: lfo(0.1).range(0, 0.6)`).
 
 ## Your own instrument
 

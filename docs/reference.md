@@ -1124,15 +1124,15 @@ Psalm's tonewheel organ, one instrument: every note is a key of it (a chord is s
 
 ### `dx`
 
-`dx(notes: generator of notes, preset: string = e_piano, voices: number = 8, file: string = , patch: number = 0) -> signal`
+`dx(notes: generator of notes, preset: string = e_piano, voices: number = 8, file: string = , patch: number = 0, ... 197 settings of the synth (harp settings dx)) -> signal`
 
-Psalm's FM synth in the way of the Yamaha DX7 and TX81Z: operators that modulate each other (electric pianos, bells, brass, basses, pads, ...), playing notes with voices notes at once. The preset (harp presets dx) is one of its own patches; file is a DX7 SysEx bank (a .syx file of 32 patches) and patch the number of the patch in it, counted from 0, which takes the place of the preset. Stereo out.
+Psalm's FM synth in the way of the Yamaha DX7 and TX81Z: operators that modulate each other (electric pianos, bells, brass, basses, pads, ...), playing notes with voices notes at once. The preset (harp presets dx) is one of its own patches; file is a DX7 SysEx bank (a .syx file of 32 patches) and patch the number of the patch in it, counted from 0, which takes the place of the preset. Stereo out. Every setting of the synth is a parameter (197 of them, with their ranges: harp settings dx, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `drumSynth`
 
-`drumSynth(notes: generator of notes, kit: string = 808, voices: number = 8) -> signal`
+`drumSynth(notes: generator of notes, kit: string = 808, voices: number = 8, ... 271 settings of the synth (harp settings drumSynth)) -> signal`
 
-Psalm's drum synthesizer: drums that are made, not played from recordings. kit is 808, 909, electro, industrial, trap. A note is a drum, by its General MIDI key: drum("kick") is the number for a kick, drum("snare"), drum("hat"), drum("open"), drum("clap"), drum("tomLow") and so on (the names are in docs/synths.md); melody([drum("kick")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out.
+Psalm's drum synthesizer: drums that are made, not played from recordings. kit is 808, 909, electro, industrial, trap. A note is a drum, by its General MIDI key: drum("kick") is the number for a kick, drum("snare"), drum("hat"), drum("open"), drum("clap"), drum("tomLow") and so on (the names are in docs/synths.md); melody([drum("kick")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out. Every setting of the synth is a parameter (271 of them, with their ranges: harp settings drumSynth, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `drum`
 

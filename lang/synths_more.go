@@ -84,42 +84,19 @@ func init() {
 			if voices < 1 || voices > 64 {
 				return Value{}, fmt.Errorf("voices is from 1 to 64")
 			}
-			var patch dx.Patch
-			var what string
-			if f := a.Str("file"); f != "" {
-				path, err := a.ev.findFile(f)
-				if err != nil {
-					return Value{}, err
-				}
-				key := path + " | " + stamp(path)
-				sysexMu.Lock()
-				bank, ok := sysexBanks[key]
-				sysexMu.Unlock()
-				if !ok {
-					if bank, err = dx.LoadSysEx(path); err != nil {
-						return Value{}, fmt.Errorf("%s: %v", filepath.Base(path), err)
-					}
-					sysexMu.Lock()
-					sysexBanks[key] = bank
-					sysexMu.Unlock()
-				}
-				n := a.Int("patch")
-				if n < 0 || n >= len(bank) {
-					return Value{}, fmt.Errorf("%s has %d patches: patch is from 0 to %d", filepath.Base(path), len(bank), len(bank)-1)
-				}
-				patch = bank[n]
-				what = fmt.Sprintf("%s | %d", key, n)
-				a.ev.patch.Info = append(a.ev.patch.Info, fmt.Sprintf("  %s: %d patches, playing %d: %s", filepath.Base(path), len(bank), n, patch.Name))
-			} else {
-				make, ok := dxPresets[a.Str("preset")]
-				if !ok {
-					return Value{}, fmt.Errorf("there is no dx preset %q%s", a.Str("preset"), didYouMean(a.Str("preset"), presetNames(dxPresets)))
-				}
-				patch = make()
-				what = "preset " + a.Str("preset")
+			patch, what, err := resolveDX(a, true)
+			if err != nil {
+				return Value{}, err
 			}
-			return sigV(blocks.DX(patch, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.DX(patch, what, voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
+	attachSettings("dx", dx.Describe(dxPresets["e_piano"]()), func(a Args) (params.Set, bool) {
+		patch, _, err := resolveDX(a, false)
+		if err != nil {
+			return params.Set{}, false // the call says what is wrong
+		}
+		return dx.Describe(patch), true
+	}, "file", "patch")
 
 	kitNames := presetNames(drumsynth.Kits)
 	add(&Func{Name: "drumSynth", Result: TSig, Doc: "psalm's drum synthesizer: drums that are made, not played from recordings. kit is " + strings.Join(kitNames, ", ") + ". A note is a drum, by its General MIDI key: drum(\"kick\") is the number for a kick, drum(\"snare\"), drum(\"hat\"), drum(\"open\"), drum(\"clap\"), drum(\"tomLow\") and so on (the names are in docs/synths.md); melody([drum(\"kick\")], every(4)) plays it. The voices are made together, so that a closed hat stops an open one. Stereo out",
@@ -135,8 +112,17 @@ func init() {
 			}
 			cfg := drumsynth.DefaultConfig()
 			cfg.Kit = kit()
-			return sigV(blocks.DrumSynth(cfg, "kit "+a.Str("kit"), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]))), nil
+			return sigV(blocks.DrumSynth(cfg, "kit "+a.Str("kit"), voices, a.value("notes").V.(dsl.Gen[[]blocks.Note]), a.synthOpts...)), nil
 		}})
+	attachSettings("drumSynth", drumsynth.Describe(func() drumsynth.Config { c := drumsynth.DefaultConfig(); return c }()), func(a Args) (params.Set, bool) {
+		kit, ok := drumsynth.Kits[a.Str("kit")]
+		if !ok {
+			return params.Set{}, false
+		}
+		cfg := drumsynth.DefaultConfig()
+		cfg.Kit = kit()
+		return drumsynth.Describe(cfg), true
+	})
 	var names []string
 	for n := range drumKeys {
 		names = append(names, n)
@@ -157,4 +143,43 @@ func init() {
 		}
 		return params.Set{}, false
 	}, "drawbars")
+}
+
+// resolveDX is the patch of a call of dx: a preset, or a patch of a SysEx bank
+func resolveDX(a Args, say bool) (patch dx.Patch, what string, err error) {
+	if f := a.Str("file"); f != "" {
+		path, err := a.ev.findFile(f)
+		if err != nil {
+			return patch, what, err
+		}
+		key := path + " | " + stamp(path)
+		sysexMu.Lock()
+		bank, ok := sysexBanks[key]
+		sysexMu.Unlock()
+		if !ok {
+			if bank, err = dx.LoadSysEx(path); err != nil {
+				return patch, what, fmt.Errorf("%s: %v", filepath.Base(path), err)
+			}
+			sysexMu.Lock()
+			sysexBanks[key] = bank
+			sysexMu.Unlock()
+		}
+		n := a.Int("patch")
+		if n < 0 || n >= len(bank) {
+			return patch, what, fmt.Errorf("%s has %d patches: patch is from 0 to %d", filepath.Base(path), len(bank), len(bank)-1)
+		}
+		patch = bank[n]
+		what = fmt.Sprintf("%s | %d", key, n)
+		if say {
+			a.ev.patch.Info = append(a.ev.patch.Info, fmt.Sprintf("  %s: %d patches, playing %d: %s", filepath.Base(path), len(bank), n, patch.Name))
+		}
+	} else {
+		make, ok := dxPresets[a.Str("preset")]
+		if !ok {
+			return patch, what, fmt.Errorf("there is no dx preset %q%s", a.Str("preset"), didYouMean(a.Str("preset"), presetNames(dxPresets)))
+		}
+		patch = make()
+		what = "preset " + a.Str("preset")
+	}
+	return patch, what, nil
 }

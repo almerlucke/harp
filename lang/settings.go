@@ -123,6 +123,15 @@ func (ss *synthSettings) read(a Args, set params.Set) (blocks.SynthOption, error
 			defaults[e.Prefix+envStages[e.Stages[i]]] = envValue(e, e.Stages[i])
 		}
 	}
+	valid := map[string]bool{}
+	for _, p := range set.Params {
+		valid[p.Key] = true
+	}
+	for _, e := range set.Envelopes {
+		for i := 0; i < len(e.Stages); i++ {
+			valid[e.Prefix+envStages[e.Stages[i]]] = true
+		}
+	}
 	var keyed []blocks.KeyedMod
 	if ss.matrix {
 		if text := a.Str("mods"); strings.TrimSpace(text) != "" {
@@ -144,6 +153,9 @@ func (ss *synthSettings) read(a Args, set params.Set) (blocks.SynthOption, error
 			continue // not given: the preset's own
 		}
 		p := ss.byKey[key]
+		if !valid[key] {
+			return nil, fmt.Errorf("%s is not a setting of %s", key, ss.of(a))
+		}
 		switch {
 		case v.T.Kind == KNum:
 			x := v.Float()
@@ -213,7 +225,7 @@ func SettingsMarkdown() string {
 
 func synthSettingNames() []string {
 	var names []string
-	for _, n := range []string{"subtractive", "supersaw", "wavetable", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "grains"} {
+	for _, n := range []string{"subtractive", "supersaw", "wavetable", "modal", "piano", "waveguide", "vocal", "pulsar", "shaper", "organ", "grains", "dx", "drumSynth"} {
 		if _, ok := allSynthSettings[n]; ok {
 			names = append(names, n)
 		}
@@ -362,4 +374,19 @@ func matrixOptions(ss *synthSettings) (src, dest []string) {
 		}
 	}
 	return
+}
+
+// of says what a setting is not part of: the kit or the preset of the call
+func (ss *synthSettings) of(a Args) string {
+	if f := funcs[ss.name]; f != nil {
+		for _, p := range f.Params[:f.NBase] {
+			if (p.Name == "kit" || p.Name == "preset") && a.value(p.Name).T.Kind == KStr {
+				if p.Name == "kit" {
+					return fmt.Sprintf("the kit %q (the sounds it has are in docs/synths.md)", a.Str("kit"))
+				}
+				return fmt.Sprintf("the preset %q", a.Str("preset"))
+			}
+		}
+	}
+	return "this " + ss.name
 }
