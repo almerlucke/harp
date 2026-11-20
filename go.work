@@ -1,12 +1,9 @@
 go 1.27
 
+// harp is one module; the libraries it is built on are developed next to it, and these are what is built (see docs/getting-started.md)
 use (
 	.
-	./blocks
-	./lang
-	./examples/play
 	../genny
-	../exbana
 	../psalm
 	../sndfile
 	../go-jack
