@@ -10,3 +10,7 @@ go run ./cmd/harp play examples/live_demo.harp
 ```
 
 Documentation is in [docs/](docs/README.md): getting started, the language, types and channels, generators, `play`, live editing, a generated function reference, the SuperCollider tools, and the architecture.
+
+## License
+
+[MIT](LICENSE).
