@@ -2,7 +2,7 @@
 
 ## Build
 
-harp is one Go module (the `go.mod` in the root), developed in a workspace with psalm, genny, sndfile and go-jack in the folder next to it (`go.work` lists them: `../psalm` and so on); exbana is not in the workspace, it is fetched as `github.com/almerlucke/exbana/v3` v3.0.0 (see `go.mod`). From `lang/`:
+harp is one Go module (the `go.mod` in the root); it builds from the tagged versions of psalm, genny, sndfile and exbana that `go.mod` lists. To develop it together with local checkouts of those libraries, make a `go.work` that lists them (`go work init . ../psalm ../genny` and so on); it is not committed. From `lang/`:
 
 ```
 go build -o harp ./cmd/harp

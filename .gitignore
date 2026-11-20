@@ -22,8 +22,9 @@ vendor/
 # Environment files
 .env
 
-# go.work is NOT ignored here: it is what joins this module to its neighbours (../genny, ../psalm, ../exbana, ../sndfile, ../go-jack),
-# which have to be in the same folder as harp. go.work.sum stays with it.
+# go.work is local: it joins this module to checkouts of the libraries next to it (../genny, ../psalm, ...) when they are developed together
+go.work
+go.work.sum
 
 # ---- harp
 
