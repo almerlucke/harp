@@ -1,4 +1,5 @@
 github.com/almerlucke/exbana/v3 v3.0.0-beta.4/go.mod h1:TJAJWdTXWqTi9abKxfK1vAzIvz/JkTuirqw5Vco+sV8=
+github.com/almerlucke/go-jack v0.1.0/go.mod h1:YG4N4/vbPTKiqZGFHq7+pjm6mI/Y8IS5eHyAoLev1CY=
 github.com/almerlucke/psalm v0.1.0/go.mod h1:L+Jzc34jvLoT3F01SpClEfUWQXc2yu5uNtWLnGQ79tQ=
 github.com/chzyer/readline v1.5.0 h1:lSwwFrbNviGePhkewF1az4oLmcwqCZijQ2/Wi3BGHAI=
 github.com/chzyer/readline v1.5.0/go.mod h1:x22KAscuvRqlLoK9CsoYsmxoXZMMFVyOl86cAH8qUic=
