@@ -18,6 +18,7 @@ type Patch struct {
 	Lookahead    int        // steps the control goroutine stays ahead of the audio when playing, default 16
 	NoOptimize   bool       // compile the graph as it was built: see the optimizer in optimize.go
 	Stats        *PlayStats // if set, Play fills it in when it returns
+	From         float64    // Play starts this many seconds into the piece (see Runner.Skip), default 0
 }
 
 // PlayStats is what Play found out about the run
@@ -107,6 +108,25 @@ func (r *Runner) Process(dst ...[]float64) {
 			copy(d[done:], r.prog.outs[c][:n])
 		}
 		r.prog.rt.pos += int64(n)
+		done += n
+		r.untilStep -= float64(n)
+	}
+}
+
+// Skip moves the runner on by seconds without making a sound: the generators and the clock run as they would, but the graph does not, and the notes that
+// start in the part that is skipped are not played. What plays after it is what plays at that time in the piece, without what was sounding before it
+// (a reverb starts empty, a note that began before it is not heard). Call it after Go and before the first Process
+func (r *Runner) Skip(seconds float64) {
+	rt := r.prog.rt
+	size := int64(math.Round(seconds * rt.SampleRate))
+	rt.skipTo = rt.pos + size
+	for done := int64(0); done < size; {
+		for r.untilStep <= 0 {
+			r.startStep()
+			r.untilStep += r.stepSamples
+		}
+		n := min(int64(math.Ceil(r.untilStep)), size-done)
+		rt.pos += n
 		done += n
 		r.untilStep -= float64(n)
 	}

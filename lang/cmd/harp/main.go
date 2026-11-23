@@ -2,7 +2,7 @@
 //
 //	harp check patch.harp                       read and check a patch
 //	harp render patch.harp -o patch.wav -seconds 10 [-float]
-//	harp play patch.harp [-seconds 30] [-buffer 512] [-rate 44100] [-watch=false] [-cpuprofile file]
+//	harp play patch.harp [-from 4:24] [-seconds 30] [-buffer 512] [-rate 44100] [-watch=false] [-cpuprofile file]
 //	                                            plays it, and plays it again when the file is saved: what is the same keeps its state
 //	harp compare patch.harp [-seconds 10] [-sc code] [-stats] [-save dir]
 //	                                            render it in harp and in SuperCollider and say how alike they are
@@ -16,9 +16,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"runtime/pprof"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,11 +67,16 @@ func main() {
 	case "play":
 		fs := flag.NewFlagSet("play", flag.ExitOnError)
 		secs := fs.Float64("seconds", 0, "stop after this many seconds (0: until Ctrl+C)")
+		from := fs.String("from", "", "start this far into the piece, in seconds (264) or minutes and seconds (4:24): the generators run on to there without a sound, so a reverb starts empty and a note that began before it is not heard")
 		buf := fs.Int("buffer", 512, "samples per buffer: smaller is less latency, bigger is safer")
 		rate := fs.Float64("rate", 44100, "sample rate of the sound card (48000 if that is what the system runs at: then nothing is resampled)")
 		watch := fs.Bool("watch", true, "play the patch again when the file changes: what is the same goes on (oscillators, filters, reverbs, generators keep their state), what changed is new. A patch with a mistake is ignored")
 		prof := fs.String("cpuprofile", "", "write a profile of where the time goes to this file (go tool pprof -top harp file)")
 		patch, patchPath := load(fs, os.Args[2:])
+		start, err := parseTime(*from)
+		if err != nil {
+			fail(err)
+		}
 		if *prof != "" {
 			f, err := os.Create(*prof)
 			if err != nil {
@@ -90,6 +97,7 @@ func main() {
 		eng := paengine.New(*rate, *buf)
 		fmt.Printf("playing at %.0f Hz, buffer %d, %.0f bpm (Ctrl+C stops)\n", eng.GetSampleRate(), eng.GetBufferSize(), patch.BPM)
 		settings := patch.Settings()
+		settings.From = start
 		var ready func(*dsl.Runner)
 		if *watch {
 			settings.NoOptimize = true // an optimized graph is another shape after a small edit, and what is the same could not be told
@@ -211,7 +219,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
   harp check patch.harp
   harp render patch.harp [-o patch.wav] [-seconds 10] [-rate 44100] [-float]
-  harp play patch.harp [-seconds 30] [-buffer 512] [-rate 44100]
+  harp play patch.harp [-from 4:24] [-seconds 30] [-buffer 512] [-rate 44100]
   harp compare patch.harp [-sc code|file] [-seconds 10] [-rate 44100] [-sclang folder] [-stats] [-save folder]
   harp functions`)
 	os.Exit(2)
@@ -239,4 +247,20 @@ func restarted(names []string) string {
 		}
 	}
 	return ": " + strings.Join(parts, ", ")
+}
+
+// parseTime reads a time in seconds ("264", "12.5") or in minutes and seconds ("4:24", "1:02:03"); an empty text is 0
+func parseTime(text string) (float64, error) {
+	if text == "" {
+		return 0, nil
+	}
+	total := 0.0
+	for _, part := range strings.Split(text, ":") {
+		v, err := strconv.ParseFloat(part, 64)
+		if err != nil || v < 0 || math.IsNaN(v) || math.IsInf(v, 0) {
+			return 0, fmt.Errorf("-from %q is not a time: use seconds (264) or minutes and seconds (4:24)", text)
+		}
+		total = total*60 + v
+	}
+	return total, nil
 }

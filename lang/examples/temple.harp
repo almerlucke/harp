@@ -43,7 +43,7 @@
 //                                        comes back under the F#: the dark chord becomes light.
 //
 // Edit it while it plays (harp play -watch): the cycles (the numbers in euclid and every), the lines of the cherubim and of the hymn, the
-// lights. It is a big patch (over a hundred voices, and a piano of three hands): `harp render` takes about 4.5 minutes for the 6:48, so `harp play` needs a fast machine (a bigger -buffer helps); `harp play` cannot start in the middle, so render it and play the file from where you want.
+// lights. It is a big patch (over a hundred voices, and a piano of three hands): `harp render` takes about 4.5 minutes for the 6:48, so `harp play` needs a fast machine (a bigger -buffer helps); `harp play -from 4:24` starts in the middle (at the oracle, here).
 
 bpm = 60
 steps = 4

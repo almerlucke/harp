@@ -22,7 +22,9 @@ or run it without building: `go run ./cmd/harp ...`.
 | `harp presets [synth]` | lists the presets of the synths |
 | `harp cache [clear]` | the folder of the kept mipmaps of recordings, and how big it is ([Recordings](recordings.md)) |
 
-`play` takes `-seconds N`, `-buffer 512`, `-rate 44100`, `-watch=false` (do not watch the file) and `-cpuprofile file`.
+`play` takes `-from 4:24` (or `-from 264`: start that far into the piece), `-seconds N` (stop after N seconds), `-buffer 512`, `-rate 44100`, `-watch=false` (do not watch the file) and `-cpuprofile file`.
+
+`-from` runs the generators on to that time without making a sound, so it starts at once, however long the piece is. What starts there is what the piece plays at that time, without what was sounding before it: a reverb starts empty, and a note that began before it (and still rings) is not heard.
 
 ## A first patch
 

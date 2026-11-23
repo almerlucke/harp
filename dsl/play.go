@@ -44,6 +44,9 @@ func (p Patch) PlayWith(ctx context.Context, out Sig, eng Engine, ready func(r *
 			p.Stats.Underruns = r.Underruns()
 		}
 	}()
+	if p.From > 0 {
+		r.Skip(p.From)
+	}
 	if ready != nil {
 		ready(r)
 	}

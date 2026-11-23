@@ -83,6 +83,8 @@ type Rt struct {
 	Live bool
 	sink *[]lane // while a node is built: where the lanes it registers go (the node owns them)
 	pos  int64   // the first sample of the block that runs, see Pos
+	// skipTo is a sample before which no event starts: while a runner skips ahead (Runner.Skip) the notes that would have started in what is skipped are not played
+	skipTo int64
 }
 
 // Kernel computes n samples (n <= BlockSize)

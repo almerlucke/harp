@@ -556,6 +556,9 @@ func (st *eventsState) apply(ps []pulled) {
 			}
 		}
 		st.count++
+		if start < st.rt.skipTo { // a note of the part that was skipped: the voices go on in turn, but it is not played
+			continue
+		}
 		// at the start of the block the time is in, and not before now
 		q := func(s int64) int64 { return max(s-s%scBlock, st.rt.pos) }
 		e := scheduled{start: q(start), end: q(end), at: max(int64(math.Ceil(step*st.rt.StepSamples)), st.rt.pos), vals: p.ev.Vals, level: p.ev.Level, voice: v}
