@@ -1,0 +1,266 @@
+// THE HOUSE: a piece made from the measures of Solomon's temple (1 Kings 6-7, 2 Chronicles 3-4). 102 bars at 60 bpm, 6 minutes 48 seconds, and it goes round.
+//
+//   harp check examples/temple.harp
+//   harp play examples/temple.harp
+//
+// A cubit is a bar (16 steps, four seconds). To walk through the house is to play as many bars as it has cubits: the court (10), the porch (10),
+// the holy place (40), the oracle (20). Before them the seven years of building, after them the days of the dedication.
+//
+// The house is one sound. Every pitch is a partial of one low D (36.7 Hz, "fund"), and every measure of the house is the number of a partial:
+// the house is 60 long, 20 wide and 30 high, that is C#, F# and C# (a fifth, and an octave: 2 : 3 : 6, the harmonic series itself); the oracle
+// is a cube, 20 by 20 by 20, which is one pitch; the three storeys of chambers are 5, 6 and 7 wide, the 4 : 5 : 6 : 7 chord of the series. All the
+// notes are tuned to those ratios (just intonation), so what sounds together sounds pure. The notes of the measures are D E F# A C#, a D major
+// with a ninth and a seventh; the oracle leaves the D and keeps F#, A and C#, which is the same chord turned dark (F# minor).
+//
+//   The seven years (1 Kings 6:38)       Y1-Y7: the partials 1 to 7 of the D, one more for every year. No hammer, axe or iron is heard (6:7).
+//   the eighth month, Bul                the 7th, a little flat, rises into the 8th: the building is finished.
+//   The court (7:23-39, 2 Chr 4:1-6)     the sea is 10 across and 30 around, on twelve oxen, three looking each way: a harp in a circle of 12 steps,
+//                                        four groups of three, that turns round the stereo field. The altar is 20 by 20 and 10 high: a drum in
+//                                        a cycle of 20 steps. Ten lavers on bases of 4 by 4 by 3: ten bells on a 4+4+3 rhythm.
+//   The porch (6:3, 7:15-22)             20 wide and 10 deep (Porch and Doors, 5 bars each). The pillars Jachin and Boaz are 18 high and 12 round:
+//                                        two pure tones, the partials 18 and 12, a fifth, that swell as slowly as they are tall. On the capitals
+//                                        are 200 pomegranates in rows around each, in nets of seven: 200 bell strokes for each pillar, in a
+//                                        cycle of seven. The doorposts are a fourth part of the wall (6:33): 20 / 4 = 5 bars, five harp runs
+//                                        of ten notes that open the sound (the doors of fir that fold, 6:34).
+//   The holy place (6:2-20, 7:49)        40 long, 20 wide, 30 high: 40 bars. A cycle of 20 steps (the width) and a cycle of 30 (the height) go
+//                                        against each other and meet again every 60 steps (the length). The chambers are 5, 6 and 7 wide, one
+//                                        above the other (6:6): three voices that go round in 5, 6 and 7 steps. The windows are narrow lights
+//                                        (6:4). Ten lamps of gold, five on the right and five on the left, are lit one by one, 4 bars each:
+//                                        each is tuned to one of the ten measures of the house: 5, 6, 7, 10, 12, 18, 20, 30, 40, 60. The last
+//                                        4 bars are the door of the oracle, a fifth part of the wall of 20 (6:31).
+//                                        So that 40 bars do not stay the same, the holy place is in rooms: the harp and the celesta (until
+//                                        2:40), a hush of 2 bars where no note is played and the sound rings out, a chorale (2:48-3:36) of
+//                                        12 bars that goes D, F# minor, A, D, F# minor, A with a bass, a choir, strings and a flute that sings
+//                                        over them, another hush (3:36), and a return to the cycles that is brighter and busier (3:44-4:16).
+//   The oracle (6:19-28, 2 Chr 3:8-13)   20 by 20 by 20: the lamps go out ("the LORD said that he would dwell in the thick darkness", 1 Kings 8:12) and
+//                                        all is one pitch, F#, in the octaves 5, 10, 20, 40. Two cherubim, each 10 cubits high, with wings of
+//                                        5 cubits, 20 across: four wings of 5 bars. Each sings a line of 10 notes (the height), a rise of 5 and a
+//                                        fall of 5, the same line ("of one measure and one size"); the wings touch in the middle, on the same
+//                                        F#. The gold nails weigh 50 shekels (3:9): 50 strokes of a bell, spread over the 20 bars.
+//   The glory (2 Chr 5:11-14, 1 Kings 8:65)  "For he is good, for his mercy endures for ever": ki tov, ki l'olam chasdo, seven syllables, one
+//                                        note a bar, for seven days and seven days: 14 bars. Trumpets and singers are as one sound; the cloud
+//                                        fills the house (the reverb that rises an octave again and again), the lamps are lit again and the D
+//                                        comes back under the F#: the dark chord becomes light.
+//
+// Edit it while it plays (harp play -watch): the cycles (the numbers in euclid and every), the lines of the cherubim and of the hymn, the
+// lights. It is a big patch (over a hundred voices, and a piano of three hands): `harp render` takes about 4.5 minutes for the 6:48, so `harp play` needs a fast machine (a bigger -buffer helps); `harp play` cannot start in the middle, so render it and play the file from where you want.
+
+bpm = 60
+steps = 4
+seed = 2
+
+// ---- the form: one cubit is one bar. The sections are named for what is measured there; Y1-Y7 are the years, L1-L10 the lamps, Wing1-Wing4 the wings
+form = song("Y1 1, Y2 1, Y3 1, Y4 1, Y5 1, Y6 1, Y7 1, Bul 1, Court 10, Porch 5, Doors 5, L1 4, L2 4, L3 4, L4 4, L5 4, L6 4, L7 4, L8 4, L9 4, L10 4, Wing1 5, Wing2 5, Wing3 5, Wing4 5, Day1 7, Day2 7")
+// the holy place cut into rooms, so that it changes: the harp (Harp, Bells), two bars of hush (Hush1) where nothing is played and the sound rings out,
+// a slow chorale that moves through D, F# minor and A with a bass and a flute (Chorale), another hush (Hush2), and a brighter, busier return in D (Bright).
+// The last 4 bars are the door of the oracle. The same length as form (102 bars)
+fine = song("Pre 28, Harp 8, Bells 4, Hush1 2, Chorale 12, Hush2 2, Bright 8, Door 4, Post 34")
+oracle = "Wing1, Wing2, Wing3, Wing4"
+glory = "Day1, Day2"
+entry = "Porch, Doors"
+
+// ---- the tuning: fund is the D that everything is a partial of. temple is the D E F# A C# of the measures, ground the same without the C# (which would
+// rub against the D when they sound together), praise the D major scale of the hymn. Each scale is in pure ratios
+fund = hz(d1)
+temple = just([1, 9/8, 5/4, 3/2, 15/8])
+ground = just([1, 9/8, 5/4, 3/2])
+praise = just([1, 9/8, 5/4, 4/3, 3/2, 5/3, 15/8])
+
+// ---- the seven years: a partial of the D for every year, 1 to 7. In the eighth month the seventh rises into the eighth. The D goes quiet in the dark
+// of the oracle (F#, the partial 5, stays) and comes back with the glory
+fn stone(f, level) { (sine(f) + sine(f * 1.002)) * 0.5 * level }
+dark = curve(form, "Y1: 1, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+breath = lfo(0.05).range(0.82, 1)
+s1 = stone(fund * 1, curve(form, "Y1: 0 -> 1 smooth") * dark) * 0.9
+s2 = stone(fund * 2, curve(form, "Y1: 0, Y2: 0 -> 1 smooth") * dark) * 1.0
+s3 = stone(fund * 3, curve(form, "Y1: 0, Y3: 0 -> 1 smooth") * dark) * 0.8
+s4 = stone(fund * 4, curve(form, "Y1: 0, Y4: 0 -> 1 smooth") * dark) * 0.7
+s5 = stone(fund * 5, curve(form, "Y1: 0, Y5: 0 -> 1 smooth")) * 0.5
+s6 = stone(fund * 6, curve(form, "Y1: 0, Y6: 0 -> 1 smooth") * dark) * 0.45
+s7 = stone(fund * (7 + curve(form, "Y1: 0, Bul: 0 -> 1 smooth")), curve(form, "Y1: 0, Y7: 0 -> 1 smooth") * dark) * 0.4
+foundation = (s1 + s2 + s3 + s4 + s5 + s6 + s7).gain(0.03 * breath).dup()
+air = noise().bandPass(cutoff: lfNoise(0.08).range(350, 800), res: 0.35).dup()
+  .gain(0.05 * lfNoise(0.1).range(0.2, 1) * curve(form, "Y1: 0 -> 1 smooth, Bul: 1, Court: 1 -> 0 smooth"))
+
+// ---- the court: the sea on twelve oxen (a harp in 12 steps: four groups of three, the north, the west, the south and the east, each a triad that
+// is a step higher than the one before; the pan goes round once in the 12 steps), bowls under it, the altar of 20 by 20 and 10 high (a drum, a stroke
+// on 0 and on 10 of 20 steps) and the ten lavers (ten bells on the 4+4+3 of their bases: 11 steps against the sea's 12)
+sea_rhythm = bySection(form, ["Court"], [every(1)])
+sea_notes = degrees(d4, ground, [0 2 3 1 3 4 2 4 5 3 5 6])
+sea = waveguide(melody(sea_notes, sea_rhythm, velocity: [0.65 0.4 0.45], length: 4), preset: "celtic_harp", voices: 8)
+  .tremolo(mode: "pan", shape: "sine", rate: 0.3333, depth: 0.8)
+  .gain(0.21)
+bowl_rhythm = bySection(form, ["Court"], [every(3)])
+bowls = modal(melody(degrees(d3, ground, [0 1 2 3]), bowl_rhythm, velocity: 0.5, length: 3), preset: "bowed_vibraphone", voices: 4).gain(0.08)
+altar_rhythm = bySection(form, ["Court"], [pattern("x.........x.........")])
+altar = waveguide(melody([d2], altar_rhythm, velocity: [0.7 0.45], length: 3), preset: "frame_drum", voices: 2).gain(0.23)
+lavers_rhythm = bySection(form, ["Court"], [pattern("A(4+4+3)")])
+lavers = modal(melody(degrees(d4, ground, [0 3 6 9 2 5 8 1 4 7]), lavers_rhythm, velocity: 0.35, length: 2), preset: "handbell_soft", voices: 6).gain(0.27)
+court = sea + bowls + altar + lavers
+
+// ---- the porch: Boaz on the left (12 round, the partial 12, A) and Jachin on the right (18 high, the partial 18, E), a pure tone each that swells as
+// slowly as it is tall (3 and 4.5 seconds), and a bell of bronze on each stroke; then the pomegranates: 20 strokes a bar for 10 bars is 200 on each
+// capital, on a cycle of seven notes (the nets and wreaths of chain are seven, 1 Kings 7:17). The doors are five bars (a fourth of the wall) and
+// five runs of ten notes up the harp
+fn column(n, side, seconds) {
+  f = fund * n
+  swell = lfo(1 / seconds).range(0.55, 1)
+  ((sine(f) + sine(f * 2) * 0.25 + sine(f * 3) * 0.08) * swell).pan(side)
+}
+pillars = (column(12, -0.5, 3) + column(18, 0.5, 4.5)).gain(0.03 * during(form, entry, glide: 16))
+boaz = modal(melody(degrees(d4, ground, [3]), bySection(form, [entry], [every(12)]), velocity: 0.6, length: 8), preset: "handbell", voices: 3).mix().pan(-0.5).gain(0.2)
+jachin = modal(melody(degrees(d4, ground, [5]), bySection(form, [entry], [every(18)]), velocity: 0.9, length: 8), preset: "handbell", voices: 3).mix().pan(0.5).gain(0.2)
+pom_r = modal(melody(degrees(d5, ground, [0 3 5 2 4 1 6]), pattern("x x x x2 x x x x2 x x x x2 x x x x2"), velocity: [0.45 0.3 0.35], length: 2), preset: "kalimba_soft", voices: 8).mix().pan(0.6).gain(0.28 * during(form, entry, glide: 4))
+pom_l = modal(melody(degrees(d5, ground, [6 1 4 2 5 3 0]), pattern("x2 x x x x2 x x x x2 x x x x2 x x x"), velocity: [0.45 0.3 0.35], length: 2), preset: "kalimba_soft", voices: 8).mix().pan(-0.6).gain(0.28 * during(form, entry, glide: 4))
+door_rhythm = bySection(form, ["Doors"], [pattern("xxxxxxxxxx......")])
+doors = waveguide(melody(degrees(d3, ground, [0 1 2 3 4 5 6 7 8 9]), door_rhythm, velocity: [0.55 0.5 0.45 0.45 0.4 0.4 0.4 0.4 0.4 0.4], length: 3), preset: "harp", voices: 10).gain(0.18)
+porch = pillars + boaz + jachin + pom_r + pom_l + doors
+
+// ---- the holy place, 40 bars. The ten lamps: lamp n is a pure tone at n times the D, lit in the order of their size, one every 4 bars, on the right and
+// on the left in turn; they flicker, each at its own pace. 7 is the 7th harmonic, a C a little under the C of the scale, the one blue note of the house
+fn lamp(n, level, side) {
+  f = fund * n
+  flame = lfNoise(0.4 + n / 50).range(0.7, 1)
+  tone = sine(f) + sine(f * 1.0008) + sine(f * 2) * 0.25 + sine(f * 3) * 0.1
+  (tone * flame * level * 0.5).pan(side)
+}
+// a lamp is lit in its own 4 bars, goes out in the oracle and burns again in the glory (the C of the seventh goes out in L4, before the chorale, and stays dark: it would rub against the C# of the chords and of the hymn)
+lit5 = curve(form, "Doors: 0, L1: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit6 = curve(form, "Doors: 0, L2: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit7 = curve(form, "Doors: 0, L3: 0 -> 1 smooth, L4: 1 -> 0 smooth")
+lit10 = curve(form, "Doors: 0, L4: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit12 = curve(form, "Doors: 0, L5: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit18 = curve(form, "Doors: 0, L6: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit20 = curve(form, "Doors: 0, L7: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit30 = curve(form, "Doors: 0, L8: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit40 = curve(form, "Doors: 0, L9: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lit60 = curve(form, "Doors: 0, L10: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth")
+lamps = (lamp(5, lit5, 0.5) * 1.0 + lamp(6, lit6, -0.5) * 0.9 + lamp(7, lit7, 0.5) * 0.8 + lamp(10, lit10, -0.5) * 0.7 + lamp(12, lit12, 0.5) * 0.6 + lamp(18, lit18, -0.5) * 0.5 + lamp(20, lit20, 0.5) * 0.45 + lamp(30, lit30, -0.5) * 0.3 + lamp(40, lit40, 0.5) * 0.25 + lamp(60, lit60, -0.5) * 0.15).gain(0.026)
+
+// Harp, Bells: the width (20 steps, a harp) and then the height (30 steps, a celesta) go on their own, and are together again every 60 steps, the
+// length; notes swap places now and then, so that they do not turn into a loop. Nothing is faded: a room starts and stops notes, and what rings goes on ringing
+width_rhythm = bySection(fine, ["Harp, Bells", "Bright"], [euclid(20, 9), euclid(20, 14)])
+width = waveguide(melody(degrees(d3, ground, mutate([4 6 3 7 5 2 6 4 8], swap: 0.1)), width_rhythm, velocity: [0.6 0.4 0.5 0.4 0.55], length: 6), preset: "harp", voices: 8).gain(0.2)
+height_rhythm = bySection(fine, ["Bells", "Bright"], [euclid(30, 8), euclid(30, 14)])
+height = modal(melody(degrees(d5, temple, mutate([4 2 0 3 1 2 0 4], swap: 0.1)), height_rhythm, velocity: [0.5 0.35 0.4], length: 4), preset: "crystal", voices: 6).gain(0.3)
+// the three storeys of chambers, 5, 6 and 7 wide: a note every 5, 6 and 7 steps (they are together every 210 steps), each going through a cycle of
+// notes as long as it is wide; the nethermost enters first (in Bells), the other two in Bright
+ch5 = modal(melody(degrees(d4, ground, [0 2 3 2 1]), bySection(fine, ["Bells, Bright"], [every(5)]), velocity: [0.5 0.3 0.35], length: 3), preset: "kalimba_soft", voices: 4).mix().pan(-0.4)
+ch6 = modal(melody(degrees(d5, ground, [3 2 0 1 2 3]), bySection(fine, ["Bright"], [every(6)]), velocity: [0.5 0.3 0.35], length: 3), preset: "kalimba_soft", voices: 4).mix().pan(0.0)
+ch7 = modal(melody(degrees(d5, ground, [4 5 3 2 4 6 5]), bySection(fine, ["Bright"], [every(7)]), velocity: [0.5 0.3 0.35], length: 3), preset: "kalimba_soft", voices: 4).mix().pan(0.4)
+chambers = (ch5 + ch6 + ch7).gain(0.2)
+// Bright: the harp again, an octave higher on a cycle of 30 against the 20, and the altar's drum comes back to keep time
+harp_hi = waveguide(melody(degrees(d4, ground, mutate([2 4 6 3 7 5 6 4 3 5 7 4 6 3], swap: 0.1)), bySection(fine, ["Bright"], [euclid(30, 17)]), velocity: [0.5 0.35 0.4], length: 4), preset: "celtic_harp", voices: 8).gain(0.23)
+pulse = waveguide(melody([d2], bySection(fine, ["Bright"], [pattern("x.........x.........")]), velocity: [0.6 0.4], length: 3), preset: "frame_drum", voices: 2).gain(0.2)
+// the windows of narrow lights: sparks at the partials 60 and 120. The cedar that lines the walls: a choir that holds a D chord, a new one every 2 bars
+windows = (dust(1.2).bandPass(cutoff: fund * 60, res: 0.97) * 4 + dust(0.8).bandPass(cutoff: fund * 120, res: 0.97) * 3).dup()
+  .gain(0.1 * curve(form, "Doors: 0, L1: 0 -> 1 smooth, Wing1: 1 -> 0 smooth, Day1: 0 -> 1 smooth"))
+cedar = vocal(chords(stack([degrees(d3, ground, [0 0 0 0 0]), degrees(d3, ground, [3 3 4 3 3]), degrees(d3, ground, [6 6 6 7 6]), degrees(d3, ground, [9 8 9 9 8])]), bySection(fine, ["Harp, Bells, Hush1", "Hush2, Bright, Door"], [every(32), every(32)]), velocity: 0.5, length: 31), preset: "ooh", voices: 8)
+  .gain(0.15 * curve(form, "L1: 0 -> 1 smooth, L9: 1, L10: 1 -> 0 smooth"))
+// Chorale: 12 bars, a chord every 2: D, F# minor, A, D, F# minor, A, the triads going up the series; a string bass on the roots, a choir and strings
+// on the chords, and a flute that sings over them, a note a bar. It ends on the A, which is what the D of Bright answers
+fn chorale_chords(root) { stack([degrees(root, temple, [5 7 8 5 7 8]), degrees(root, temple, [7 8 9 7 8 9]), degrees(root, temple, [8 9 11 8 9 11]), degrees(root, temple, [11 12 13 11 12 13])]) }
+chorale_choir = vocal(chords(chorale_chords(d3), bySection(fine, ["Chorale"], [every(32)]), velocity: 0.55, length: 31), preset: "ooh", voices: 8).gain(0.23)
+chorale_strings = subtractive(chords(chorale_chords(d2), bySection(fine, ["Chorale"], [every(32)]), velocity: 0.5, length: 31), preset: "string_machine", voices: 8).gain(0.1)
+chorale_bass = waveguide(melody(degrees(d2, temple, [0 2 3 0 2 3]), bySection(fine, ["Chorale"], [every(32)]), velocity: 0.7, length: 30), preset: "upright_bass", voices: 2).gain(0.55)
+chorale_flute = waveguide(melody(degrees(d3, temple, [11 10 9 8 11 9 10 8 9 12 11 13]), bySection(fine, ["Chorale"], [every(16)]), velocity: 0.6, length: 15), preset: "alto_flute", voices: 2).gain(0.22)
+chorale = chorale_choir + chorale_strings + chorale_bass + chorale_flute
+nave_music = lamps + width + height + chambers + harp_hi + pulse + windows + cedar + chorale
+
+// ---- the oracle: a cube, one pitch. The F# in the octaves 5, 10, 20, 40 swells from the door and stays; a hum on it; the cherubim (a generator is one
+// stream wherever it is used by name, so a line that two voices sing is a function: wing() is a new line each time). Cherub 1 has the first two wings
+// and 2 the last two, 5 bars each; the line is 10 notes, one a bar: up through F# A C# E to F#, and down again to F#, where the wings touch
+cube_level = curve(form, "L9: 0, L10: 0 -> 0.6 smooth, Wing1: 0.6 -> 1 smooth, Wing4: 1, Day1: 1 -> 0.3 smooth")
+cube = (stone(fund * 5, 1) * 1.0 + stone(fund * 10, 1) * 0.8 + stone(fund * 20, 1) * 0.5 + stone(fund * 40, 1) * 0.25).gain(0.045 * cube_level * breath).dup()
+hum = vocal(melody(degrees(d3, ground, [2 6]), bySection(form, [oracle], [every(32)]), velocity: 0.5, length: 30), preset: "humming_choir", voices: 3).gain(0.23)
+fn wing() { degrees(d3, temple, [7 8 9 11 12 11 10 9 8 7]) }
+cherub1 = vocal(melody(wing(), bySection(form, ["Wing1, Wing2"], [every(16)]), velocity: 0.6, length: 15), preset: "angels", voices: 2).mix().pan(-0.5)
+  .gain(0.42 * curve(form, "Wing1: 0.3 -> 1 smooth, Wing2: 1 -> 0.5"))
+cherub2 = vocal(melody(wing(), bySection(form, ["Wing3, Wing4"], [every(16)]), velocity: 0.6, length: 15), preset: "angels", voices: 2).mix().pan(0.5)
+  .gain(0.42 * curve(form, "Wing3: 0.5 -> 1 smooth, Wing4: 1 -> 0.3"))
+// the nails of gold, 50 of them, spread over the 20 bars (320 steps)
+nails = modal(melody(degrees(d3, just([1, 5/4]), [7 5 7 5 5 7]), bySection(form, [oracle], [euclid(320, 50)]), velocity: 0.3, length: 2), preset: "handbell_soft", voices: 6).gain(0.45)
+oracle_music = cube + hum + cherub1 + cherub2 + nails
+
+// ---- the glory: "ki tov, ki l'olam chasdo" (for he is good, for his mercy endures for ever): seven syllables, one a bar, for seven days, and again.
+// Four voices over the D, in D, A and the sixth of D, so that nothing rubs against the F# and the A that still burn. Trumpets (the 120 priests)
+// sing the top line with them, and four harps (the psalteries) spread the chord of each bar, as one sound
+fn hymn() { bySection(form, [glory], [every(16)]) }
+fn sop() { degrees(d4, praise, [2 4 5 7 6 5 4  2 4 5 7 8 6 7]) }
+fn alt() { degrees(d4, praise, [0 2 2 4 4 4 2  0 2 2 4 6 4 4]) }
+fn ten() { degrees(d3, praise, [4 7 7 9 8 8 7  4 7 7 9 11 8 9]) }
+fn bas() { degrees(d2, praise, [7 7 7 7 4 4 7  7 7 7 7 4 4 7]) }
+fn voice(line, kind, level) { vocal(melody(line, hymn(), velocity: 0.6, length: 15), preset: kind, voices: 2).gain(level) }
+choir = voice(sop(), "choir", 0.21) + voice(alt(), "alto_choir", 0.26) + voice(ten(), "tenor_choir", 0.26) + voice(bas(), "bass_choir", 0.23)
+trumpets = dx(melody(sop(), hymn(), velocity: 0.5, length: 15), preset: "soft_brass", voices: 4).gain(0.7 * curve(form, "Day1: 0.5, Day2: 1"))
+fn strum(line, steps) { waveguide(melody(stutter(line, 2), bySection(form, [glory], [pattern(steps)]), velocity: [0.5 0.35], length: 6), preset: "celtic_harp", voices: 6) }
+psalteries = (strum(bas(), "x.......x.......") + strum(ten(), "..x.......x.....") + strum(alt(), "....x.......x...") + strum(sop(), "......x.......x.")).gain(0.25)
+cymbals = modal(melody([d4], bySection(form, ["Day2"], [every(16)]), velocity: [0.4 0.3], length: 4), preset: "brushed_cymbal", voices: 2).gain(0.9)
+glory_music = choir + trumpets + psalteries + cymbals
+
+// ---- the mix: everything in a hall, and a cloud (a reverb that rises an octave again and again) that comes with the darkness and fills the house in the
+// glory. arc is how loud the house is: it grows in the holy place, is hushed in the oracle and is fullest in the glory
+body = foundation + air
+// ---- the pilgrim: a piano written out as a score (part) and tuned onto the just scale of the house (tune), in three hands: a line on top that climbs and
+// is held, a figure of broken chords in the middle that is not quite the same each bar (some notes are left to chance), and a left hand with the bass and the
+// fifth. A bar is 16 steps, so the text is read a bar at a time. Where it goes:
+//   Bul 0:28, the court 0:32-1:12      one D that calls the court in; then a melody that goes up D, F#, A over a slow arpeggio in D and D with the E, and ends on the A
+//   the porch                          only low notes, and the A and the E of the pillars, high and alone
+//   the doors 1:32-1:52                F# A D: the D an octave above where it began, as the doors open, over the arpeggio again
+//   the first lamps 1:52-2:40          it comes down again, quiet, from D to D: nobody enters the holy place from above
+//   the two hushes (2:40, 3:36)        where nothing else plays the piano calls: A, F# into the chorale; E, D out of it into the return
+//   the chorale 2:48-3:36              the thirds of the chords climb on top (F# A C# E), a figure goes round in the middle, the bass holds the roots
+//   the return 3:44-4:16               a line up through the D major seventh (D F# A C#) over a quick figure; it stops on the C#, the note that asks
+//   the door 4:16-4:32                 the C# falls through A and C# to F#: the dark chord
+//   the oracle                         the piano gives up its hunt and plays one note on each wing, the F# of the cherubim (octaves 3, 4 and 5), over one open
+//                                      chord of F# and C#: nothing else moves
+//   the glory 5:52-6:48                the same line as the first, now quiet in D, to the D at the top, with a figure in sixteenths on the hymn and in the last bar
+//                                      the chord of D in four octaves: what it was reaching for
+fn at(bar, s) { shift(s, bar * 16) }
+fn hand(scores) { piano(pad(tune(together(scores), d3, temple), 1632), preset: "felt", voices: 10) }
+pilgrim_top = hand([
+  at(7, part("D5+D4 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(8, part("D4 - - - - - F#4 - A4 - - - - - - - | F#4 - - - E4 - - - D4 - - - - - - - | E4 - - - A4 - - - - - - - F#4 - E4 - | D4 - - - - - - - - - - - . . . . | F#4 - - - - - A4 - - - - - - - F#4 - | E4 - D4 - E4 - F#4 - - - - - - - - - | A4 - - - - - - - E4 - - - F#4 - - - | A4 - - - - - - - - - - - . . . . | F#4 - - - A4 - - - - - - - - - - - | A4 - - - - - - - - - - - - - - -", velocity: 0.7, legato: 0.95)),
+  at(19, part("A4 - - - - - - - - - - - - - - -", velocity: 0.45, legato: 0.95)),
+  at(21, part("E4 - - - - - - - - - - - - - - -", velocity: 0.45, legato: 0.95)),
+  at(23, part("F#4 - - - - - - - A4 - - - - - - - | A4 - - - D5 - - - - - - - - - - - | D5 - - - - - E5 - D5 - - - A4 - - - | F#5 - - - E5 - D5 - - - - - - - - - | D5 - - - - - - - - - - - - - - -", velocity: 0.7, legato: 0.95)),
+  at(28, part("D5 - - - - - - - A4 - - - - - - - | F#4 - - - A4 - - - - - - - - - - - | A4 - - - F#4 - - - E4 - - - - - - - | D4 - - - - - - - - - - - . . . . | F#4 - - - - - A4 - - - - - F#4 - E4 - | D4 - - - - - - - - - - - - - - - | E4 - - - F#4 - - - A4 - - - F#4 - - - | E4 - - - - - - - D4 - - - - - - - | A3 - - - D4 - - - F#4 - - - - - - - | E4 - - - D4 - - - - - - - - - - - | D4 - - - - - - - A3 - - - - - - - | D4 - - - - - - - - - - - - - - -", velocity: 0.5, legato: 0.95)),
+  at(40, part("A4 - - - - - - - - - - - - - - - | F#4 - - - - - - - - - - - - - - -", velocity: 0.6, legato: 0.95)),
+  at(54, part("E5 - - - - - - - - - - - - - - - | D5 - - - - - - - - - - - - - - -", velocity: 0.6, legato: 0.95)),
+  at(42, part("F#4 - - - - - - - - - - - - - - - | F#4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | C#5 - - - - - - - - - - - - - - - | C#5 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | C#5 - - - - - - - - - - - - - - - | C#5 - - - - - - - - - - - - - - - | E5 - - - - - - - - - - - - - - - | E5 - - - - - - - - - - - - - - -", velocity: 0.6, legato: 0.95)),
+  at(56, part("D5 - - - - - - - - - - - - - - - | D5 - - - - - - - - - - - - - - - | F#5 - - - - - - - - - - - - - - - | F#5 - - - - - - - - - - - - - - - | A5 - - - - - - - - - - - - - - - | A5 - - - - - - - - - - - - - - - | C#6 - - - - - - - - - - - - - - - | C#6 - - - - - - - - - - - - - - -", velocity: 0.68, legato: 0.95)),
+  at(64, part("C#6 - - - - - - - - - - - - - - - | A5 - - - - - - - - - - - - - - - | C#5 - - - - - - - - - - - - - - - | F#4 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(68, part("F#3 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(73, part("F#4 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(78, part("F#5 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(83, part("F#5 - - - - - - - - - - - - - - -", velocity: 0.55, legato: 0.95)),
+  at(88, part("D4 - - - - - - - - - - - - - - - | F#4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | F#4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | D5 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - -", velocity: 0.65, legato: 0.95)),
+  at(95, part("F#4 - - - - - - - - - - - - - - - | A4 - - - - - - - - - - - - - - - | D5 - - - - - - - - - - - - - - - | E5 - - - - - - - - - - - - - - - | F#5 - - - - - - - - - - - - - - - | A5 - - - - - - - - - - - - - - - | D6 - - - - - - - - - - - - - - -", velocity: 0.75, legato: 0.95))])
+pilgrim_inner = hand([
+  at(42, part("D4 - F#4?88 - A4?88 - F#4?88 - D4?88 - F#4?88 - A4?88 - F#4?88 - | D4 - F#4?88 - A4?88 - F#4?88 - D4?88 - F#4?88 - A4?88 - F#4?88 - | F#4 - A4?88 - C#5?88 - A4?88 - F#4?88 - A4?88 - C#5?88 - A4?88 - | F#4 - A4?88 - C#5?88 - A4?88 - F#4?88 - A4?88 - C#5?88 - A4?88 - | A3 - C#4?88 - E4?88 - C#4?88 - A3?88 - C#4?88 - E4?88 - C#4?88 - | A3 - C#4?88 - E4?88 - C#4?88 - A3?88 - C#4?88 - E4?88 - C#4?88 - | D4 - F#4?88 - A4?88 - F#4?88 - D4?88 - F#4?88 - A4?88 - F#4?88 - | D4 - F#4?88 - A4?88 - F#4?88 - D4?88 - F#4?88 - A4?88 - F#4?88 - | F#4 - A4?88 - C#5?88 - A4?88 - F#4?88 - A4?88 - C#5?88 - A4?88 - | F#4 - A4?88 - C#5?88 - A4?88 - F#4?88 - A4?88 - C#5?88 - A4?88 - | A3 - C#4?88 - E4?88 - C#4?88 - A3?88 - C#4?88 - E4?88 - C#4?88 - | A3 - C#4?88 - E4?88 - C#4?88 - A3?88 - C#4?88 - E4?88 - C#4?88 -", velocity: 0.32, legato: 0.95)),
+  at(56, part("D4 - F#4?86 - A4?86 - F#4?86 - D4?86 - F#4?86 - A4?86 - F#4?86 - | D4 - F#4?86 - A4?86 - F#4?86 - D4?86 - F#4?86 - A4?86 - F#4?86 - | D4 - F#4?86 - A4?86 - F#4?86 - D4?86 - F#4?86 - A4?86 - F#4?86 - | F#4 - A4?86 - D5?86 - A4?86 - F#4?86 - A4?86 - D5?86 - A4?86 - | F#4 - A4?86 - D5?86 - A4?86 - F#4?86 - A4?86 - D5?86 - A4?86 - | F#4 - A4?86 - D5?86 - A4?86 - F#4?86 - A4?86 - D5?86 - A4?86 - | F#4 - A4?86 - F#4?86 - A4?86 - F#4?86 - A4?86 - F#4?86 - A4?86 - | F#4 - A4?86 - F#4?86 - A4?86 - F#4?86 - A4?86 - F#4?86 - A4?86 -", velocity: 0.34, legato: 0.95)),
+  at(88, part("F#4 - A4?88 - D5?88 - A4?88 - F#4?88 - A4?88 - D5?88 - A4?88 - | F#4 - A4?88 - D5?88 - A4?88 - F#4?88 - A4?88 - D5?88 - A4?88 - | F#4 - A4?88 - D5?88 - A4?88 - F#4?88 - A4?88 - D5?88 - A4?88 - | F#4 - A4?88 - D5?88 - A4?88 - F#4?88 - A4?88 - D5?88 - A4?88 - | E4 - A4?88 - E5?88 - A4?88 - E4?88 - A4?88 - E5?88 - A4?88 - | E4 - A4?88 - E5?88 - A4?88 - E4?88 - A4?88 - E5?88 - A4?88 - | F#4 - A4?88 - D5?88 - A4?88 - F#4?88 - A4?88 - D5?88 - A4?88 -", velocity: 0.32, legato: 0.95)),
+  at(95, part("F#4 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 | F#4 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 | F#4 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 | F#4 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 | E4 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 | E4 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 E4?82 A4?82 E5?82 A4?82 | F#4 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82 F#4?82 A4?82 D5?82 A4?82", velocity: 0.3, legato: 0.95))])
+pilgrim_low = hand([
+  at(8, part("D2 - A2?90 - D3?90 - F#3?90 - A3?90 - F#3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - F#3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - E3?90 - A3?90 - E3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - E3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - F#3?90 - A3?90 - F#3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - F#3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - E3?90 - A3?90 - E3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - E3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - F#3?90 - A3?90 - F#3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - F#3?90 - A3?90 - - -", velocity: 0.45, legato: 0.95)),
+  at(18, part("D2 - - - - - - - A2 - - - - - - - | D2 - - - - - - - - - - - A2 - - - | D2 - - - - - - - A2 - - - - - - - | D2 - - - - - - - - - - - A2 - - - | D2 - - - A2 - - - D3 - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(23, part("D2 - A2?90 - D3?90 - F#3?90 - A3?90 - F#3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - F#3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - E3?90 - A3?90 - E3?90 - D3?90 - A2?90 - | D2 - - - A2?90 - - - D3?90 - F#3?90 - A3?90 - - - | D2 - A2?90 - D3?90 - F#3?90 - A3?90 - F#3?90 - D3?90 - A2?90 -", velocity: 0.45, legato: 0.95)),
+  at(28, part("D2 - - - - - - - A2?92 - - - F#3?92 - - - | D2 - - - - - - - - - - - A2?92 - - - | D2 - - - - - - - A2?92 - - - E3?92 - - - | D2 - - - - - - - - - - - A2?92 - - - | D2 - - - - - - - A2?92 - - - F#3?92 - - - | D2 - - - - - - - - - - - A2?92 - - - | D2 - - - - - - - A2?92 - - - E3?92 - - - | D2 - - - - - - - - - - - A2?92 - - - | D2 - - - - - - - A2?92 - - - F#3?92 - - - | D2 - - - - - - - - - - - A2?92 - - - | D2 - - - - - - - A2?92 - - - E3?92 - - - | D2 - - - - - - - - - - - A2?92 - - -", velocity: 0.38, legato: 0.95)),
+  at(42, part("D2 - - - - - - - A2?92 - - - - - - - | D2 - - - - - - - D3?92 - - - A2?92 - - - | F#2 - - - - - - - C#3?92 - - - - - - - | F#2 - - - - - - - F#3?92 - - - C#3?92 - - - | A2 - - - - - - - E3?92 - - - - - - - | A2 - - - - - - - A3?92 - - - E3?92 - - - | D2 - - - - - - - A2?92 - - - - - - - | D2 - - - - - - - D3?92 - - - A2?92 - - - | F#2 - - - - - - - C#3?92 - - - - - - - | F#2 - - - - - - - F#3?92 - - - C#3?92 - - - | A2 - - - - - - - E3?92 - - - - - - - | A2 - - - - - - - A3?92 - - - E3?92 - - -", velocity: 0.42, legato: 0.95)),
+  at(56, part("D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - A2?92 - D3?92 - - - - - A2?92 - | D2 - - - - - - - - - - - - - - -", velocity: 0.45, legato: 0.95)),
+  at(64, part("F#2 - - - C#3 - - - F#3 - - - - - - - | F#2 - - - - - - - C#3 - - - - - - - | F#2 - - - C#3 - - - F#3 - - - - - - - | F#2 - - - - - - - - - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(68, part("F#2 - C#3 - F#3 - - - - - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(73, part("F#2 - C#3 - F#3 - - - - - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(78, part("F#2 - C#3 - F#3 - - - - - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(83, part("F#2 - C#3 - F#3 - - - - - - - - - - -", velocity: 0.4, legato: 0.95)),
+  at(88, part("D2 - - - A2?92 - - - D3?92 - - - F#3?92 - - - | D2 - - - A2?92 - - - D3?92 - - - F#3?92 - - - | D2 - - - A2?92 - - - D3?92 - - - F#3?92 - - - | D2 - - - A2?92 - - - D3?92 - - - F#3?92 - - - | A2 - - - E3?92 - - - A3?92 - - - E3?92 - - - | A2 - - - E3?92 - - - A3?92 - - - E3?92 - - - | D2 - - - A2?92 - - - D3?92 - - - F#3?92 - - -", velocity: 0.45, legato: 0.95)),
+  at(95, part("D2 - - - A2 - - - D3 - - - F#3 - - - | D2 - - - A2 - - - D3 - - - F#3 - - - | D2 - - - A2 - - - D3 - - - F#3 - - - | D2 - - - A2 - - - D3 - - - F#3 - - - | A2 - - - E3 - - - A3 - - - E3 - - - | A2 - - - E3 - - - A3 - - - E3 - - - | D2+D3+A3+D4 - - - - - - - - - - - - - - -", velocity: 0.4, legato: 0.95))])
+pilgrim = pilgrim_top.gain(0.27) + pilgrim_inner.gain(0.22) + pilgrim_low.gain(0.22)
+
+bright = court + porch + nave_music + oracle_music + glory_music + pilgrim
+dry = body + bright
+hall = dry.highPass(cutoff: 180).reverb(mix: 1, decay: 5)
+cloud = dry.shimmer(mix: 1, shimmer: 0.6, decay: 9, lowCut: 300)
+cloud_level = curve(form, "Y1: 0, Wing1: 0 -> 0.02 smooth, Day1: 0.02 -> 0.04 smooth, Day2: 0.04")
+arc = curve(form, "Y1: 0.8 -> 1 smooth, Court: 1.1, Doors: 1.15, L1: 1.15 -> 1.25 smooth, L10: 1.25, Wing1: 1.05, Day1: 1 -> 1.2 smooth, Day2: 1.2 -> 1.5 smooth")
+out = ((dry + hall * 0.3 + cloud * cloud_level) * arc).gain(0.8)
