@@ -1070,9 +1070,9 @@ How strong each step of a bar is, by the groups of a meter, as a list for the ac
 
 ### `subtractive`
 
-`subtractive(notes: generator of notes, preset: string = pad, voices: number = 8, ... 66 settings of the synth (harp settings subtractive)) -> signal`
+`subtractive(notes: generator of notes, preset: string = pad, voices: number = 8, ... 67 settings of the synth (harp settings subtractive)) -> signal`
 
-Psalm's subtractive synth playing notes, with one of its presets (see presets) and voices notes at once. Stereo out. Every setting of the synth is a parameter (66 of them, with their ranges: harp settings subtractive, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
+Psalm's subtractive synth playing notes, with one of its presets (see presets) and voices notes at once. Stereo out. Every setting of the synth is a parameter (67 of them, with their ranges: harp settings subtractive, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `supersaw`
 
@@ -1094,9 +1094,9 @@ Psalm's piano: hammers, strings and a soundboard, playing notes with voices note
 
 ### `waveguide`
 
-`waveguide(notes: generator of notes, preset: string = guitar, voices: number = 8, ... 45 settings of the synth (harp settings waveguide)) -> signal`
+`waveguide(notes: generator of notes, preset: string = guitar, voices: number = 8, ... 46 settings of the synth (harp settings waveguide)) -> signal`
 
-Psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets waveguide). Every setting of the synth is a parameter (45 of them, with their ranges: harp settings waveguide, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
+Psalm's physical models: plucked and bowed strings, flutes, drums and more as waves going up and down a line, playing notes with voices notes at once. Stereo out. The presets are in docs/presets.md (harp presets waveguide). Every setting of the synth is a parameter (46 of them, with their ranges: harp settings waveguide, docs/settings.md), a number, a name or true/false, or for a knob a signal that moves it; the envelopes are ampAttack, ampDecay, ampSustain, ampRelease and the others of the synth; what is not given is the preset's own.
 
 ### `vocal`
 

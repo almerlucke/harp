@@ -5,7 +5,7 @@
 Every setting of a synth is an optional parameter of its function, with the name psalm gives it: `subtractive(notes, preset: "pad", cutoff: 900, filterMode: "band pass", ampAttack: 400)`. A knob is a number, or a signal that moves it while the notes sound (`cutoff: lfo(0.1).range(300, 3000)`); a choice is a name (or its number); a switch is `true` or `false`. What is not given is the preset's own. The envelopes are a setting for each stage, in milliseconds (`ampAttack`, `ampDecay`, `ampSustain` from 0 to 1, `ampRelease`).
 
 
-## subtractive (66)
+## subtractive (67)
 
 **Modulation matrix** (`mods`): sources filter env, amp env, lfo 1, lfo 2, velocity, key, random, wheel, ext 1, ext 2, ext 3, ext 4; destinations pitch, cutoff, resonance, pulse width, level 1, level 2, sub, noise, detune 2, fm, drive, vowel, level, lfo 1 rate, lfo 2 rate, unison detune, cutoff 2
 
@@ -15,7 +15,7 @@ Every setting of a synth is an optional parameter of its function, with the name
 
 **Filter 2**: `filter2Mode` (off, low pass, band pass, high pass, notch); `filter2Cutoff` (20 to 18000 Hz); `filter2Resonance` (0 to 1); `filter2EnvAmount` (-6 to 6 oct); `filter2KeyTrack` (0 to 1); `filter2Parallel` (true or false)
 
-**Pitch**: `glide` (0 to 2000 ms); `filterEnvToPitch` (-48 to 48 st); `level` (0 to 4)
+**Pitch**: `glide` (0 to 2000 ms); `glideMode` (exponential, constant time, constant rate); `filterEnvToPitch` (-48 to 48 st); `level` (0 to 4)
 
 **LFO 1**: `lfo1Waveform` (sine, triangle, saw, ramp, square, sample & hold); `lfo1Rate` (0.01 to 40 Hz); `lfo1Delay` (0 to 3000 ms); `lfo1KeySync` (true or false); `lfo1Pitch` (-12 to 12 st); `lfo1Cutoff` (-4 to 4 oct); `lfo1PulseWidth` (0 to 0.5); `lfo1Amp` (0 to 1)
 
@@ -101,11 +101,11 @@ Every setting of a synth is an optional parameter of its function, with the name
 
 **Output**: `position` (player, studio, hall); `width` (0 to 1); `treble` (-24 to 12 dB); `level` (0 to 32)
 
-## waveguide (45)
+## waveguide (46)
 
 **Modulation matrix** (`mods`): sources filter env, amp env, lfo 1, lfo 2, velocity, key, random, wheel, ext 1, ext 2, ext 3, ext 4; destinations decay, damping, brightness, pick position, pressure, bow position, vibrato depth, body, pitch, level, cutoff, breath, embouchure, bow force, bow speed
 
-**Pluck**: `damping` (0 to 1); `brightness` (0 to 1); `pickPosition` (0 to 0.5); `pluckWidth` (0 to 0.2); `plectrum` (0 to 1); `harmonic` (0 to 0.5); `fretNoise` (0 to 1); `fretBuzz` (0 to 1); `fretPosition` (0.05 to 0.98); `slide` (0 to 2 s)
+**Pluck**: `damping` (0 to 1); `brightness` (0 to 1); `pickPosition` (0 to 0.5); `pluckWidth` (0 to 0.2); `edge` (0 to 1); `plectrum` (0 to 1); `harmonic` (0 to 0.5); `fretNoise` (0 to 1); `fretBuzz` (0 to 1); `fretPosition` (0.05 to 0.98); `slide` (0 to 2 s)
 
 **String**: `inharmonicity` (0 to 0.005); `polarization` (0 to 1); `tensionMod` (0 to 1); `bodyCoupling` (0 to 1)
 
